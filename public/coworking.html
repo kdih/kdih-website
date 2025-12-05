@@ -466,6 +466,8 @@
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 2rem;">
                         <p>Unable to load desks. Please try refreshing.</p>
+                        <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 0.5rem;">Error: ${error.message}</p>
+                        <p style="font-size: 0.8rem; opacity: 0.8;">Date: ${date}</p>
                         <button onclick="checkDeskAvailability()" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.9rem;">Retry</button>
                     </div>
                 `;
@@ -564,15 +566,22 @@
                 });
 
                 const result = await response.json();
-                if (result.message === 'success') {
+
+                if (response.ok && result.message === 'success') {
                     document.getElementById('booking-id').textContent = result.booking_id;
                     document.getElementById('desk-success').classList.add('show');
+                    // Scroll to success message
+                    document.getElementById('desk-success').scrollIntoView({ behavior: 'smooth' });
                     e.target.reset();
                     selectedDesk = null;
-                    loadDesks();
+                    document.getElementById('selected-desk').value = '';
+                    loadDesks(); // Refresh availability
+                } else {
+                    alert(`Booking failed: ${result.error || 'Unknown error'}`);
                 }
             } catch (error) {
-                alert('Error booking desk. Please try again.');
+                console.error('Booking error:', error);
+                alert(`Error booking desk: ${error.message}`);
             }
         });
 
