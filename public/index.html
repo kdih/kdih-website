@@ -1486,7 +1486,8 @@
                     <ul class="check-list">
                         <li><span class="check-icon"><i class="ph-bold ph-check"></i></span> Reducing youth unemployment
                             through skills</li>
-                        <li><span class="check-icon"><i class="ph-bold ph-check"></i></span> Promoting gender equality
+                        <li id="gender-stat"><span class="check-icon"><i class="ph-bold ph-check"></i></span> Promoting
+                            gender equality
                             (Targeting 40%+ women)</li>
                         <li><span class="check-icon"><i class="ph-bold ph-check"></i></span> Creating direct and
                             indirect job opportunities</li>
@@ -1515,7 +1516,6 @@
             </div>
         </div>
     </section>
-
 
 
 
@@ -1863,6 +1863,14 @@
                             <span class="stat-label">${stat.label}</span>
                         </div>
                     `).join('');
+                }
+
+                // Update Gender Stat if available
+                if (statsData.gender_stats && statsData.gender_stats.percentage > 0) {
+                    const genderEl = document.getElementById('gender-stat');
+                    if (genderEl) {
+                        genderEl.innerHTML = `<span class="check-icon"><i class="ph-bold ph-check"></i></span> Promoting gender equality (${statsData.gender_stats.percentage}% Women Participation)`;
+                    }
                 }
 
                 // Fetch Services

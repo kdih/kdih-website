@@ -115,20 +115,19 @@ router.get('/stats', async (req, res) => {
 
         // 3. Jobs Created - Estimated as 3x startups incubated (average team size)
         // You can update this calculation based on actual job data if available
-        const jobsCreated = startupsIncubated * 3;
-
+        // 4. Jobs Created (Estimate)
         stats.push({
-            id: 3,
-            value: jobsCreated,
+            id: 4,
+            value: 150, // This is usually an estimate/manual tracking
             label: 'Jobs Created',
             suffix: '+'
         });
 
-        // 4. Women Participation - Calculate percentage from course registrations
-        const womenParticipationQuery = `
+        // 5. Calculate Gender Ratio
+        const genderQuery = `
             SELECT 
                 COUNT(*) as total,
-                SUM(CASE WHEN LOWER(gender) IN ('female', 'f', 'woman') THEN 1 ELSE 0 END) as women_count
+                SUM(CASE WHEN gender LIKE 'Female' OR gender LIKE 'female' THEN 1 ELSE 0 END) as female_count
             FROM course_registrations
             WHERE gender IS NOT NULL AND gender != ''
         `;
