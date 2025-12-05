@@ -433,6 +433,10 @@
                 <i class="ph-fill ph-shield-check"></i>
                 <span>Manage Admins</span>
             </div>
+            <div class="nav-item" onclick="switchTab('settings')">
+                <i class="ph-fill ph-gear"></i>
+                <span>Settings</span>
+            </div>
         </div>
         <div class="logout">
             <button class="logout-btn" onclick="logout()">
@@ -904,7 +908,8 @@
                 events: 'Events',
                 startups: 'Startup Applications',
                 analytics: 'Analytics',
-                admins: 'Manage Admins'
+                admins: 'Manage Admins',
+                settings: 'Settings'
             };
             document.getElementById('page-title').textContent = titles[tab];
 
@@ -940,6 +945,9 @@
                     break;
                 case 'admins':
                     loadAdmins();
+                    break;
+                case 'settings':
+                    // Settings content is static, no data to load
                     break;
             }
         }

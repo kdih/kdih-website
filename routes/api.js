@@ -292,6 +292,67 @@ router.get('/check-auth', (req, res) => {
     }
 });
 
+// Change password endpoint (requires authentication)
+router.post('/change-password', requireAuth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.session.user.id;
+        const bcrypt = require('bcrypt');
+        const logger = require('../utils/logger');
+
+        // Validate inputs
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current password and new password are required' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+        }
+
+        // Get current user from database
+        db.get("SELECT * FROM users WHERE id = ?", [userId], async (err, user) => {
+            if (err) {
+                logger.error(`Password change error: ${err.message}`);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            // Verify current password
+            const validPassword = await bcrypt.compare(currentPassword, user.password);
+            if (!validPassword) {
+                logger.warn(`Invalid current password for user: ${user.username}`);
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+
+            // Hash new password
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            // Update password in database
+            db.run(
+                "UPDATE users SET password = ? WHERE id = ?",
+                [hashedPassword, userId],
+                function (err) {
+                    if (err) {
+                        logger.error(`Error updating password: ${err.message}`);
+                        return res.status(500).json({ error: 'Failed to update password' });
+                    }
+
+                    logger.info(`Password changed successfully for user: ${user.username}`);
+                    res.json({ message: 'Password changed successfully' });
+                }
+            );
+        });
+    } catch (error) {
+        const logger = require('../utils/logger');
+        logger.error(`Password change exception: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 // ===== LMS ENDPOINTS =====
 
 // Get all courses
