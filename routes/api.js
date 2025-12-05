@@ -486,6 +486,70 @@ router.post('/change-password', requireAuth, async (req, res) => {
     }
 });
 
+// Update Profile endpoint (requires authentication)
+router.put('/profile', requireAuth, async (req, res) => {
+    try {
+        const { username, email } = req.body;
+        const userId = req.session.user.id;
+        const logger = require('../utils/logger');
+
+        // Validate inputs
+        if (!username || !email) {
+            return res.status(400).json({ error: 'Username and email are required' });
+        }
+
+        if (username.length < 3) {
+            return res.status(400).json({ error: 'Username must be at least 3 characters long' });
+        }
+
+        // Check availability (exclude current user)
+        db.get(
+            `SELECT * FROM users WHERE (username = ? OR email = ?) AND id != ?`,
+            [username, email, userId],
+            (err, row) => {
+                if (err) {
+                    logger.error(`Profile update validation error: ${err.message}`);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                if (row) {
+                    if (row.username === username) {
+                        return res.status(400).json({ error: 'Username is already taken' });
+                    }
+                    if (row.email === email) {
+                        return res.status(400).json({ error: 'Email is already registered' });
+                    }
+                }
+
+                // Update user
+                db.run(
+                    `UPDATE users SET username = ?, email = ? WHERE id = ?`,
+                    [username, email, userId],
+                    function (err) {
+                        if (err) {
+                            logger.error(`Error updating profile: ${err.message}`);
+                            return res.status(500).json({ error: 'Failed to update profile' });
+                        }
+
+                        // Update session
+                        req.session.user.username = username;
+                        req.session.user.email = email;
+
+                        logger.info(`Profile updated for user ID: ${userId}`);
+                        res.json({
+                            message: 'Profile updated successfully',
+                            user: { username, email }
+                        });
+                    }
+                );
+            }
+        );
+    } catch (error) {
+        const logger = require('../utils/logger');
+        logger.error(`Profile update exception: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 // ===== LMS ENDPOINTS =====
 

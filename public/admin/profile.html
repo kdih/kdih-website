@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Change Password | KDIH Admin</title>
+    <title>Edit Profile | KDIH Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -36,7 +36,7 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             padding: 2rem;
         }
@@ -92,6 +92,11 @@
         input:focus {
             outline: none;
             border-color: var(--accent);
+        }
+
+        input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn {
@@ -175,49 +180,46 @@
             <h1>Account Settings</h1>
 
             <div class="tabs">
-                <a href="profile.html" class="tab">Edit Profile</a>
-                <a href="#" class="tab active">Change Password</a>
+                <a href="#" class="tab active">Edit Profile</a>
+                <a href="change-password.html" class="tab">Change Password</a>
             </div>
-
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Update your admin password</p>
 
             <div id="message" class="message"></div>
 
-            <form id="change-password-form">
+            <form id="profile-form">
                 <div class="form-group">
-                    <label for="current-password">Current Password *</label>
-                    <input type="password" id="current-password" required minlength="6">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required minlength="3">
                 </div>
 
                 <div class="form-group">
-                    <label for="new-password">New Password *</label>
-                    <input type="password" id="new-password" required minlength="6">
-                </div>
-
-                <div class="form-group">
-                    <label for="confirm-password">Confirm New Password *</label>
-                    <input type="password" id="confirm-password" required minlength="6">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required>
                 </div>
 
                 <button type="submit" class="btn">
-                    <i class="ph-fill ph-lock-key"></i>
-                    Change Password
+                    <i class="ph-fill ph-floppy-disk"></i>
+                    Save Changes
                 </button>
             </form>
         </div>
     </div>
 
     <script>
-        // Check authentication
+        // Check authentication and load data
         fetch('/api/check-auth')
             .then(res => res.json())
             .then(data => {
                 if (!data.authenticated) {
                     window.location.href = 'login.html';
+                } else {
+                    // Pre-fill form
+                    document.getElementById('username').value = data.user.username;
+                    document.getElementById('email').value = data.user.email;
                 }
             });
 
-        const form = document.getElementById('change-password-form');
+        const form = document.getElementById('profile-form');
         const messageDiv = document.getElementById('message');
 
         function showMessage(text, type) {
@@ -231,46 +233,27 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            // Validate passwords match
-            if (newPassword !== confirmPassword) {
-                showMessage('New passwords do not match', 'error');
-                return;
-            }
-
-            // Validate password length
-            if (newPassword.length < 6) {
-                showMessage('New password must be at least 6 characters', 'error');
-                return;
-            }
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
 
             try {
-                const response = await fetch('/api/change-password', {
-                    method: 'POST',
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        currentPassword,
-                        newPassword
+                        username,
+                        email
                     })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('Password changed successfully!', 'success');
-                    form.reset();
-
-                    //Redirect to dashboard after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
+                    showMessage('Profile updated successfully!', 'success');
                 } else {
-                    showMessage(data.error || 'Failed to change password', 'error');
+                    showMessage(data.error || 'Failed to update profile', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
