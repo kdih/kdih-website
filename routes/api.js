@@ -250,7 +250,8 @@ router.post('/login', async (req, res) => {
         const bcrypt = require('bcrypt');
         const logger = require('../utils/logger');
 
-        db.get("SELECT * FROM users WHERE username = ?", [username], async (err, row) => {
+        // Check for username OR email
+        db.get("SELECT * FROM users WHERE username = ? OR email = ?", [username, username], async (err, row) => {
             if (err) {
                 logger.error(`Login error: ${err.message}`);
                 return res.status(500).json({ error: 'Internal server error' });
