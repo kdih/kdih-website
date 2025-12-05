@@ -3,6 +3,10 @@
   "version": "2.0.0",
   "description": "Katsina Digital Innovation Hub - Professional Platform",
   "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "NODE_ENV=development nodemon server.js",
@@ -30,7 +34,7 @@
     "helmet": "^7.1.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.8",
-    "paystack-node": "^0.4.0",
+    "paystack-node": "^0.3.0",
     "pg": "^8.11.3",
     "sqlite3": "^5.1.7",
     "winston": "^3.11.0"
