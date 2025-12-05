@@ -447,15 +447,28 @@
             const date = document.getElementById('desk-date').value;
             if (!date) return;
 
+            const grid = document.getElementById('desk-grid');
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading desks...</div>';
+
             try {
                 const response = await fetch(`/api/coworking/available-desks/${date}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+
                 const data = await response.json();
 
                 if (data.message === 'success') {
                     renderDesks(data.desks);
+                } else {
+                    throw new Error(data.error || 'Failed to load desks');
                 }
             } catch (error) {
                 console.error('Error checking availability:', error);
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 2rem;">
+                        <p>Unable to load desks. Please try refreshing.</p>
+                        <button onclick="checkDeskAvailability()" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.9rem;">Retry</button>
+                    </div>
+                `;
             }
         }
 
@@ -463,6 +476,11 @@
         function renderDesks(desks) {
             const grid = document.getElementById('desk-grid');
             grid.innerHTML = '';
+
+            if (desks.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">No desks found configuraiton.</div>';
+                return;
+            }
 
             desks.forEach(desk => {
                 const deskEl = document.createElement('div');
@@ -478,14 +496,14 @@
                     <span style="font-size: 0.8rem; color: ${statusColor}">${statusText}</span>
                 `;
 
+                grid.appendChild(deskEl);
+
                 if (desk.status === 'available') {
                     deskEl.onclick = () => selectDesk(desk.desk_number, deskEl);
                 } else {
                     deskEl.style.cursor = 'not-allowed';
                     deskEl.style.opacity = '0.7';
                 }
-
-                grid.appendChild(deskEl);
             });
         }
 
