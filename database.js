@@ -112,6 +112,14 @@ function initDatabase() {
             }
         });
 
+        // Password Resets Table
+        db.run(`CREATE TABLE IF NOT EXISTS password_resets (
+            email TEXT,
+            token TEXT,
+            expires_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
 
         // Members Table (Unified portal for all user types)
         db.run(`CREATE TABLE IF NOT EXISTS members (

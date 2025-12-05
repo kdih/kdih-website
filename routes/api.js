@@ -292,6 +292,139 @@ router.get('/check-auth', (req, res) => {
     }
 });
 
+// Forgot Password - Initiate Reset
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const crypto = require('crypto');
+        const logger = require('../utils/logger');
+        const { sendEmail } = require('../utils/email');
+
+        if (!email) {
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        // Check if user exists
+        db.get("SELECT * FROM users WHERE email = ?", [email], async (err, user) => {
+            if (err) {
+                logger.error(`Forgot password database error: ${err.message}`);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            if (!user) {
+                // Determine response based on environment for security
+                const isProd = process.env.NODE_ENV === 'production';
+                // In production, we don't want to reveal if an email exists
+                // In dev, we can be more explicit for debugging
+                if (isProd) {
+                    logger.warn(`Forgot password request for non-existent email: ${email}`);
+                    return res.json({ message: 'If your email is registered, you will receive a reset link.' });
+                } else {
+                    return res.status(404).json({ error: 'Email not found' });
+                }
+            }
+
+            // Generate reset token
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date(Date.now() + 3600000); // 1 hour expiration
+
+            // Save token to database
+            db.run(
+                "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)",
+                [email, token, expiresAt.toISOString()],
+                async function (err) {
+                    if (err) {
+                        logger.error(`Error saving reset token: ${err.message}`);
+                        return res.status(500).json({ error: 'Failed to process request' });
+                    }
+
+                    // Send email
+                    const emailResult = await sendEmail(email, 'passwordReset', [email, token]);
+
+                    if (emailResult.success) {
+                        logger.info(`Password reset email sent to: ${email}`);
+                        res.json({ message: 'If your email is registered, you will receive a reset link.' });
+                    } else {
+                        logger.error(`Failed to send reset email: ${emailResult.error}`);
+                        // Even if email fails, respond with success generic message to prevent user enumeration
+                        res.json({ message: 'If your email is registered, you will receive a reset link.' });
+                    }
+                }
+            );
+        });
+    } catch (error) {
+        const logger = require('../utils/logger');
+        logger.error(`Forgot password exception: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Reset Password - Verify Token and Set New Password
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+        const bcrypt = require('bcrypt');
+        const logger = require('../utils/logger');
+
+        if (!token || !newPassword) {
+            return res.status(400).json({ error: 'Token and new password are required' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+        }
+
+        // Verify token exists and is not expired
+        db.get(
+            "SELECT * FROM password_resets WHERE token = ? AND expires_at > datetime('now')",
+            [token],
+            async (err, resetRequest) => {
+                if (err) {
+                    logger.error(`Reset password database error: ${err.message}`);
+                    return res.status(500).json({ error: 'Internal server error' });
+                }
+
+                if (!resetRequest) {
+                    return res.status(400).json({ error: 'Invalid or expired reset token' });
+                }
+
+                // Token valid, find user
+                db.get("SELECT * FROM users WHERE email = ?", [resetRequest.email], async (err, user) => {
+                    if (err || !user) {
+                        logger.error(`User for reset token not found: ${resetRequest.email}`);
+                        return res.status(404).json({ error: 'User account not found' });
+                    }
+
+                    // Hash new password
+                    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+                    // Update password
+                    db.run(
+                        "UPDATE users SET password = ? WHERE id = ?",
+                        [hashedPassword, user.id],
+                        function (err) {
+                            if (err) {
+                                logger.error(`Error updating password: ${err.message}`);
+                                return res.status(500).json({ error: 'Failed to reset password' });
+                            }
+
+                            // Delete the consumed token (and any other tokens for this email for security)
+                            db.run("DELETE FROM password_resets WHERE email = ?", [resetRequest.email]);
+
+                            logger.info(`Password successfully reset for user: ${user.username}`);
+                            res.json({ message: 'Password has been reset successfully. You can now login.' });
+                        }
+                    );
+                });
+            }
+        );
+    } catch (error) {
+        const logger = require('../utils/logger');
+        logger.error(`Reset password exception: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Change password endpoint (requires authentication)
 router.post('/change-password', requireAuth, async (req, res) => {
     try {

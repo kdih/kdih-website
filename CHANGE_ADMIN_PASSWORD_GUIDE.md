@@ -90,8 +90,15 @@ OR
 
 ---
 
-## Next: Add Password Change to Dashboard
 
-For a permanent solution, I can add a "Change Password" feature to your admin dashboard. This would allow you to change passwords from the web interface without needing shell access.
+## 🆘 What if I forget my password?
 
-Would you like me to add this feature now?
+If you cannot login to the dashboard, you cannot use the "Change Password" page. You must use the **Render Shell** method:
+
+1. Login to **Render.com**
+2. Go to your **kdih-website** service
+3. Click the **"Shell"** tab
+4. Run: `node change-admin-password.js`
+5. Follow the prompts to set a new password
+
+This method works even if you are completely locked out of the website.

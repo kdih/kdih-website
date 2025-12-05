@@ -228,6 +228,26 @@ const emailTemplates = {
                 <p>Best regards,<br>The KDIH Incubation Team</p>
             </div>
         `
+    }),
+
+    passwordReset: (email, token) => ({
+        subject: 'Reset Your KDIH Admin Password',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Password Reset Request</h2>
+                <p>We received a request to reset your password for the KDIH Admin Dashboard.</p>
+                <p>Click the link below to set a new password:</p>
+                <p>
+                    <a href="${process.env.APP_URL || 'https://kdih-website.onrender.com'}/admin/reset-password.html?token=${token}" 
+                       style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                       Reset Password
+                    </a>
+                </p>
+                <p style="margin-top: 20px; color: #64748b; font-size: 14px;">This link is valid for 1 hour.</p>
+                <p style="color: #64748b; font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
+                <p>Best regards,<br>The KDIH Team</p>
+            </div>
+        `
     })
 };
 
