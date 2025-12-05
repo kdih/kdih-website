@@ -156,6 +156,7 @@ function initDatabase() {
             member_id INTEGER,
             desk_number TEXT,
             desk_type TEXT NOT NULL,
+            booking_type TEXT,
             booking_date DATE NOT NULL,
             start_time TIME,
             end_time TIME,
@@ -164,13 +165,18 @@ function initDatabase() {
             FOREIGN KEY (member_id) REFERENCES members(id)
         )`, (err) => {
             if (!err) {
-                // Auto-migration: Check if desk_number column exists (for existing DBs)
+                // Auto-migration: Check for missing columns (desk_number, booking_type)
                 db.all("PRAGMA table_info(desk_bookings)", [], (err, columns) => {
                     if (!err && columns) {
-                        const hasDeskNumber = columns.some(c => c.name === 'desk_number');
-                        if (!hasDeskNumber) {
+                        // Check desk_number
+                        if (!columns.some(c => c.name === 'desk_number')) {
                             console.log('Migrating desk_bookings: Adding desk_number column...');
                             db.run("ALTER TABLE desk_bookings ADD COLUMN desk_number TEXT");
+                        }
+                        // Check booking_type
+                        if (!columns.some(c => c.name === 'booking_type')) {
+                            console.log('Migrating desk_bookings: Adding booking_type column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN booking_type TEXT");
                         }
                     }
                 });
