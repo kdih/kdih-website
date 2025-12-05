@@ -248,6 +248,42 @@ const emailTemplates = {
                 <p>Best regards,<br>The KDIH Team</p>
             </div>
         `
+    }),
+
+    coworkingRegistration: (name, memberCode, type, startDate, endDate) => ({
+        subject: 'Welcome to KDIH Co-working Community!',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Welcome to the Hub!</h2>
+                <p>Dear ${name},</p>
+                <p>Your membership has been successfully registered.</p>
+                <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; color: #64748b; font-size: 0.9em;">Member ID</p>
+                    <p style="margin: 5px 0 0 0; font-size: 1.5em; font-weight: bold; color: #0f172a; letter-spacing: 1px;">${memberCode}</p>
+                </div>
+                <p><strong>Membership Details:</strong></p>
+                <ul>
+                    <li><strong>Type:</strong> ${type}</li>
+                    <li><strong>Validity:</strong> ${startDate} to ${endDate}</li>
+                </ul>
+                <p>Please use your Member ID (${memberCode}) to book desks and meeting rooms.</p>
+                <p>Best regards,<br>The KDIH Team</p>
+            </div>
+        `
+    }),
+
+    deskBookingConfirmed: (name, deskNumber, date, bookingId) => ({
+        subject: `Desk Booking Confirmed - ${deskNumber}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Desk Reserved! ✅</h2>
+                <p>Dear ${name},</p>
+                <p>You have successfully booked <strong>${deskNumber}</strong> for ${date}.</p>
+                <p><strong>Booking ID:</strong> ${bookingId}</p>
+                <p>Please check in at the front desk when you arrive.</p>
+                <p>Happy working!<br>The KDIH Team</p>
+            </div>
+        `
     })
 };
 

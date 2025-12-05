@@ -135,20 +135,30 @@ function initDatabase() {
             is_active INTEGER DEFAULT 1
         )`);
 
-        // Co-working Memberships Table
-        db.run(`CREATE TABLE IF NOT EXISTS coworking_memberships (
+        // Co-working Members Table (Unified)
+        db.run(`CREATE TABLE IF NOT EXISTS coworking_members (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            member_id INTEGER,
-            membership_plan TEXT NOT NULL,
+            full_name TEXT NOT NULL,
+            member_code TEXT UNIQUE,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            membership_type TEXT NOT NULL,
             start_date DATE NOT NULL,
             end_date DATE NOT NULL,
             status TEXT DEFAULT 'active',
-            payment_amount DECIMAL(10,2),
-            payment_status TEXT DEFAULT 'paid',
-            auto_renew INTEGER DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (member_id) REFERENCES members(id)
-        )`);
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`, (err) => {
+            if (!err) {
+                db.all("PRAGMA table_info(coworking_members)", [], (err, columns) => {
+                    if (!err && columns) {
+                        if (!columns.some(c => c.name === 'member_code')) {
+                            console.log('Migrating coworking_members: Adding member_code...');
+                            db.run("ALTER TABLE coworking_members ADD COLUMN member_code TEXT UNIQUE");
+                        }
+                    }
+                });
+            }
+        });
 
         // Desk Bookings Table
         db.run(`CREATE TABLE IF NOT EXISTS desk_bookings (

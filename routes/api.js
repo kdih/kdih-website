@@ -811,12 +811,29 @@ router.patch('/admin/startups/:id', requireAuth, (req, res) => {
 // Register as co-working member
 router.post('/coworking/register', (req, res) => {
     const { full_name, email, phone, membership_type, start_date, end_date } = req.body;
-    const sql = `INSERT INTO coworking_members (full_name, email, phone, membership_type, start_date, end_date) 
-                 VALUES (?, ?, ?, ?, ?, ?)`;
 
-    db.run(sql, [full_name, email, phone, membership_type, start_date, end_date], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'success', member_id: this.lastID });
+    // Generate Custom Member ID: KDIH-YYYY-XXXX
+    const year = new Date().getFullYear();
+
+    // Get count to determine next number
+    db.get("SELECT COUNT(*) as count FROM coworking_members", [], (err, row) => {
+        if (err) return res.status(500).json({ error: 'Database error generating ID' });
+
+        const nextNum = (row.count + 1).toString().padStart(4, '0');
+        const member_code = `KDIH-${year}-${nextNum}`;
+
+        const sql = `INSERT INTO coworking_members (full_name, member_code, email, phone, membership_type, start_date, end_date) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+        db.run(sql, [full_name, member_code, email, phone, membership_type, start_date, end_date], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            // Send Email Confirmation
+            const emailUtil = require('../utils/email');
+            emailUtil.sendEmail(email, 'coworkingRegistration', [full_name, member_code, membership_type, start_date, end_date]);
+
+            res.json({ message: 'success', member_id: this.lastID, member_code: member_code });
+        });
     });
 });
 

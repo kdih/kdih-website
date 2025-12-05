@@ -537,7 +537,8 @@
 
                 const result = await response.json();
                 if (result.message === 'success') {
-                    document.getElementById('member-id').textContent = result.member_id;
+                    // Display Member Code (e.g. KDIH-2025-001)
+                    document.getElementById('member-id').textContent = result.member_code;
                     document.getElementById('membership-success').classList.add('show');
                     e.target.reset();
                 }
