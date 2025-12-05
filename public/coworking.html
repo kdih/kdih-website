@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Book your workspace at KDIH Co-working Space. Flexible desk booking, meeting rooms, and collaborative environment for entrepreneurs and tech professionals in Katsina.">
+    <meta name="keywords"
+        content="KDIH coworking, workspace booking, meeting rooms, desk rental, Katsina, Nigeria, tech hub">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kdih.org/coworking.html">
+    <meta property="og:title" content="Co-working Space & Desk Booking | KDIH">
+    <meta property="og:description"
+        content="Book your workspace at KDIH. Flexible desk booking, meeting rooms, and collaborative environment for entrepreneurs and tech professionals.">
+    <meta property="og:image" content="https://kdih.org/images/kdih-coworking-og.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://kdih.org/coworking.html">
+    <meta property="twitter:title" content="Co-working Space & Desk Booking | KDIH">
+    <meta property="twitter:description"
+        content="Book your workspace at KDIH. Flexible desk booking, meeting rooms, and collaborative environment.">
+    <meta property="twitter:image" content="https://kdih.org/images/kdih-coworking-og.jpg">
+
+    <title>Co-working Space & Desk Booking | KDIH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #2563eb;
+            --success: #10b981;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .desk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .desk {
+            aspect-ratio: 1;
+            background: var(--secondary);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .desk:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .desk.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .desk.booked {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .desk.booked:hover {
+            transform: none;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">KDIH</div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Co-working Space</h1>
+        <p>Professional workspace in the heart of Katsina's innovation hub</p>
+    </section>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="membership">Membership</button>
+            <button class="tab" data-tab="desk">Book Desk</button>
+            <button class="tab" data-tab="room">Book Room</button>
+        </div>
+
+        <!-- Membership Tab -->
+        <div id="membership-tab" class="tab-content active">
+            <h2>Register as Member</h2>
+            <form id="membership-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="full_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="tel" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Membership Type *</label>
+                        <select name="membership_type" required>
+                            <option value="">Select type</option>
+                            <option value="daily">Daily (₦2,000/day)</option>
+                            <option value="weekly">Weekly (₦10,000/week)</option>
+                            <option value="monthly">Monthly (₦30,000/month)</option>
+                            <option value="quarterly">Quarterly (₦75,000/3 months)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date *</label>
+                        <input type="date" name="end_date" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Register Membership</button>
+            </form>
+            <div id="membership-success" class="success-message">
+                <h3>✓ Membership Registered Successfully!</h3>
+                <p>Your member ID: <strong id="member-id"></strong></p>
+                <p>You can now book desks and meeting rooms.</p>
+            </div>
+        </div>
+
+        <!-- Desk Booking Tab -->
+        <div id="desk-tab" class="tab-content">
+            <h2>Book a Desk</h2>
+            <form id="desk-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Member ID *</label>
+                        <input type="number" name="member_id" required placeholder="Enter your member ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Booking Date *</label>
+                        <input type="date" name="booking_date" id="desk-date" required
+                            onchange="checkDeskAvailability()">
+                    </div>
+                    <div class="form-group">
+                        <label>Booking Type *</label>
+                        <select name="booking_type" required>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3>Select a Desk</h3>
+                <div id="desk-grid" class="desk-grid">
+                    <!-- Desks will be loaded here -->
+                </div>
+                <input type="hidden" name="desk_number" id="selected-desk">
+
+                <button type="submit" class="btn">Book Desk</button>
+            </form>
+            <div id="desk-success" class="success-message">
+                <h3>✓ Desk Booked Successfully!</h3>
+                <p>Booking ID: <strong id="booking-id"></strong></p>
+            </div>
+        </div>
+
+        <!-- Room Booking Tab -->
+        <div id="room-tab" class="tab-content">
+            <h2>Book Meeting Room</h2>
+            <form id="room-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="guest_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" name="guest_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="tel" name="guest_phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Organization *</label>
+                        <input type="text" name="guest_organization" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Room *</label>
+                        <select name="room_name" id="room-name" required onchange="checkRoomAvailability()">
+                            <option value="">Select room</option>
+                            <option value="Conference Room A">Conference Room A (10 people) - ₦20,000/hr</option>
+                            <option value="Conference Room B">Conference Room B (6 people) - ₦12,000/hr</option>
+                            <option value="Meeting Pod 1">Meeting Pod 1 (4 people) - ₦8,000/hr</option>
+                            <option value="Meeting Pod 2">Meeting Pod 2 (4 people) - ₦8,000/hr</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking Date *</label>
+                        <input type="date" name="booking_date" id="room-date" required
+                            onchange="checkRoomAvailability()">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time *</label>
+                        <input type="time" name="start_time" id="room-start-time" required
+                            onchange="checkRoomAvailability()">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time *</label>
+                        <input type="time" name="end_time" id="room-end-time" required
+                            onchange="checkRoomAvailability()">
+                    </div>
+                    <div class="form-group">
+                        <label>Purpose *</label>
+                        <textarea name="purpose" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Book Room</button>
+            </form>
+            <div id="room-success" class="success-message">
+                <h3>✓ Room Booked Successfully!</h3>
+                <p>Booking ID: <strong id="room-booking-id"></strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let availableDesks = [];
+        let selectedDesk = null;
+
+        // Tab Switching Logic
+        document.querySelectorAll('.tab').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.getAttribute('data-tab');
+
+                // Update buttons
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                button.classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+
+                // Load desks if needed
+                if (tabName === 'desk') {
+                    loadDesks();
+                }
+            });
+        });
+
+        // Load available desks
+        function loadDesks() {
+            const dateInput = document.getElementById('desk-date');
+            if (!dateInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+            checkDeskAvailability();
+        }
+
+        // Check desk availability
+        async function checkDeskAvailability() {
+            const date = document.getElementById('desk-date').value;
+            if (!date) return;
+
+            try {
+                const response = await fetch(`/api/coworking/available-desks/${date}`);
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    renderDesks(data.desks);
+                }
+            } catch (error) {
+                console.error('Error checking availability:', error);
+            }
+        }
+
+        // Render desks with status
+        function renderDesks(desks) {
+            const grid = document.getElementById('desk-grid');
+            grid.innerHTML = '';
+
+            desks.forEach(desk => {
+                const deskEl = document.createElement('div');
+                deskEl.className = `desk ${desk.status}`;
+
+                // Add tooltip or status text
+                const statusText = desk.status === 'booked' ? 'Booked' : 'Available';
+                const statusColor = desk.status === 'booked' ? '#ef4444' : '#10b981';
+
+                deskEl.innerHTML = `
+                    <i class="ph-fill ph-desk" style="font-size: 2rem; color: ${statusColor}"></i>
+                    <span>${desk.desk_number}</span>
+                    <span style="font-size: 0.8rem; color: ${statusColor}">${statusText}</span>
+                `;
+
+                if (desk.status === 'available') {
+                    deskEl.onclick = () => selectDesk(desk.desk_number, deskEl);
+                } else {
+                    deskEl.style.cursor = 'not-allowed';
+                    deskEl.style.opacity = '0.7';
+                }
+
+                grid.appendChild(deskEl);
+            });
+        }
+
+        // Select a desk
+        function selectDesk(deskNumber, element) {
+            if (element.classList.contains('booked')) return;
+
+            // Remove previous selection
+            document.querySelectorAll('.desk').forEach(d => d.classList.remove('selected'));
+
+            // Select new desk
+            element.classList.add('selected');
+            selectedDesk = deskNumber;
+            document.getElementById('selected-desk').value = deskNumber;
+        }
+
+        // Handle membership form
+        document.getElementById('membership-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/coworking/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.message === 'success') {
+                    document.getElementById('member-id').textContent = result.member_id;
+                    document.getElementById('membership-success').classList.add('show');
+                    e.target.reset();
+                }
+            } catch (error) {
+                alert('Error registering membership. Please try again.');
+            }
+        });
+
+        // Handle desk booking
+        document.getElementById('desk-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedDesk) {
+                alert('Please select a desk');
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/coworking/book-desk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.message === 'success') {
+                    document.getElementById('booking-id').textContent = result.booking_id;
+                    document.getElementById('desk-success').classList.add('show');
+                    e.target.reset();
+                    selectedDesk = null;
+                    loadDesks();
+                }
+            } catch (error) {
+                alert('Error booking desk. Please try again.');
+            }
+        });
+
+        // Check room availability
+        async function checkRoomAvailability() {
+            const bookingDate = document.getElementById('room-date').value;
+            const startTime = document.getElementById('room-start-time').value;
+            const endTime = document.getElementById('room-end-time').value;
+            const roomSelect = document.getElementById('room-name');
+
+            // Reset to default options if any field is missing
+            if (!bookingDate || !startTime || !endTime) {
+                resetRoomDropdown();
+                return;
+            }
+
+            // Validate time range
+            if (startTime >= endTime) {
+                resetRoomDropdown();
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/coworking/check-all-rooms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        booking_date: bookingDate,
+                        start_time: startTime,
+                        end_time: endTime
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.rooms) {
+                    // Save current selection
+                    const currentValue = roomSelect.value;
+
+                    // Clear and rebuild dropdown
+                    roomSelect.innerHTML = '<option value="">Select room</option>';
+
+                    result.rooms.forEach(room => {
+                        const option = document.createElement('option');
+                        option.value = room.room_name;
+
+                        if (room.available) {
+                            option.textContent = `${room.room_name} ✓ Available`;
+                            option.style.color = '#10b981';
+                        } else {
+                            const conflictTimes = room.conflicts.map(c => `${c.start_time}-${c.end_time}`).join(', ');
+                            option.textContent = `${room.room_name} ✗ Booked (${conflictTimes})`;
+                            option.style.color = '#ef4444';
+                            option.disabled = true;
+                        }
+
+                        roomSelect.appendChild(option);
+                    });
+
+                    // Restore selection if still valid
+                    if (currentValue) {
+                        roomSelect.value = currentValue;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking availability:', error);
+                resetRoomDropdown();
+            }
+        }
+
+        function resetRoomDropdown() {
+            const roomSelect = document.getElementById('room-name');
+            roomSelect.innerHTML = `
+                <option value="">Select room</option>
+                <option value="Conference Room A">Conference Room A (10 people) - ₦20,000/hr</option>
+                <option value="Conference Room B">Conference Room B (6 people) - ₦12,000/hr</option>
+                <option value="Meeting Pod 1">Meeting Pod 1 (4 people) - ₦8,000/hr</option>
+                <option value="Meeting Pod 2">Meeting Pod 2 (4 people) - ₦8,000/hr</option>
+            `;
+        }
+
+        // Handle room booking
+        document.getElementById('room-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/coworking/book-room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.message === 'success') {
+                    document.getElementById('room-booking-id').textContent = result.booking_id;
+                    document.getElementById('room-success').classList.add('show');
+                    e.target.reset();
+                }
+            } catch (error) {
+                alert('Error booking room. Please try again.');
+            }
+        });
+
+        // Initialize
+        loadDesks();
+    </script>
+</body>
+
+</html>

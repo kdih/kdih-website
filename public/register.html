@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Register for KDIH Courses">
+    <title>Register | KDIH</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* --- Reset & Variables (Copied from index.html) --- */
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --accent-glow: #3b82f6;
+            --secondary: #06b6d4;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            border-radius: 8px;
+        }
+
+        /* --- Form Section --- */
+        .register-section {
+            padding: 4rem 0;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .form-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-section-title {
+            font-size: 1.25rem;
+            color: var(--primary);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--bg-light);
+            padding: 3rem 0;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container nav-inner">
+            <a href="index.html" class="logo"><img src="kdihlogo.jpeg" alt="KDIH Logo"></a>
+            <a href="index.html" style="font-weight: 500; color: var(--text-light);">Back to Home</a>
+        </div>
+    </nav>
+
+    <!-- Registration Form -->
+    <section class="register-section">
+        <div class="container">
+            <div class="form-card">
+                <div class="form-header">
+                    <h1>Course Registration</h1>
+                    <p style="color: var(--text-light);">Complete the form below to register for your selected course.
+                    </p>
+                </div>
+
+                <!-- Success Message (Hidden by default) -->
+                <div id="success-message" style="display: none; text-align: center; padding: 3rem;">
+                    <div
+                        style="width: 80px; height: 80px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="ph-fill ph-check" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <h2 style="color: var(--primary); margin-bottom: 1rem;">Registration Successful!</h2>
+                    <p style="color: var(--text-light); font-size: 1.1rem; margin-bottom: 2rem;">
+                        Thank you for registering. We've received your application and will contact you soon.
+                    </p>
+                    <a href="index.html" class="btn btn-primary">Back to Home</a>
+                </div>
+
+                <form id="registration-form">
+
+                    <!-- Course Details -->
+                    <div class="form-section-title">Course Details</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="course_title">Selected Course</label>
+                            <input type="text" id="course_title" name="course_title" readonly
+                                style="background-color: #e2e8f0; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label for="schedule">Preferred Schedule/Cohort</label>
+                            <select id="schedule" name="schedule" required>
+                                <option value="">Select a Start Date</option>
+                                <option value="Next Available">Next Available Cohort</option>
+                                <option value="January 2025">January 2025</option>
+                                <option value="February 2025">February 2025</option>
+                                <option value="March 2025">March 2025</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Personal Details -->
+                    <div class="form-section-title">Personal Details</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <select id="title" name="title">
+                                <option value="Mr">Mr</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Dr">Dr</option>
+                                <option value="Prof">Prof</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="surname">Surname</label>
+                            <input type="text" id="surname" name="surname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstname">First Name</label>
+                            <input type="text" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="othernames">Other Names</label>
+                            <input type="text" id="othernames" name="othernames">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="nationality">Nationality</label>
+                            <input type="text" id="nationality" name="nationality" required>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="form-section-title">Contact Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email_personal">Personal Email</label>
+                            <input type="email" id="email_personal" name="email_personal" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email_official">Official Email</label>
+                            <input type="email" id="email_official" name="email_official">
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="form-section-title">Professional Information</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="organization">Organization</label>
+                            <input type="text" id="organization" name="organization">
+                        </div>
+                        <div class="form-group">
+                            <label for="job_title">Job Title</label>
+                            <input type="text" id="job_title" name="job_title">
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <input type="text" id="department" name="department">
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" name="country">
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state">
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City/Town</label>
+                            <input type="text" id="city" name="city">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Postal Address</label>
+                            <textarea id="address" name="address" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Expectations -->
+                    <div class="form-section-title">Expectations</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="duties">Current Duties</label>
+                            <textarea id="duties" name="duties" rows="3"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="expectations">Training Expectations</label>
+                            <textarea id="expectations" name="expectations" rows="3"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="requirements">Tailor-made Requirements</label>
+                            <textarea id="requirements" name="requirements" rows="3"
+                                placeholder="Any specific needs?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Referral -->
+                    <div class="form-section-title">Referral</div>
+                    <div class="form-group full-width">
+                        <label for="referral">How did you hear about us?</label>
+                        <select id="referral" name="referral">
+                            <option value="">Select an option</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Friend/Colleague">Friend/Colleague</option>
+                            <option value="Website">Website</option>
+                            <option value="Email">Email Newsletter</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <button type="submit" class="btn btn-primary"
+                            style="width: 100%; max-width: 400px; font-size: 1.1rem;">Submit Registration</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p style="color: var(--text-light); font-size: 0.9rem;">&copy; 2025 Katsina Digital Innovation Hub (KDIH).
+                All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Pre-fill course title from URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const course = params.get('course');
+            if (course) {
+                document.getElementById('course_title').value = decodeURIComponent(course);
+            }
+        });
+
+        // Handle Form Submission
+        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                btn.innerText = 'Submitting...';
+                btn.disabled = true;
+
+                // Send to backend (using existing enroll endpoint structure for now)
+                const res = await fetch('/api/enroll', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (result.message === 'success' || res.ok) {
+                    // Hide form and header, show success message
+                    document.querySelector('.form-header').style.display = 'none';
+                    document.getElementById('registration-form').style.display = 'none';
+                    document.getElementById('success-message').style.display = 'block';
+                    // Scroll to top to see message
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('Error submitting registration. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting registration. Please try again.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+
+</html>

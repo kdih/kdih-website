@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="KDIH Events & Workshops - Join our tech events, workshops, and hackathons">
+    <title>Events & Workshops | KDIH</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --secondary: #06b6d4;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+
+        .btn-primary:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 50px;
+            border-radius: 8px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary), #1e293b);
+            color: white;
+            padding: 4rem 0 3rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Events Section */
+        .events-section {
+            padding: 4rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .event-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .event-content {
+            padding: 1.5rem;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .event-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .event-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .event-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .event-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        footer {
+            background: var(--bg-light);
+            padding: 3rem 0;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container nav-inner">
+            <a href="index.html" class="logo"><img src="kdihlogo.jpeg" alt="KDIH Logo"></a>
+            <a href="index.html" style="font-weight: 500; color: var(--text-light);">Back to Home</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Events & Workshops</h1>
+            <p>Join our tech events, workshops, and hackathons to learn, network, and grow</p>
+        </div>
+    </section>
+
+    <!-- Upcoming Events -->
+    <section class="events-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Upcoming Events</h2>
+                <p style="color: var(--text-light);">Don't miss out on these exciting opportunities</p>
+            </div>
+
+            <div class="events-grid" id="events-grid">
+                <!-- Events will be loaded here -->
+            </div>
+
+            <div id="no-events" style="display: none; text-align: center; padding: 3rem;">
+                <i class="ph-fill ph-calendar-x" style="font-size: 4rem; color: var(--text-light);"></i>
+                <p style="color: var(--text-light); margin-top: 1rem;">No upcoming events at the moment. Check back
+                    soon!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Modal -->
+    <div class="modal" id="registration-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Register for Event</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="registration-form">
+                <input type="hidden" id="event-id">
+
+                <div class="form-group">
+                    <label for="attendee-name">Full Name *</label>
+                    <input type="text" id="attendee-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="attendee-email">Email *</label>
+                    <input type="email" id="attendee-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="attendee-phone">Phone Number *</label>
+                    <input type="tel" id="attendee-phone" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Complete Registration
+                </button>
+            </form>
+
+            <div id="success-message" style="display: none; text-align: center; padding: 2rem 0;">
+                <i class="ph-fill ph-check-circle" style="font-size: 4rem; color: #10b981;"></i>
+                <h3 style="margin-top: 1rem;">Registration Successful!</h3>
+                <p style="color: var(--text-light); margin-top: 0.5rem;">We'll send you event details via email.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p style="color: var(--text-light);">&copy; 2025 Katsina Digital Innovation Hub (KDIH). All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        let currentEventId = null;
+
+        // Load events on page load
+        window.addEventListener('DOMContentLoaded', loadEvents);
+
+        async function loadEvents() {
+            try {
+                const res = await fetch('/api/events/upcoming');
+                const data = await res.json();
+
+                const grid = document.getElementById('events-grid');
+                const noEvents = document.getElementById('no-events');
+
+                if (data.data && data.data.length > 0) {
+                    grid.innerHTML = '';
+                    data.data.forEach(event => {
+                        const card = createEventCard(event);
+                        grid.appendChild(card);
+                    });
+                } else {
+                    grid.style.display = 'none';
+                    noEvents.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        function createEventCard(event) {
+            const card = document.createElement('div');
+            card.className = 'event-card';
+
+            const eventDate = new Date(event.event_date);
+            const formattedDate = eventDate.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            const price = event.price > 0 ? `₦${event.price.toLocaleString()}` : 'Free';
+
+            card.innerHTML = `
+                <div class="event-image">
+                    <i class="ph-fill ph-calendar-check"></i>
+                </div>
+                <div class="event-content">
+                    <span class="event-type-badge">${event.event_type || 'Workshop'}</span>
+                    <h3 class="event-title">${event.title}</h3>
+                    <div class="event-meta">
+                        <div class="event-meta-item">
+                            <i class="ph-fill ph-calendar"></i>
+                            <span>${formattedDate}</span>
+                        </div>
+                        <div class="event-meta-item">
+                            <i class="ph-fill ph-map-pin"></i>
+                            <span>${event.location || 'KDIH'}</span>
+                        </div>
+                    </div>
+                    <p class="event-description">${event.description || 'Join us for an exciting event!'}</p>
+                    <div class="event-footer">
+                        <span class="event-price">${price}</span>
+                        <button class="btn btn-primary" onclick="openRegistration(${event.id}, '${event.title}')">
+                            Register Now
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function openRegistration(eventId, eventTitle) {
+            currentEventId = eventId;
+            document.getElementById('event-id').value = eventId;
+            document.getElementById('modal-title').textContent = `Register for: ${eventTitle}`;
+            document.getElementById('registration-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('registration-modal').classList.remove('active');
+            document.getElementById('registration-form').reset();
+            document.getElementById('success-message').style.display = 'none';
+            document.getElementById('registration-form').style.display = 'block';
+        }
+
+        // Handle registration form submission
+        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                attendee_name: document.getElementById('attendee-name').value,
+                attendee_email: document.getElementById('attendee-email').value,
+                attendee_phone: document.getElementById('attendee-phone').value
+            };
+
+            try {
+                const res = await fetch(`/api/events/${currentEventId}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await res.json();
+
+                if (result.message === 'success') {
+                    document.getElementById('registration-form').style.display = 'none';
+                    document.getElementById('success-message').style.display = 'block';
+
+                    setTimeout(() => {
+                        closeModal();
+                    }, 3000);
+                } else {
+                    alert('Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Registration failed. Please try again.');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

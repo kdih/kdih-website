@@ -1,0 +1,483 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../database');
+
+// Middleware for authentication
+const requireAuth = (req, res, next) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+};
+
+// ===== EXISTING ENDPOINTS =====
+
+// Get all services
+router.get('/services', (req, res) => {
+    const sql = "SELECT * FROM services";
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            res.status(400).json({ "error": err.message });
+            return;
+        }
+        res.json({
+            "message": "success",
+            "data": rows
+        });
+    });
+});
+
+// Get all stats
+router.get('/stats', (req, res) => {
+    const sql = "SELECT * FROM stats";
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            res.status(400).json({ "error": err.message });
+            return;
+        }
+        res.json({
+            "message": "success",
+            "data": rows
+        });
+    });
+});
+
+// Contact Form Submission
+router.post('/contact', (req, res) => {
+    const { name, email, message } = req.body;
+    const sql = 'INSERT INTO messages (name, email, message) VALUES (?, ?, ?)';
+    db.run(sql, [name, email, message], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'success', id: this.lastID });
+    });
+});
+
+// Membership Registration
+router.post('/register', (req, res) => {
+    const { full_name, email, phone, interest } = req.body;
+    const sql = 'INSERT INTO members (full_name, email, phone, interest) VALUES (?, ?, ?, ?)';
+    db.run(sql, [full_name, email, phone, interest], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'success', id: this.lastID });
+    });
+});
+
+// Course Enrollment
+router.post('/enroll', (req, res) => {
+    const {
+        course_title, schedule, title, surname, firstname, othernames,
+        gender, nationality, phone, email_personal, email_official,
+        organization, job_title, department, country, state, city,
+        address, duties, expectations, requirements, referral
+    } = req.body;
+
+    const sql = `INSERT INTO course_registrations (
+        course_title, schedule, title, surname, firstname, othernames,
+        gender, nationality, phone, email_personal, email_official,
+        organization, job_title, department, country, state, city,
+        address, duties, expectations, requirements, referral
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const params = [
+        course_title, schedule, title, surname, firstname, othernames,
+        gender, nationality, phone, email_personal, email_official,
+        organization, job_title, department, country, state, city,
+        address, duties, expectations, requirements, referral
+    ];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            console.error("Database Error:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'success', id: this.lastID });
+    });
+});
+
+// ===== AUTHENTICATION =====
+
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    db.get("SELECT * FROM users WHERE username = ? AND password = ?", [username, password], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(401).json({ error: 'Invalid credentials' });
+
+        req.session.user = row;
+        res.json({ message: 'success', user: { username: row.username, role: row.role } });
+    });
+});
+
+router.post('/logout', (req, res) => {
+    req.session.destroy();
+    res.json({ message: 'success' });
+});
+
+router.get('/check-auth', (req, res) => {
+    if (req.session.user) {
+        res.json({ authenticated: true, user: req.session.user });
+    } else {
+        res.json({ authenticated: false });
+    }
+});
+
+// ===== LMS ENDPOINTS =====
+
+// Get all courses
+router.get('/courses', (req, res) => {
+    const sql = "SELECT * FROM courses WHERE status = 'active' ORDER BY created_at DESC";
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// Get single course with modules
+router.get('/courses/:id', (req, res) => {
+    const courseId = req.params.id;
+
+    db.get("SELECT * FROM courses WHERE id = ?", [courseId], (err, course) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+
+        db.all("SELECT * FROM course_modules WHERE course_id = ? ORDER BY module_order", [courseId], (err, modules) => {
+            if (err) return res.status(500).json({ error: err.message });
+            course.modules = modules;
+            res.json({ message: 'success', data: course });
+        });
+    });
+});
+
+// Create course (Admin only)
+router.post('/courses', requireAuth, (req, res) => {
+    const { title, description, track, duration_weeks, price, thumbnail_url } = req.body;
+    const sql = `INSERT INTO courses (title, description, track, duration_weeks, instructor_id, price, thumbnail_url) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [title, description, track, duration_weeks, req.session.user.id, price, thumbnail_url], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', id: this.lastID });
+    });
+});
+
+// Student enrollment in course
+router.post('/courses/:id/enroll', (req, res) => {
+    const courseId = req.params.id;
+    const { student_id, payment_status } = req.body;
+
+    const sql = `INSERT INTO student_enrollments (student_id, course_id, payment_status) VALUES (?, ?, ?)`;
+    db.run(sql, [student_id, courseId, payment_status || 'pending'], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', enrollment_id: this.lastID });
+    });
+});
+
+// Get student enrollments
+router.get('/students/:id/enrollments', (req, res) => {
+    const studentId = req.params.id;
+    const sql = `SELECT e.*, c.title as course_title, c.duration_weeks 
+                 FROM student_enrollments e 
+                 JOIN courses c ON e.course_id = c.id 
+                 WHERE e.student_id = ?`;
+
+    db.all(sql, [studentId], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// ===== EVENTS ENDPOINTS =====
+
+// Get all events
+router.get('/events', (req, res) => {
+    const sql = "SELECT * FROM events WHERE status != 'cancelled' ORDER BY event_date DESC";
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// Get upcoming events
+router.get('/events/upcoming', (req, res) => {
+    const sql = "SELECT * FROM events WHERE event_date >= datetime('now') AND status = 'upcoming' ORDER BY event_date ASC";
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// Create event (Admin only)
+router.post('/events', requireAuth, (req, res) => {
+    const { title, description, event_type, event_date, end_date, location, max_attendees, price, thumbnail_url } = req.body;
+    const sql = `INSERT INTO events (title, description, event_type, event_date, end_date, location, max_attendees, price, thumbnail_url) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [title, description, event_type, event_date, end_date, location, max_attendees, price, thumbnail_url], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', id: this.lastID });
+    });
+});
+
+// Register for event
+router.post('/events/:id/register', (req, res) => {
+    const eventId = req.params.id;
+    const { attendee_name, attendee_email, attendee_phone } = req.body;
+
+    const sql = `INSERT INTO event_registrations (event_id, attendee_name, attendee_email, attendee_phone) 
+                 VALUES (?, ?, ?, ?)`;
+
+    db.run(sql, [eventId, attendee_name, attendee_email, attendee_phone], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', registration_id: this.lastID });
+    });
+});
+
+// ===== CERTIFICATES ENDPOINTS =====
+
+// Generate certificate
+router.post('/certificates/generate', requireAuth, (req, res) => {
+    const { student_id, course_id, student_name, course_title, certificate_type } = req.body;
+
+    // Generate unique certificate number and verification code
+    const certificate_number = `KDIH-${Date.now()}-${student_id}`;
+    const verification_code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const issue_date = new Date().toISOString().split('T')[0];
+
+    const sql = `INSERT INTO certificates (certificate_number, student_id, course_id, student_name, course_title, 
+                 issue_date, certificate_type, verification_code) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [certificate_number, student_id, course_id, student_name, course_title, issue_date, certificate_type, verification_code], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({
+            message: 'success',
+            certificate_id: this.lastID,
+            certificate_number,
+            verification_code
+        });
+    });
+});
+
+// Verify certificate
+router.get('/certificates/verify/:code', (req, res) => {
+    const code = req.params.code;
+    const sql = "SELECT * FROM certificates WHERE verification_code = ? OR certificate_number = ?";
+
+    db.get(sql, [code, code], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Certificate not found' });
+        res.json({ message: 'success', data: row, valid: true });
+    });
+});
+
+// ===== STARTUP INCUBATION ENDPOINTS =====
+
+// Submit startup application
+router.post('/startups/apply', (req, res) => {
+    const { startup_name, founder_name, founder_email, founder_phone, business_description,
+        pitch_deck_url, team_size, industry, stage, funding_sought } = req.body;
+
+    const sql = `INSERT INTO startup_applications (startup_name, founder_name, founder_email, founder_phone, 
+                 business_description, pitch_deck_url, team_size, industry, stage, funding_sought) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [startup_name, founder_name, founder_email, founder_phone, business_description,
+        pitch_deck_url, team_size, industry, stage, funding_sought], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'success', application_id: this.lastID });
+        });
+});
+
+// Get all startup applications (Admin only)
+router.get('/admin/startups', requireAuth, (req, res) => {
+    const sql = "SELECT * FROM startup_applications ORDER BY applied_at DESC";
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// Update application status (Admin only)
+router.patch('/admin/startups/:id', requireAuth, (req, res) => {
+    const { application_status } = req.body;
+    const sql = "UPDATE startup_applications SET application_status = ? WHERE id = ?";
+
+    db.run(sql, [application_status, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success' });
+    });
+});
+
+// ===== CO-WORKING SPACE ENDPOINTS =====
+
+// Register as co-working member
+router.post('/coworking/register', (req, res) => {
+    const { full_name, email, phone, membership_type, start_date, end_date } = req.body;
+    const sql = `INSERT INTO coworking_members (full_name, email, phone, membership_type, start_date, end_date) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [full_name, email, phone, membership_type, start_date, end_date], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', member_id: this.lastID });
+    });
+});
+
+// Book a desk
+router.post('/coworking/book-desk', (req, res) => {
+    const { member_id, desk_number, booking_date, booking_type } = req.body;
+    const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type) 
+                 VALUES (?, ?, ?, ?)`;
+
+    db.run(sql, [member_id, desk_number, booking_date, booking_type], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', booking_id: this.lastID });
+    });
+});
+
+// Book meeting room
+router.post('/coworking/book-room', (req, res) => {
+    const { member_id, room_name, booking_date, start_time, end_time, purpose } = req.body;
+    const sql = `INSERT INTO meeting_room_bookings (member_id, room_name, booking_date, start_time, end_time, purpose) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [member_id, room_name, booking_date, start_time, end_time, purpose], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', booking_id: this.lastID });
+    });
+});
+
+// Get available desks for a date
+router.get('/coworking/available-desks/:date', (req, res) => {
+    const date = req.params.date;
+    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status = 'confirmed'";
+
+    db.all(sql, [date], (err, booked) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Assuming desks 1-20 are available
+        const allDesks = Array.from({ length: 20 }, (_, i) => `DESK-${i + 1}`);
+        const bookedDesks = booked.map(b => b.desk_number);
+        const available = allDesks.filter(desk => !bookedDesks.includes(desk));
+
+        res.json({ message: 'success', available_desks: available });
+    });
+});
+
+// ===== ANALYTICS ENDPOINTS =====
+
+// Dashboard analytics (Admin only)
+router.get('/admin/analytics/dashboard', requireAuth, (req, res) => {
+    const analytics = {};
+
+    // Get total students
+    db.get("SELECT COUNT(*) as count FROM course_registrations", [], (err, row) => {
+        analytics.total_students = row ? row.count : 0;
+
+        // Get total revenue (from payments)
+        db.get("SELECT SUM(amount) as total FROM payments WHERE status = 'success'", [], (err, row) => {
+            analytics.total_revenue = row && row.total ? row.total : 0;
+
+            // Get active courses
+            db.get("SELECT COUNT(*) as count FROM courses WHERE status = 'active'", [], (err, row) => {
+                analytics.active_courses = row ? row.count : 0;
+
+                // Get upcoming events
+                db.get("SELECT COUNT(*) as count FROM events WHERE event_date >= datetime('now')", [], (err, row) => {
+                    analytics.upcoming_events = row ? row.count : 0;
+
+                    // Get startup applications
+                    db.get("SELECT COUNT(*) as count FROM startup_applications WHERE application_status = 'pending'", [], (err, row) => {
+                        analytics.pending_applications = row ? row.count : 0;
+
+                        // Get co-working members
+                        db.get("SELECT COUNT(*) as count FROM coworking_members WHERE status = 'active'", [], (err, row) => {
+                            analytics.active_members = row ? row.count : 0;
+
+                            res.json({ message: 'success', data: analytics });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+// Course completion rates
+router.get('/admin/analytics/completion-rates', requireAuth, (req, res) => {
+    const sql = `SELECT 
+                    c.title,
+                    COUNT(e.id) as total_enrollments,
+                    SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) as completed,
+                    ROUND(CAST(SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(e.id) * 100, 2) as completion_rate
+                 FROM courses c
+                 LEFT JOIN student_enrollments e ON c.id = e.course_id
+                 GROUP BY c.id, c.title`;
+
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// ===== ADMIN ROUTES (Protected) =====
+
+// Get all members
+router.get('/admin/members', requireAuth, (req, res) => {
+    db.all("SELECT * FROM members ORDER BY created_at DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+
+// Delete member
+router.delete('/admin/members/:id', requireAuth, (req, res) => {
+    db.run("DELETE FROM members WHERE id = ?", [req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success' });
+    });
+});
+
+// Get all messages
+router.get('/admin/messages', requireAuth, (req, res) => {
+    db.all("SELECT * FROM messages ORDER BY timestamp DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+
+// Delete message
+router.delete('/admin/messages/:id', requireAuth, (req, res) => {
+    db.run("DELETE FROM messages WHERE id = ?", [req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success' });
+    });
+});
+
+// Get all course registrations
+router.get('/admin/registrations', requireAuth, (req, res) => {
+    db.all("SELECT * FROM course_registrations ORDER BY created_at DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+
+// Get all events (Admin)
+router.get('/admin/events', requireAuth, (req, res) => {
+    db.all("SELECT * FROM events ORDER BY event_date DESC", [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+
+// Get event registrations
+router.get('/admin/events/:id/registrations', requireAuth, (req, res) => {
+    db.all("SELECT * FROM event_registrations WHERE event_id = ? ORDER BY registered_at DESC", [req.params.id], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+
+module.exports = router;

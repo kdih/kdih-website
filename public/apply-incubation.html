@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apply for KDIH Startup Incubation Program">
+    <title>Startup Incubation Application | KDIH</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --secondary: #06b6d4;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+
+        .btn-primary:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .logo img {
+            height: 50px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary), #1e293b);
+            color: white;
+            padding: 4rem 0 3rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .application-section {
+            padding: 4rem 0;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .form-section-title {
+            font-size: 1.25rem;
+            color: var(--primary);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        footer {
+            background: var(--bg-light);
+            padding: 3rem 0;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .info-banner {
+            background: rgba(37, 99, 235, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .info-banner h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-banner ul {
+            margin-left: 1.5rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="logo"><img src="kdihlogo.jpeg" alt="KDIH Logo"></a>
+            <a href="index.html" style="font-weight: 500; color: var(--text-light);">Back to Home</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Startup Incubation Application</h1>
+            <p>Join our 3-6 month intensive program with mentorship and investor linkages</p>
+        </div>
+    </section>
+
+    <section class="application-section">
+        <div class="container">
+            <div class="form-card">
+                <div class="info-banner">
+                    <h3><i class="ph-fill ph-lightbulb"></i> What We Offer</h3>
+                    <ul>
+                        <li>3-6 month intensive mentorship program</li>
+                        <li>Access to industry experts and successful entrepreneurs</li>
+                        <li>Investor networking and pitch opportunities</li>
+                        <li>Co-working space and resources</li>
+                        <li>Business development support</li>
+                    </ul>
+                </div>
+
+                <form id="application-form">
+                    <!-- Startup Information -->
+                    <div class="form-section-title">Startup Information</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="startup-name">Startup Name *</label>
+                            <input type="text" id="startup-name" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="business-description">Business Description *</label>
+                            <textarea id="business-description" rows="4" required
+                                placeholder="Describe your business idea, problem you're solving, and your solution"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="industry">Industry *</label>
+                            <select id="industry" required>
+                                <option value="">Select Industry</option>
+                                <option value="FinTech">FinTech</option>
+                                <option value="EdTech">EdTech</option>
+                                <option value="HealthTech">HealthTech</option>
+                                <option value="AgriTech">AgriTech</option>
+                                <option value="E-commerce">E-commerce</option>
+                                <option value="SaaS">SaaS</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stage">Current Stage *</label>
+                            <select id="stage" required>
+                                <option value="">Select Stage</option>
+                                <option value="Idea">Idea Stage</option>
+                                <option value="Prototype">Prototype</option>
+                                <option value="MVP">MVP (Minimum Viable Product)</option>
+                                <option value="Early Revenue">Early Revenue</option>
+                                <option value="Growth">Growth Stage</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="team-size">Team Size *</label>
+                            <input type="number" id="team-size" min="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="funding-sought">Funding Sought (₦) *</label>
+                            <input type="number" id="funding-sought" min="0" step="100000" required
+                                placeholder="e.g., 5000000">
+                        </div>
+                    </div>
+
+                    <!-- Founder Information -->
+                    <div class="form-section-title">Founder Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="founder-name">Full Name *</label>
+                            <input type="text" id="founder-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="founder-email">Email *</label>
+                            <input type="email" id="founder-email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="founder-phone">Phone Number *</label>
+                            <input type="tel" id="founder-phone" required>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section-title">Additional Information</div>
+                    <div class="form-group full-width">
+                        <label for="pitch-deck-url">Pitch Deck URL (Google Drive, Dropbox, etc.)</label>
+                        <input type="url" id="pitch-deck-url" placeholder="https://drive.google.com/...">
+                        <small style="color: var(--text-light); display: block; margin-top: 0.5rem;">
+                            Optional: Share a link to your pitch deck or business plan
+                        </small>
+                    </div>
+
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <button type="submit" class="btn btn-primary"
+                            style="width: 100%; max-width: 400px; font-size: 1.1rem;">
+                            Submit Application
+                        </button>
+                    </div>
+                </form>
+
+                <div class="success-message" id="success-message">
+                    <div style="width: 80px; height: 80px; background: #10b981; border-radius: 50%; 
+                                display: flex; align-items: center; justify-content: center; 
+                                margin: 0 auto 1.5rem;">
+                        <i class="ph-fill ph-check" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <h2 style="color: var(--primary); margin-bottom: 1rem;">Application Submitted!</h2>
+                    <p style="color: var(--text-light); font-size: 1.1rem; margin-bottom: 2rem;">
+                        Thank you for applying to the KDIH Incubation Program. Our team will review your application and
+                        contact you within 5-7 business days.
+                    </p>
+                    <a href="index.html" class="btn btn-primary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p style="color: var(--text-light);">&copy; 2025 Katsina Digital Innovation Hub (KDIH). All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('application-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                startup_name: document.getElementById('startup-name').value,
+                business_description: document.getElementById('business-description').value,
+                industry: document.getElementById('industry').value,
+                stage: document.getElementById('stage').value,
+                team_size: parseInt(document.getElementById('team-size').value),
+                funding_sought: parseFloat(document.getElementById('funding-sought').value),
+                founder_name: document.getElementById('founder-name').value,
+                founder_email: document.getElementById('founder-email').value,
+                founder_phone: document.getElementById('founder-phone').value,
+                pitch_deck_url: document.getElementById('pitch-deck-url').value || null
+            };
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+
+            try {
+                btn.textContent = 'Submitting...';
+                btn.disabled = true;
+
+                const res = await fetch('/api/startups/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await res.json();
+
+                if (result.message === 'success') {
+                    document.getElementById('application-form').style.display = 'none';
+                    document.querySelector('.info-banner').style.display = 'none';
+                    document.getElementById('success-message').classList.add('show');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('Application submission failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Application submission failed. Please try again.');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+
+</html>

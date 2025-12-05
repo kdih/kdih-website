@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | KDIH - Katsina Digital Innovation Hub</title>
+    <meta name="description"
+        content="Explore the vibrant community, modern facilities, and events at Katsina Digital Innovation Hub.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .gallery-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 8rem 0 4rem;
+            text-align: center;
+        }
+
+        .gallery-filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            background: white;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .full-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            padding-bottom: 4rem;
+        }
+
+        .gallery-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            background: white;
+            transition: transform 0.3s;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-img {
+            height: 250px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-info {
+            padding: 1.5rem;
+        }
+
+        .gallery-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .gallery-info p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="container nav-inner">
+            <a href="index.html" class="logo"><img src="kdihlogo.jpeg" alt="KDIH Logo"></a>
+            <div class="mobile-toggle" id="mobile-toggle">☰</div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="courses.html">Courses</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="coworking.html">Co-working</a></li>
+                <li><a href="gallery.html" class="active">Gallery</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="verify-certificate.html" style="color: var(--accent);">Verify Certificate</a></li>
+                <li class="login-dropdown">
+                    <a href="#" class="login-trigger">Login <span style="font-size: 0.7em;">▼</span></a>
+                    <div class="login-menu">
+                        <a href="/member/login.html" class="login-option">
+                            <i class="ph-fill ph-user-circle"></i>
+                            <div>
+                                <strong>Member Portal</strong>
+                                <small>Students & Co-working</small>
+                            </div>
+                        </a>
+                        <a href="/admin/login.html" class="login-option">
+                            <i class="ph-fill ph-shield-check"></i>
+                            <div>
+                                <strong>Admin Portal</strong>
+                                <small>Staff access only</small>
+                            </div>
+                        </a>
+                    </div>
+                </li>
+                <li><a href="/member/register.html" class="btn btn-primary"
+                        style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Enroll Now</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="gallery-header">
+        <div class="container">
+            <h1>Our Gallery</h1>
+            <p>A glimpse into the daily life, events, and community at KDIH</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="gallery-filters">
+            <button class="filter-btn active" onclick="filterGallery('all')">All Photos</button>
+            <button class="filter-btn" onclick="filterGallery('events')">Events</button>
+            <button class="filter-btn" onclick="filterGallery('facilities')">Facilities</button>
+            <button class="filter-btn" onclick="filterGallery('community')">Community</button>
+        </div>
+
+        <div class="full-gallery-grid" id="gallery-grid">
+            <!-- Facilities -->
+            <div class="gallery-card" data-category="facilities">
+                <img src="images/gallery/meeting-room.png" alt="Meeting Room" class="gallery-img" loading="lazy">
+                <div class="gallery-info">
+                    <h3>Executive Meeting Room</h3>
+                    <p>State-of-the-art facilities for team collaboration.</p>
+                </div>
+            </div>
+            <div class="gallery-card" data-category="facilities">
+                <img src="images/gallery/lounge.png" alt="Lounge Area" class="gallery-img" loading="lazy">
+                <div class="gallery-info">
+                    <h3>Community Lounge</h3>
+                    <p>A relaxing space to connect and unwind.</p>
+                </div>
+            </div>
+            <div class="gallery-card" data-category="facilities">
+                <img src="images/gallery/meeting-room.png" alt="Co-working Space" class="gallery-img" loading="lazy"
+                    style="filter: brightness(0.9);">
+                <div class="gallery-info">
+                    <h3>Co-working Space</h3>
+                    <p>Modern desks and ergonomic seating for productivity.</p>
+                </div>
+            </div>
+
+            <!-- Events -->
+            <div class="gallery-card" data-category="events">
+                <img src="images/gallery/tech-workshop.png" alt="Tech Workshop" class="gallery-img" loading="lazy">
+                <div class="gallery-info">
+                    <h3>Coding Workshop</h3>
+                    <p>Hands-on training sessions for aspiring developers.</p>
+                </div>
+            </div>
+            <div class="gallery-card" data-category="events">
+                <img src="images/gallery/networking.png" alt="Networking Event" class="gallery-img" loading="lazy">
+                <div class="gallery-info">
+                    <h3>Tech Networking Night</h3>
+                    <p>Connecting innovators, founders, and investors.</p>
+                </div>
+            </div>
+            <div class="gallery-card" data-category="events">
+                <img src="images/gallery/presentation.png" alt="Student Presentation" class="gallery-img"
+                    loading="lazy">
+                <div class="gallery-info">
+                    <h3>Demo Day Presentation</h3>
+                    <p>Students showcasing their final projects.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="background: var(--dark-bg); color: white; padding: 4rem 0;">
+        <div class="container text-center">
+            <p>&copy; 2025 Katsina Digital Innovation Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const navLinks = document.getElementById('nav-links');
+
+        mobileToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Gallery Filter
+        function filterGallery(category) {
+            const cards = document.querySelectorAll('.gallery-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            // Update active button
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Filter cards
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

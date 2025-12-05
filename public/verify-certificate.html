@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Verify KDIH Certificates - Check authenticity of certificates">
+    <title>Certificate Verification | KDIH</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --error: #ef4444;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+
+        .btn-primary:hover {
+            background: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .logo img {
+            height: 50px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary), #1e293b);
+            color: white;
+            padding: 4rem 0 3rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .verification-section {
+            padding: 4rem 0;
+        }
+
+        .verification-card {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .result-card {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            margin-top: 2rem;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-icon.success {
+            color: var(--success);
+        }
+
+        .result-icon.error {
+            color: var(--error);
+        }
+
+        .result-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-details {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .detail-value {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .certificate-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        footer {
+            background: var(--bg-light);
+            padding: 3rem 0;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .info-box {
+            background: rgba(37, 99, 235, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .info-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="index.html" class="logo"><img src="kdihlogo.jpeg" alt="KDIH Logo"></a>
+            <a href="index.html" style="font-weight: 500; color: var(--text-light);">Back to Home</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Certificate Verification</h1>
+            <p>Verify the authenticity of KDIH certificates</p>
+        </div>
+    </section>
+
+    <section class="verification-section">
+        <div class="container">
+            <div class="verification-card">
+                <h2 style="text-align: center; margin-bottom: 2rem;">Enter Certificate Details</h2>
+
+                <form id="verification-form">
+                    <div class="form-group">
+                        <label for="certificate-code">Certificate Number or Verification Code</label>
+                        <input type="text" id="certificate-code"
+                            placeholder="e.g., KDIH-1732577890123-45 or verification code" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem;">
+                        <i class="ph-fill ph-shield-check" style="margin-right: 0.5rem;"></i>
+                        Verify Certificate
+                    </button>
+                </form>
+
+                <div class="info-box">
+                    <h3><i class="ph-fill ph-info"></i> How to Verify</h3>
+                    <p>Enter the certificate number (found at the top of the certificate) or the verification code
+                        (found at the bottom). Our system will instantly verify the authenticity and display the
+                        certificate details.</p>
+                </div>
+            </div>
+
+            <!-- Success Result -->
+            <div class="result-card" id="success-result">
+                <div class="result-header">
+                    <div class="result-icon success">
+                        <i class="ph-fill ph-check-circle"></i>
+                    </div>
+                    <h2 class="result-title">Certificate Verified ✓</h2>
+                    <p style="color: var(--text-light);">This is an authentic KDIH certificate</p>
+                    <span class="certificate-badge">VALID CERTIFICATE</span>
+                </div>
+
+                <div class="result-details" id="certificate-details">
+                    <!-- Details will be populated here -->
+                </div>
+
+                <button class="btn btn-primary" onclick="resetForm()" style="width: 100%; margin-top: 2rem;">
+                    Verify Another Certificate
+                </button>
+            </div>
+
+            <!-- Error Result -->
+            <div class="result-card" id="error-result">
+                <div class="result-header">
+                    <div class="result-icon error">
+                        <i class="ph-fill ph-x-circle"></i>
+                    </div>
+                    <h2 class="result-title">Certificate Not Found</h2>
+                    <p style="color: var(--text-light);">We couldn't find a certificate matching this code</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>Possible Reasons:</h3>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem; color: var(--text-light);">
+                        <li>The certificate number or code was entered incorrectly</li>
+                        <li>The certificate may be fraudulent</li>
+                        <li>The certificate has not been issued yet</li>
+                    </ul>
+                    <p style="margin-top: 1rem;">If you believe this is an error, please contact KDIH at
+                        <strong>info@kdih.org</strong></p>
+                </div>
+
+                <button class="btn btn-primary" onclick="resetForm()" style="width: 100%; margin-top: 2rem;">
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p style="color: var(--text-light);">&copy; 2025 Katsina Digital Innovation Hub (KDIH). All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('verification-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const code = document.getElementById('certificate-code').value.trim();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.innerHTML = '<i class="ph-fill ph-spinner" style="animation: spin 1s linear infinite;"></i> Verifying...';
+                btn.disabled = true;
+
+                const res = await fetch(`/api/certificates/verify/${encodeURIComponent(code)}`);
+                const data = await res.json();
+
+                if (res.ok && data.valid) {
+                    showSuccess(data.data);
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError();
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        function showSuccess(certificate) {
+            document.querySelector('.verification-card').style.display = 'none';
+            document.getElementById('success-result').classList.add('show');
+
+            const issueDate = new Date(certificate.issue_date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const details = `
+                <div class="detail-row">
+                    <span class="detail-label">Certificate Number</span>
+                    <span class="detail-value">${certificate.certificate_number}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Student Name</span>
+                    <span class="detail-value">${certificate.student_name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Course Title</span>
+                    <span class="detail-value">${certificate.course_title}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Certificate Type</span>
+                    <span class="detail-value">${certificate.certificate_type || 'Completion'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Issue Date</span>
+                    <span class="detail-value">${issueDate}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Verification Code</span>
+                    <span class="detail-value" style="font-family: monospace;">${certificate.verification_code}</span>
+                </div>
+            `;
+
+            document.getElementById('certificate-details').innerHTML = details;
+        }
+
+        function showError() {
+            document.querySelector('.verification-card').style.display = 'none';
+            document.getElementById('error-result').classList.add('show');
+        }
+
+        function resetForm() {
+            document.querySelector('.verification-card').style.display = 'block';
+            document.getElementById('success-result').classList.remove('show');
+            document.getElementById('error-result').classList.remove('show');
+            document.getElementById('verification-form').reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Add spinner animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+</body>
+
+</html>

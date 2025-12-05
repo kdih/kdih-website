@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard | KDIH</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-type {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            color: #0f172a;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .course-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .course-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .course-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .membership-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .membership-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .membership-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .detail-item {
+            opacity: 0.9;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 1rem;
+                z-index: 100;
+            }
+
+            .logo,
+            .user-info {
+                display: none;
+            }
+
+            .nav-menu {
+                display: flex;
+                justify-content: space-around;
+            }
+
+            .nav-item {
+                margin: 0;
+            }
+
+            .nav-link span {
+                display: none;
+            }
+
+            .main-content {
+                padding-bottom: 100px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="logo">KDIH</div>
+            <div class="user-info">
+                <div class="user-name" id="user-name">Loading...</div>
+                <div class="user-type" id="user-type"></div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showSection('overview')">
+                        <i class="ph-fill ph-house"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="courses-nav" style="display:none;">
+                    <a class="nav-link" onclick="showSection('courses')">
+                        <i class="ph-fill ph-book-open"></i>
+                        <span>My Courses</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="membership-nav" style="display:none;">
+                    <a class="nav-link" onclick="showSection('membership')">
+                        <i class="ph-fill ph-buildings"></i>
+                        <span>Co-working</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('profile')">
+                        <i class="ph-fill ph-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="logout()">
+                        <i class="ph-fill ph-sign-out"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview-section" class="section active">
+                <div class="header">
+                    <h1>Welcome Back! 👋</h1>
+                </div>
+
+                <div class="stats-grid" id="stats-grid">
+                    <!-- Stats will be loaded here -->
+                </div>
+
+                <div id="quick-actions">
+                    <!-- Quick actions will be loaded here -->
+                </div>
+            </section>
+
+            <!-- My Courses Section -->
+            <section id="courses-section" class="section">
+                <div class="header">
+                    <h2 class="section-title">My Courses</h2>
+                    <a href="/courses.html" class="btn btn-outline">Browse More Courses</a>
+                </div>
+                <div class="course-grid" id="courses-grid">
+                    <!-- Courses will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Co-working Section -->
+            <section id="membership-section" class="section">
+                <h2 class="section-title">Co-working Membership</h2>
+                <div id="membership-content">
+                    <!-- Membership details will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile-section" class="section">
+                <h2 class="section-title">My Profile</h2>
+                <div id="profile-content">
+                    <!-- Profile will be loaded here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let currentMember = null;
+        let dashboardData = null;
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/member/check-session');
+                const data = await response.json();
+
+                if (!data.authenticated) {
+                    window.location.href = '/member/login.html';
+                    return;
+                }
+
+                currentMember = data.member;
+                document.getElementById('user-name').textContent = currentMember.full_name;
+                document.getElementById('user-type').textContent = getMemberTypeLabel(currentMember.member_type);
+
+                // Show/hide nav items based on member type
+                if (currentMember.member_type === 'student' || currentMember.member_type === 'both') {
+                    document.getElementById('courses-nav').style.display = 'block';
+                }
+                if (currentMember.member_type === 'coworking' || currentMember.member_type === 'both') {
+                    document.getElementById('membership-nav').style.display = 'block';
+                }
+
+                loadDashboard();
+            } catch (error) {
+                window.location.href = '/member/login.html';
+            }
+        }
+
+        function getMemberTypeLabel(type) {
+            const labels = {
+                'student': 'Course Student',
+                'coworking': 'Co-working Member',
+                'both': 'Student & Co-working Member'
+            };
+            return labels[type] || type;
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/member/dashboard');
+                dashboardData = await response.json();
+
+                loadOverview();
+                loadCourses();
+                loadMembership();
+                loadProfile();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load overview
+        function loadOverview() {
+            const statsGrid = document.getElementById('stats-grid');
+            let statsHTML = '';
+
+            if (currentMember.member_type === 'student' || currentMember.member_type === 'both') {
+                const coursesCount = dashboardData.courses?.length || 0;
+                const avgProgress = coursesCount > 0
+                    ? Math.round(dashboardData.courses.reduce((sum, c) => sum + (c.progress_percentage || 0), 0) / coursesCount)
+                    : 0;
+
+                statsHTML += `
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value">${coursesCount}</div>
+                        <div class="stat-label">Enrolled Courses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-value">${avgProgress}%</div>
+                        <div class="stat-label">Average Progress</div>
+                    </div>
+                `;
+            }
+
+            if (currentMember.member_type === 'coworking' || currentMember.member_type === 'both') {
+                const bookingsCount = dashboardData.bookings?.length || 0;
+                const hasMembership = dashboardData.membership ? 'Active' : 'None';
+
+                statsHTML += `
+                    <div class="stat-card">
+                        <div class="stat-icon">🏢</div>
+                        <div class="stat-value">${hasMembership}</div>
+                        <div class="stat-label">Membership Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-value">${bookingsCount}</div>
+                        <div class="stat-label">Total Bookings</div>
+                    </div>
+                `;
+            }
+
+            statsGrid.innerHTML = statsHTML;
+        }
+
+        // Load courses
+        async function loadCourses() {
+            const coursesGrid = document.getElementById('courses-grid');
+
+            try {
+                // Fetch course enrollments
+                const response = await fetch('/api/member/enrollments');
+                const result = await response.json();
+
+                const enrollments = result.data || [];
+
+                if (enrollments.length === 0) {
+                    coursesGrid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="ph-fill ph-book-open"></i>
+                            <p>No courses enrolled yet</p>
+                            <a href="/index.html#courses" class="btn" style="margin-top: 1rem;">Browse Courses</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                coursesGrid.innerHTML = enrollments.map(enrollment => {
+                    const amount = (enrollment.course_fee || enrollment.course_price * 100) / 100;
+                    const isPaid = enrollment.payment_status === 'paid';
+                    const statusBadge = isPaid
+                        ? `<span style="padding: 0.25rem 0.75rem; background: #d1fae5; color: #065f46; border-radius: 12px; font-size: 0.85rem;">✓ Paid</span>`
+                        : `<span style="padding: 0.25rem 0.75rem; background: #fef3c7; color: #92400e; border-radius: 12px; font-size: 0.85rem;">⏳ Pending Payment</span>`;
+
+                    return `
+                        <div class="course-card">
+                            <div class="course-title">${enrollment.course_title}</div>
+                            <div class="stat-label">${enrollment.duration_weeks || 'N/A'} weeks${enrollment.schedule ? ' • ' + new Date(enrollment.schedule).toLocaleDateString() : ''}</div>
+                            <div style="margin: 1rem 0; display: flex; justify-content: space-between; align-items: center;">
+                                ${statusBadge}
+                                <span style="font-weight: 600; color: #0f172a;">₦${amount.toLocaleString()}</span>
+                            </div>
+                            ${isPaid
+                            ? `<button class="btn" style="width: 100%; padding: 0.5rem 1rem; font-size: 0.9rem;" disabled>Enrolled</button>`
+                            : `<button class="btn" style="width: 100%; padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="initiatePayment(${enrollment.id}, '${enrollment.course_title}', ${amount})">Pay Now - ₦${amount.toLocaleString()}</button>`
+                        }
+                        </div>
+                    `;
+                }).join('');
+
+                // Update courses count in stats
+                if (dashboardData) {
+                    dashboardData.courses = enrollments;
+                    loadOverview();
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                coursesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <p>Error loading course enrollments</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load membership
+        function loadMembership() {
+            const membershipContent = document.getElementById('membership-content');
+            const membership = dashboardData.membership;
+
+            if (!membership) {
+                membershipContent.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ph-fill ph-buildings"></i>
+                        <p>No active co-working membership</p>
+                        <a href="/coworking.html" class="btn" style="margin-top: 1rem;">View Membership Plans</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const endDate = new Date(membership.end_date);
+            const now = new Date();
+            const daysRemaining = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+
+            membershipContent.innerHTML = `
+                <div class="membership-card">
+                    <div class="membership-status">● ${membership.status.toUpperCase()}</div>
+                    <h3 style="font-size: 1.75rem; margin-bottom: 0.5rem;">${membership.membership_plan} Membership</h3>
+                    <div class="membership-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Valid Until</div>
+                            <div class="detail-value">${new Date(membership.end_date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Days Remaining</div>
+                            <div class="detail-value">${daysRemaining} days</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Plan</div>
+                            <div class="detail-value">${membership.membership_plan}</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <button class="btn" style="background: white; color: #667eea;">Renew Membership</button>
+                        <button class="btn btn-outline" style="margin-left: 1rem;">Book Desk</button>
+                    </div>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem;">Recent Bookings</h3>
+                <div id="bookings-list">
+                    ${(dashboardData.bookings || []).map(booking => `
+                        <div class="course-card">
+                            <div class="course-title">${booking.desk_type}</div>
+                            <div class="stat-label">${new Date(booking.booking_date).toLocaleDateString()} • ${booking.start_time} - ${booking.end_time}</div>
+                            <div style="margin-top: 0.5rem;">
+                                <span style="padding: 0.25rem 0.75rem; background: #d1fae5; color: #065f46; border-radius: 12px; font-size: 0.85rem;">
+                                    ${booking.status}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('') || '<p class="stat-label">No bookings yet</p>'}
+                </div>
+            `;
+        }
+
+        // Load profile
+        async function loadProfile() {
+            const profileContent = document.getElementById('profile-content');
+
+            try {
+                const response = await fetch('/api/member/profile');
+                const profile = await response.json();
+
+                profileContent.innerHTML = `
+                    <div style="max-width: 600px;">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Full Name</label>
+                            <input type="text" id="profile-name" value="${profile.full_name}" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email</label>
+                            <input type="email" value="${profile.email}" disabled style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Phone</label>
+                            <input type="tel" id="profile-phone" value="${profile.phone || ''}" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Member Type</label>
+                            <input type="text" value="${getMemberTypeLabel(profile.member_type)}" disabled style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                        </div>
+                        <button class="btn" onclick="updateProfile()">Save Changes</button>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // Update profile
+        async function updateProfile() {
+            const full_name = document.getElementById('profile-name').value;
+            const phone = document.getElementById('profile-phone').value;
+
+            try {
+                const response = await fetch('/api/member/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ full_name, phone })
+                });
+
+                if (response.ok) {
+                    alert('Profile updated successfully!');
+                    checkAuth();
+                } else {
+                    alert('Failed to update profile');
+                }
+            } catch (error) {
+                alert('Error updating profile');
+            }
+        }
+
+        // Show section
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            document.getElementById(`${section}-section`).classList.add('active');
+            event.target.closest('.nav-link').classList.add('active');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/member/logout', { method: 'POST' });
+                window.location.href = '/member/login.html';
+            } catch (error) {
+                window.location.href = '/member/login.html';
+            }
+        }
+
+        // Initiate Payment for Course
+        async function initiatePayment(enrollmentId, courseTitle, amount) {
+            try {
+                const button = event.target;
+                button.disabled = true;
+                button.textContent = 'Initializing...';
+
+                const response = await fetch(`/api/member/courses/${enrollmentId}/pay`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.authorization_url) {
+                    // Redirect to Paystack checkout
+                    window.location.href = result.authorization_url;
+                } else {
+                    alert('Failed to initialize payment. Please try again.');
+                    button.disabled = false;
+                    button.textContent = `Pay Now - ₦${amount.toLocaleString()}`;
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Error initializing payment. Please try again.');
+                event.target.disabled = false;
+                event.target.textContent = `Pay Now - ₦${amount.toLocaleString()}`;
+            }
+        }
+
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | KDIH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --sidebar: #1e293b;
+            --accent: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            padding: 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        .logout {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem 2rem;
+            background: var(--sidebar);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--sidebar);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--sidebar);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #3b82f6;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--sidebar);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">KDIH Admin</div>
+        <div class="nav">
+            <div class="nav-item active" onclick="switchTab('overview')">
+                <i class="ph-fill ph-house"></i>
+                <span>Overview</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('members')">
+                <i class="ph-fill ph-users"></i>
+                <span>Members</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('messages')">
+                <i class="ph-fill ph-envelope"></i>
+                <span>Messages</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('courses')">
+                <i class="ph-fill ph-graduation-cap"></i>
+                <span>Courses</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('registrations')">
+                <i class="ph-fill ph-notebook"></i>
+                <span>Course Registrations</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('events')">
+                <i class="ph-fill ph-calendar"></i>
+                <span>Events</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('startups')">
+                <i class="ph-fill ph-rocket-launch"></i>
+                <span>Startup Applications</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('analytics')">
+                <i class="ph-fill ph-chart-bar"></i>
+                <span>Analytics</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('services')">
+                <i class="ph-fill ph-briefcase"></i>
+                <span>Services</span>
+            </div>
+            <div class="nav-item" id="admins-nav" onclick="switchTab('admins')" style="display: none;">
+                <i class="ph-fill ph-shield-check"></i>
+                <span>Manage Admins</span>
+            </div>
+        </div>
+        <div class="logout">
+            <button class="logout-btn" onclick="logout()">
+                <i class="ph-fill ph-sign-out"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <div class="header">
+            <h1 id="page-title">Overview</h1>
+            <div class="user-info">
+                <i class="ph-fill ph-user-circle" style="font-size: 2rem;"></i>
+                <div>
+                    <div id="user-name">Admin</div>
+                    <div id="user-role" style="font-size: 0.875rem; color: var(--text-muted);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Members</span>
+                            <i class="ph-fill ph-users stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-members">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Course Enrollments</span>
+                            <i class="ph-fill ph-graduation-cap stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-enrollments">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Upcoming Events</span>
+                            <i class="ph-fill ph-calendar stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-events">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Pending Applications</span>
+                            <i class="ph-fill ph-rocket-launch stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-applications">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-activity">
+                            <tr>
+                                <td colspan="3" class="empty-state">
+                                    <i class="ph ph-activity"></i>
+                                    <p>No recent activity</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Members Tab -->
+            <div id="members-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Members</h2>
+                        <button class="btn" onclick="showCreateMemberModal()">
+                            <i class="ph-fill ph-plus"></i> Quick Add Member
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Interest</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div id="messages-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Contact Messages</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Courses Tab -->
+            <div id="courses-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Courses</h2>
+                        <button class="btn" onclick="showCreateCourseModal()">
+                            <i class="ph-fill ph-plus"></i> Create Course
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Track</th>
+                                <th>Duration</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Course Registrations Tab -->
+            <div id="registrations-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Course Registrations</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrations-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Events Tab -->
+            <div id="events-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Events</h2>
+                        <button class="btn" onclick="showCreateEventModal()">
+                            <i class="ph-fill ph-plus"></i> Create Event
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Attendees</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Startup Applications Tab -->
+            <div id="startups-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Startup Applications</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Startup Name</th>
+                                <th>Founder</th>
+                                <th>Industry</th>
+                                <th>Stage</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="startups-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admins Tab (Super Admin Only) -->
+            <div id="admins-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Admin Users</h2>
+                        <button class="btn" onclick="showCreateAdminModal()">
+                            <i class="ph-fill ph-plus"></i> Create Admin
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admins-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Revenue</span>
+                            <i class="ph-fill ph-currency-circle-dollar stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-revenue">₦0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Active Courses</span>
+                            <i class="ph-fill ph-book-open stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-active-courses">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Co-working Members</span>
+                            <i class="ph-fill ph-desk stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-coworking">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Students</span>
+                            <i class="ph-fill ph-student stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-students">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div id="services-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Services</h2>
+                        <button class="btn" onclick="showCreateServiceModal()">
+                            <i class="ph-fill ph-plus"></i> Create Service
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Icon</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Course Modal -->
+    <div id="create-course-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Course</h2>
+                <button class="close-btn" onclick="closeModal('create-course-modal')">&times;</button>
+            </div>
+            <form id="create-course-form">
+                <div class="form-group">
+                    <label>Course Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Track *</label>
+                    <select name="track" required>
+                        <option value="">Select track</option>
+                        <option value="Technical Skills">Technical Skills</option>
+                        <option value="Business Skills">Business Skills</option>
+                        <option value="Design">Design</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Duration (weeks) *</label>
+                    <input type="number" name="duration_weeks" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" required>
+                </div>
+                <button type="submit" class="btn">Create Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div id="create-event-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Event</h2>
+                <button class="close-btn" onclick="closeModal('create-event-modal')">&times;</button>
+            </div>
+            <form id="create-event-form">
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Event Type *</label>
+                    <select name="event_type" required>
+                        <option value="">Select type</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Training">Training</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date & Time *</label>
+                    <input type="datetime-local" name="event_date" required>
+                </div>
+                <div class="form-group">
+                    <label>End Date & Time *</label>
+                    <input type="datetime-local" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location *</label>
+                    <input type="text" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label>Max Attendees *</label>
+                    <input type="number" name="max_attendees" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" value="0" required>
+                </div>
+                <button type="submit" class="btn">Create Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Admin Modal (Super Admin Only) -->
+    <div id="create-admin-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Admin</h2>
+                <button class="close-btn" onclick="closeModal('create-admin-modal')">&times;</button>
+            </div>
+            <form id="create-admin-form">
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" name="username" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" name="password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Role *</label>
+                    <select name="role" required>
+                        <option value="">Select role</option>
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Create Admin</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Member Details Modal -->
+    <div id="member-details-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>Member Dashboard View</h2>
+                <button class="close-btn" onclick="closeModal('member-details-modal')">&times;</button>
+            </div>
+            <div id="member-details-content">
+                <!-- Content will be loaded dynamically -->
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                    <p>Loading member data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced admin functionality
+        let currentTab = 'overview';
+        let currentUser = null;
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tab}-tab`).classList.add('active');
+
+            // Update title
+            const titles = {
+                overview: 'Overview',
+                members: 'Members',
+                messages: 'Messages',
+                courses: 'Courses',
+                registrations: 'Course Registrations',
+                events: 'Events',
+                startups: 'Startup Applications',
+                analytics: 'Analytics',
+                admins: 'Manage Admins'
+            };
+            document.getElementById('page-title').textContent = titles[tab];
+
+            // Load data for tab
+            loadTabData(tab);
+        }
+
+        function loadTabData(tab) {
+            switch (tab) {
+                case 'overview':
+                    loadOverview();
+                    break;
+                case 'members':
+                    loadMembers();
+                    break;
+                case 'messages':
+                    loadMessages();
+                    break;
+                case 'courses':
+                    loadCourses();
+                    break;
+                case 'registrations':
+                    loadRegistrations();
+                    break;
+                case 'events':
+                    loadEvents();
+                    break;
+                case 'startups':
+                    loadStartups();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                case 'admins':
+                    loadAdmins();
+                    break;
+            }
+        }
+
+        // Check authentication and load user info
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/check-session');
+                const data = await response.json();
+
+                if (!data.authenticated) {
+                    window.location.href = '/admin/login.html';
+                    return;
+                }
+
+                currentUser = data.user;
+                document.getElementById('user-name').textContent = data.user.username;
+                document.getElementById('user-role').textContent = data.user.role === 'super_admin' ? 'Super Admin' : 'Admin';
+
+                // Show Admins tab only for super admins
+                if (data.user.role === 'super_admin') {
+                    document.getElementById('admins-nav').style.display = 'flex';
+                }
+            } catch (error) {
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        async function loadOverview() {
+            try {
+                const response = await fetch('/api/admin/analytics/dashboard');
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    document.getElementById('stat-members').textContent = data.data.active_members || 0;
+                    document.getElementById('stat-enrollments').textContent = data.data.total_students || 0;
+                    document.getElementById('stat-events').textContent = data.data.upcoming_events || 0;
+                    document.getElementById('stat-applications').textContent = data.data.pending_applications || 0;
+                }
+            } catch (error) {
+                console.error('Error loading overview:', error);
+            }
+        }
+
+        async function loadMembers() {
+            try {
+                const response = await fetch('/api/admin/members/detailed');
+                const data = await response.json();
+                const list = document.getElementById('members-list');
+
+                // Update table header to include more details
+                const thead = document.querySelector('#members-tab thead tr');
+                thead.innerHTML = `
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Enrollments</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                `;
+
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(member => `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">${member.full_name || 'N/A'}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Joined: ${new Date(member.created_at).toLocaleDateString()}</div>
+                            </td>
+                            <td>${member.email}</td>
+                            <td><span class="badge badge-warning">${member.member_type || 'student'}</span></td>
+                            <td>
+                                <div style="font-size: 0.85rem;">
+                                    <div>Courses: ${member.lms_enrollments_count + member.course_registrations_count}</div>
+                                    <div>Memberships: ${member.active_memberships_count}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge ${member.is_active ? 'badge-success' : 'badge-danger'}">
+                                    ${member.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm" onclick="viewMemberDashboard(${member.id})" style="margin-right: 0.5rem;">
+                                    <i class="ph-fill ph-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">
+                                    <i class="ph-fill ph-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-users"></i><p>No members found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading members:', error);
+                // Fallback to basic members list if detailed endpoint fails
+                loadBasicMembers();
+            }
+        }
+
+        async function loadBasicMembers() {
+            try {
+                const response = await fetch('/api/admin/members');
+                const data = await response.json();
+                const list = document.getElementById('members-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(member => `
+                        <tr>
+                            <td>${member.full_name || member.username || 'N/A'}</td>
+                            <td>${member.email}</td>
+                            <td>${member.phone || 'N/A'}</td>
+                            <td>${member.interest || 'N/A'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ph ph-users"></i><p>No members found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading members:', error);
+            }
+        }
+
+        async function viewMemberDashboard(memberId) {
+            const modal = document.getElementById('member-details-modal');
+            const content = document.getElementById('member-details-content');
+
+            modal.classList.add('show');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                    <p>Loading member data...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/admin/members/${memberId}/dashboard`);
+                const result = await response.json();
+
+                if (result.message === 'success') {
+                    const data = result.data;
+                    const member = data.member;
+
+                    let html = `
+                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                            <!-- Left Column: Profile -->
+                            <div>
+                                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                                        <div style="width: 80px; height: 80px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; font-weight: bold;">
+                                            ${member.full_name ? member.full_name.charAt(0).toUpperCase() : 'U'}
+                                        </div>
+                                        <h3 style="margin-bottom: 0.5rem;">${member.full_name}</h3>
+                                        <span class="badge badge-warning">${member.member_type}</span>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Email</label>
+                                        <div>${member.email}</div>
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Phone</label>
+                                        <div>${member.phone || 'N/A'}</div>
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Joined</label>
+                                        <div>${new Date(member.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Last Login</label>
+                                        <div>${member.last_login ? new Date(member.last_login).toLocaleString() : 'Never'}</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 1.5rem; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <h4 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Payment History</h4>
+                                    ${data.payments.length > 0 ? `
+                                        <div style="max-height: 300px; overflow-y: auto;">
+                                            ${data.payments.map(p => `
+                                                <div style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+                                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                                        <span style="font-weight: 600;">₦${(p.amount / 100).toLocaleString()}</span>
+                                                        <span class="badge ${p.status === 'success' ? 'badge-success' : 'badge-warning'}" style="font-size: 0.7rem;">${p.status}</span>
+                                                    </div>
+                                                    <div style="color: var(--text-muted); font-size: 0.8rem;">${new Date(p.created_at).toLocaleDateString()}</div>
+                                                    <div style="color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.payment_for || 'Payment'}</div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : '<p style="color: var(--text-muted); font-size: 0.9rem;">No payments recorded</p>'}
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column: Enrollments & Memberships -->
+                            <div style="max-height: 80vh; overflow-y: auto; padding-right: 0.5rem;">
+                                <!-- Course Registrations -->
+                                <div style="margin-bottom: 2rem;">
+                                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="ph-fill ph-graduation-cap"></i> Course Enrollments
+                                    </h3>
+                                    
+                                    ${(data.course_registrations.length === 0 && data.lms_enrollments.length === 0) ?
+                            '<div class="empty-state" style="padding: 2rem; background: rgba(255,255,255,0.02); border-radius: 12px;"><p>No course enrollments</p></div>' : ''}
+                                    
+                                    ${data.course_registrations.map(reg => `
+                                        <div style="background: var(--sidebar); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem;">${reg.course_title}</h4>
+                                                    <div style="font-size: 0.9rem; color: var(--text-muted);">Registered: ${new Date(reg.created_at).toLocaleDateString()}</div>
+                                                </div>
+                                                <span class="badge ${reg.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">
+                                                    ${reg.payment_status === 'paid' ? 'Paid' : 'Payment Pending'}
+                                                </span>
+                                            </div>
+                                            
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Course Fee</div>
+                                                    <div style="font-weight: 600;">₦${(reg.fee_display / 100).toLocaleString()}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Duration</div>
+                                                    <div>${reg.duration_weeks ? reg.duration_weeks + ' weeks' : 'N/A'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Expected Completion</div>
+                                                    <div>${reg.completion_date ? new Date(reg.completion_date).toLocaleDateString() : 'N/A'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Schedule</div>
+                                                    <div>${reg.schedule || 'N/A'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                    
+                                    ${data.lms_enrollments.map(enr => `
+                                        <div style="background: var(--sidebar); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem;">${enr.course_title}</h4>
+                                                    <div style="font-size: 0.9rem; color: var(--text-muted);">Enrolled (LMS): ${new Date(enr.enrollment_date).toLocaleDateString()}</div>
+                                                </div>
+                                                <span class="badge ${enr.status === 'completed' ? 'badge-success' : 'badge-primary'}">
+                                                    ${enr.status}
+                                                </span>
+                                            </div>
+                                            
+                                            <div style="margin-bottom: 1rem;">
+                                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                                    <span>Progress</span>
+                                                    <span>${enr.progress_percentage}%</span>
+                                                </div>
+                                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
+                                                    <div style="width: ${enr.progress_percentage}%; height: 100%; background: var(--success); border-radius: 3px;"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Expected Completion</div>
+                                                    <div>${enr.expected_completion_date ? new Date(enr.expected_completion_date).toLocaleDateString() : 'N/A'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Track</div>
+                                                    <div>${enr.track || 'General'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <!-- Co-working Memberships -->
+                                <div>
+                                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="ph-fill ph-buildings"></i> Co-working Memberships
+                                    </h3>
+                                    
+                                    ${data.coworking_memberships.length === 0 ?
+                            '<div class="empty-state" style="padding: 2rem; background: rgba(255,255,255,0.02); border-radius: 12px;"><p>No memberships found</p></div>' : ''}
+                                    
+                                    ${data.coworking_memberships.map(mem => `
+                                        <div style="background: var(--sidebar); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem;">${mem.membership_plan} Plan</h4>
+                                                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                                                        ${new Date(mem.start_date).toLocaleDateString()} - ${new Date(mem.end_date).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                                <span class="badge ${mem.is_expired ? 'badge-danger' : (mem.is_expiring_soon ? 'badge-warning' : 'badge-success')}">
+                                                    ${mem.is_expired ? 'Expired' : (mem.is_expiring_soon ? 'Expiring Soon' : 'Active')}
+                                                </span>
+                                            </div>
+                                            
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Days Remaining</div>
+                                                    <div style="font-weight: 600; color: ${mem.days_remaining < 5 ? 'var(--danger)' : 'var(--text)'};">
+                                                        ${mem.days_remaining > 0 ? mem.days_remaining + ' days' : 'Expired'}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Auto Renew</div>
+                                                    <div>${mem.auto_renew ? 'Enabled' : 'Disabled'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Payment Status</div>
+                                                    <div style="text-transform: capitalize;">${mem.payment_status}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Amount</div>
+                                                    <div>₦${(mem.payment_amount || 0).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = '<div class="empty-state"><p>Error loading member data</p></div>';
+                }
+            } catch (error) {
+                console.error('Error fetching member dashboard:', error);
+                content.innerHTML = '<div class="empty-state"><p>Error loading member data</p></div>';
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/admin/messages');
+                const data = await response.json();
+                const list = document.getElementById('messages-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(msg => `
+                        <tr>
+                            <td>${msg.name}</td>
+                            <td>${msg.email}</td>
+                            <td>${msg.message}</td>
+                            <td>${new Date(msg.timestamp).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMessage(${msg.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ph ph-envelope"></i><p>No messages found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        async function deleteMember(id) {
+            if (!confirm('Are you sure you want to delete this member?')) return;
+            try {
+                const res = await fetch(`/api/admin/members/${id}`, { method: 'DELETE' });
+                if (res.ok) loadMembers();
+                else alert('Error deleting member');
+            } catch (err) {
+                alert('Error deleting member');
+            }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('Are you sure you want to delete this message?')) return;
+            try {
+                const res = await fetch(`/api/admin/messages/${id}`, { method: 'DELETE' });
+                if (res.ok) loadMessages();
+                else alert('Error deleting message');
+            } catch (err) {
+                alert('Error deleting message');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/admin/login.html';
+            } catch (err) {
+                console.error('Error logging out:', err);
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        async function loadCourses() {
+            try {
+                const list = document.getElementById('courses-list');
+
+                // Add fade out effect
+                list.style.opacity = '0.5';
+                list.style.transition = 'opacity 0.2s ease';
+
+                const response = await fetch('/api/courses');
+                const data = await response.json();
+
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(course => `
+                        <tr>
+                            <td>${course.title}</td>
+                            <td>${course.track || 'General'}</td>
+                            <td>${course.duration_weeks} weeks</td>
+                            <td>₦${course.price.toLocaleString()}</td>
+                            <td><span class="badge badge-success">${course.status}</span></td>
+                            <td>
+                                <button class="btn btn-sm" onclick="editCourse(${course.id})">
+                                    <i class="ph-fill ph-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCourse(${course.id}, '${course.title.replace(/'/g, "\\'")}')">
+                                    <i class="ph-fill ph-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ph ph-books"></i><p>No courses yet</p></td></tr>';
+                }
+
+                // Fade back in
+                setTimeout(() => {
+                    list.style.opacity = '1';
+                }, 50);
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                const list = document.getElementById('courses-list');
+                list.style.opacity = '1';
+            }
+        }
+
+        async function loadRegistrations() {
+            try {
+                const response = await fetch('/api/admin/registrations');
+                const data = await response.json();
+
+                const list = document.getElementById('registrations-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(reg => `
+                        <tr>
+                            <td>${reg.firstname} ${reg.surname}</td>
+                            <td>${reg.email_personal}</td>
+                            <td>${reg.course_title}</td>
+                            <td>${new Date(reg.created_at).toLocaleDateString()}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="ph ph-notebook"></i><p>No registrations yet</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading registrations:', error);
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                const list = document.getElementById('events-list');
+
+                // Add fade out effect
+                list.style.opacity = '0.5';
+                list.style.transition = 'opacity 0.2s ease';
+
+                const response = await fetch('/api/admin/events');
+                const data = await response.json();
+
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(event => `
+                        <tr>
+                            <td>${event.title}</td>
+                            <td>${event.event_type}</td>
+                            <td>${new Date(event.event_date).toLocaleDateString()}</td>
+                            <td>${event.location}</td>
+                            <td>${event.registered_count || 0}/${event.max_attendees}</td>
+                            <td>
+                                <button class="btn btn-sm" onclick="editEvent(${event.id})">
+                                    <i class="ph-fill ph-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')">
+                                    <i class="ph-fill ph-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-calendar"></i><p>No events yet</p></td></tr>';
+                }
+
+                // Fade back in
+                setTimeout(() => {
+                    list.style.opacity = '1';
+                }, 50);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                const list = document.getElementById('events-list');
+                list.style.opacity = '1';
+            }
+        }
+
+        async function loadStartups() {
+            try {
+                const response = await fetch('/api/admin/startups');
+                const data = await response.json();
+
+                const list = document.getElementById('startups-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(startup => `
+                        <tr>
+                            <td>${startup.startup_name}</td>
+                            <td>${startup.founder_name}</td>
+                            <td>${startup.industry}</td>
+                            <td>${startup.stage}</td>
+                            <td><span class="badge badge-warning">${startup.application_status}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="updateStartupStatus(${startup.id}, 'accepted')">Accept</button>
+                                <button class="btn btn-sm btn-danger" onclick="updateStartupStatus(${startup.id}, 'rejected')">Reject</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-rocket-launch"></i><p>No applications yet</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading startups:', error);
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/admin/analytics/dashboard');
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    document.getElementById('stat-revenue').textContent = '₦' + (data.data.total_revenue || 0).toLocaleString();
+                    document.getElementById('stat-active-courses').textContent = data.data.active_courses || 0;
+                    document.getElementById('stat-coworking').textContent = data.data.active_members || 0;
+                    document.getElementById('stat-students').textContent = data.data.total_students || 0;
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Modal functions
+        function showCreateCourseModal() {
+            document.getElementById('create-course-modal').classList.add('show');
+        }
+
+        function showCreateEventModal() {
+            document.getElementById('create-event-modal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Form submissions
+        document.getElementById('create-course-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/courses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Course created successfully!');
+                    closeModal('create-course-modal');
+                    e.target.reset();
+                    loadCourses();
+                }
+            } catch (error) {
+                alert('Error creating course');
+            }
+        });
+
+        document.getElementById('create-event-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Event created successfully!');
+                    closeModal('create-event-modal');
+                    e.target.reset();
+                    loadEvents();
+                }
+            } catch (error) {
+                alert('Error creating event');
+            }
+        });
+
+        async function updateStartupStatus(id, status) {
+            try {
+                const response = await fetch(`/api/admin/startups/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ application_status: status })
+                });
+
+                if (response.ok) {
+                    alert(`Application ${status}!`);
+                    loadStartups();
+                }
+            } catch (error) {
+                alert('Error updating status');
+            }
+        }
+
+        // Load admins (Super Admin only)
+        async function loadAdmins() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+
+                const list = document.getElementById('admins-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(admin => `
+                        <tr>
+                            <td>${admin.username}</td>
+                            <td>${admin.email || 'N/A'}</td>
+                            <td><span class="badge ${admin.role === 'super_admin' ? 'badge-success' : 'badge-warning'}">${admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}</span></td>
+                            <td><span class="badge ${admin.is_active ? 'badge-success' : 'badge-danger'}">${admin.is_active ? 'Active' : 'Inactive'}</span></td>
+                            <td>${new Date(admin.created_at).toLocaleDateString()}</td>
+                            <td>
+                                ${admin.id !== currentUser.id ? `
+                                    <button class="btn btn-sm ${admin.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleAdminStatus(${admin.id}, ${admin.is_active})">
+                                        ${admin.is_active ? 'Deactivate' : 'Activate'}
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.id}, '${admin.username}')">Delete</button>
+                                ` : '<span style="color: var(--text-muted);">Current User</span>'}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-shield-check"></i><p>No admins found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading admins:', error);
+            }
+        }
+
+        // Modal functions
+        function showCreateAdminModal() {
+            document.getElementById('create-admin-modal').classList.add('show');
+        }
+
+        // Toggle admin status
+        async function toggleAdminStatus(id, currentStatus) {
+            const newStatus = currentStatus ? 0 : 1;
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: newStatus })
+                });
+
+                if (response.ok) {
+                    alert(`Admin ${newStatus ? 'activated' : 'deactivated'} successfully!`);
+                    loadAdmins();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Error updating admin status');
+                }
+            } catch (error) {
+                alert('Error updating admin status');
+            }
+        }
+
+        // Delete admin
+        async function deleteAdmin(id, username) {
+            if (!confirm(`Are you sure you want to delete admin "${username}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Admin deleted successfully!');
+                    loadAdmins();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Error deleting admin');
+                }
+            } catch (error) {
+                alert('Error deleting admin');
+            }
+        }
+
+        // Create admin form submission
+        document.getElementById('create-admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Admin created successfully!');
+                    closeModal('create-admin-modal');
+                    e.target.reset();
+                    loadAdmins();
+                } else {
+                    alert(result.error || 'Error creating admin');
+                }
+            } catch (error) {
+                alert('Error creating admin');
+            }
+        });
+
+        // Initialize
+        checkAuth();
+        loadOverview();
+    </script>
+    <!-- Create Member Modal (Quick Add) -->
+    <div id="create-member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Quick Add Member</h2>
+                <button class="close-btn" onclick="closeModal('create-member-modal')">&times;</button>
+            </div>
+            <form id="create-member-form">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone">
+                </div>
+                <div class="form-group">
+                    <label>Member Type *</label>
+                    <select name="member_type" required>
+                        <option value="student">Student</option>
+                        <option value="coworking">Co-working</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <div class="alert-info"
+                    style="background: rgba(37, 99, 235, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    <i class="ph-fill ph-info"></i> A temporary password will be generated and emailed to the user.
+                </div>
+                <button type="submit" class="btn">Create Member</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Show Create Member Modal
+        function showCreateMemberModal() {
+            document.getElementById('create-member-modal').classList.add('show');
+        }
+
+        // Create Member Form Submission
+        document.getElementById('create-member-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const btn = form.querySelector('button[type="submit"]');
+
+            try {
+                btn.innerText = 'Creating...';
+                btn.disabled = true;
+
+                const res = await fetch('/api/admin/members/quick-add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (res.ok) {
+                    alert(`Member created successfully!\nEmail: ${result.email}\nTemp Password: ${result.temporary_password}`);
+                    closeModal('create-member-modal');
+                    form.reset();
+                    loadMembers(); // Refresh list
+                } else {
+                    alert(result.error || 'Failed to create member');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            } finally {
+            }
+        });
+    </script>
+    <!-- Edit Course Modal -->
+    <div id="edit-course-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Course</h2>
+                <button class="close-btn" onclick="closeModal('edit-course-modal')">&times;</button>
+            </div>
+            <form id="edit-course-form" onsubmit="handleEditCourse(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Course Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Track *</label>
+                    <select name="track" required>
+                        <option value="">Select track</option>
+                        <option value="Technical Skills">Technical Skills</option>
+                        <option value="Business Skills">Business Skills</option>
+                        <option value="Design">Design</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Duration (weeks) *</label>
+                    <input type="number" name="duration_weeks" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" required>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail URL</label>
+                    <input type="text" name="thumbnail_url">
+                </div>
+                <button type="submit" class="btn">Update Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div id="edit-event-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Event</h2>
+                <button class="close-btn" onclick="closeModal('edit-event-modal')">&times;</button>
+            </div>
+            <form id="edit-event-form" onsubmit="handleEditEvent(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Event Type *</label>
+                    <select name="event_type" required>
+                        <option value="">Select type</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Training">Training</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date & Time *</label>
+                    <input type="datetime-local" name="event_date" required>
+                </div>
+                <div class="form-group">
+                    <label>End Date & Time *</label>
+                    <input type="datetime-local" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location *</label>
+                    <input type="text" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label>Max Attendees *</label>
+                    <input type="number" name="max_attendees" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail URL</label>
+                    <input type="text" name="thumbnail_url">
+                </div>
+                <button type="submit" class="btn">Update Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Service Modal -->
+    <div id="create-service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Service</h2>
+                <button class="close-btn" onclick="closeModal('create-service-modal')">&times;</button>
+            </div>
+            <form id="create-service-form" onsubmit="handleCreateService(event)">
+                <div class="form-group">
+                    <label>Icon (Phosphor Icon Class) *</label>
+                    <input type="text" name="icon" placeholder="ph-fill ph-rocket" required>
+                    <small style="color: var(--text-muted);">Use Phosphor icon classes (e.g., ph-fill ph-rocket)</small>
+                </div>
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Create Service</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Service Modal -->
+    <div id="edit-service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Service</h2>
+                <button class="close-btn" onclick="closeModal('edit-service-modal')">&times;</button>
+            </div>
+            <form id="edit-service-form" onsubmit="handleEditService(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Icon (Phosphor Icon Class) *</label>
+                    <input type="text" name="icon" required>
+                </div>
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Update Service</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-edit.js"></script>
+</body>
+
+</html>
