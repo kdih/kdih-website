@@ -154,6 +154,7 @@ function initDatabase() {
         db.run(`CREATE TABLE IF NOT EXISTS desk_bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             member_id INTEGER,
+            desk_number TEXT,
             desk_type TEXT NOT NULL,
             booking_date DATE NOT NULL,
             start_time TIME,
@@ -161,7 +162,20 @@ function initDatabase() {
             status TEXT DEFAULT 'confirmed',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (member_id) REFERENCES members(id)
-        )`);
+        )`, (err) => {
+            if (!err) {
+                // Auto-migration: Check if desk_number column exists (for existing DBs)
+                db.all("PRAGMA table_info(desk_bookings)", [], (err, columns) => {
+                    if (!err && columns) {
+                        const hasDeskNumber = columns.some(c => c.name === 'desk_number');
+                        if (!hasDeskNumber) {
+                            console.log('Migrating desk_bookings: Adding desk_number column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN desk_number TEXT");
+                        }
+                    }
+                });
+            }
+        });
 
         // ===== LMS TABLES =====
 
