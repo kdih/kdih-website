@@ -148,7 +148,7 @@ const emailTemplates = {
                     <p style="margin-top: 30px; color: #64748b; font-size: 14px;">
                         Best regards,<br>
                         <strong style="color: #0f172a;">The KDIH Team</strong><br>
-                        Email: info@kdih.org | Phone: 07011114441
+                        Email: info@kdih.org | Phone: +234 701 111 4441
                     </p>
                 </div>
             </div>
