@@ -823,10 +823,11 @@ router.post('/coworking/register', (req, res) => {
 // Book a desk
 router.post('/coworking/book-desk', (req, res) => {
     const { member_id, desk_number, booking_date, booking_type } = req.body;
-    const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type) 
-                 VALUES (?, ?, ?, ?)`;
+    const desk_type = 'Hot Desk'; // Default value
+    const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type) 
+                 VALUES (?, ?, ?, ?, ?)`;
 
-    db.run(sql, [member_id, desk_number, booking_date, booking_type], function (err) {
+    db.run(sql, [member_id, desk_number, booking_date, booking_type, desk_type], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ message: 'success', booking_id: this.lastID });
     });
