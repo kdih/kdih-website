@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifying Payment - KDIH</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .verification-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-icon {
+            color: #10b981;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-icon {
+            color: #ef4444;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="verification-container">
+        <div id="loading">
+            <div class="spinner"></div>
+            <h2>Verifying Payment...</h2>
+            <p>Please wait while we confirm your transaction.</p>
+        </div>
+
+        <div id="success" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h2>Payment Successful!</h2>
+            <p id="success-msg">Your booking has been confirmed.</p>
+            <a href="/coworking.html" class="btn btn-primary" style="margin-top: 20px; display: inline-block;">Return to
+                Dashboard</a>
+        </div>
+
+        <div id="error" style="display: none;">
+            <div class="error-icon">✕</div>
+            <h2>Verification Failed</h2>
+            <p id="error-msg">We couldn't verify your payment.</p>
+            <a href="/coworking.html" class="btn"
+                style="margin-top: 20px; display: inline-block; background: #ef4444; color: white;">Return Home</a>
+        </div>
+    </div>
+
+    <script>
+        async function verifyPayment() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reference = urlParams.get('reference');
+
+            if (!reference) {
+                showError('No payment reference found.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/pay/verify/${reference}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showSuccess(data.message);
+                } else {
+                    showError(data.message || 'Payment verification failed.');
+                }
+            } catch (error) {
+                showError('Network error occurred. Please contact support.');
+            }
+        }
+
+        function showSuccess(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+            document.getElementById('success-msg').textContent = msg;
+        }
+
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-msg').textContent = msg;
+        }
+
+        window.onload = verifyPayment;
+    </script>
+</body>
+
+</html>

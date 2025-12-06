@@ -568,15 +568,20 @@
 
                 const result = await response.json();
 
-                if (response.ok && result.message === 'success') {
-                    document.getElementById('booking-id').textContent = result.booking_id;
-                    document.getElementById('desk-success').classList.add('show');
-                    // Scroll to success message
-                    document.getElementById('desk-success').scrollIntoView({ behavior: 'smooth' });
-                    e.target.reset();
-                    selectedDesk = null;
-                    document.getElementById('selected-desk').value = '';
-                    loadDesks(); // Refresh availability
+                if (response.ok && (result.message === 'success' || result.message === 'payment_required')) {
+                    if (result.message === 'payment_required') {
+                        // Redirect to Paystack
+                        window.location.href = result.authorization_url;
+                    } else {
+                        // Legacy success (if free)
+                        document.getElementById('booking-id').textContent = result.booking_id;
+                        document.getElementById('desk-success').classList.add('show');
+                        document.getElementById('desk-success').scrollIntoView({ behavior: 'smooth' });
+                        e.target.reset();
+                        selectedDesk = null;
+                        document.getElementById('selected-desk').value = '';
+                        loadDesks();
+                    }
                 } else {
                     alert(`Booking failed: ${result.error || 'Unknown error'}`);
                 }

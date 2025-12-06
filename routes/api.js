@@ -837,17 +837,47 @@ router.post('/coworking/register', (req, res) => {
     });
 });
 
-// Book a desk
-router.post('/coworking/book-desk', (req, res) => {
+// Book a desk (Initiate Payment)
+router.post('/coworking/book-desk', async (req, res) => {
     const { member_id, desk_number, booking_date, booking_type } = req.body;
-    const desk_type = 'Hot Desk'; // Default value
-    const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type) 
-                 VALUES (?, ?, ?, ?, ?)`;
+    const desk_type = 'Hot Desk';
+    const amount = 2000; // Fixed price (TODO: Make dynamic based on booking_type)
 
-    db.run(sql, [member_id, desk_number, booking_date, booking_type, desk_type], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'success', booking_id: this.lastID });
-    });
+    try {
+        // 1. Get user email for payment
+        db.get("SELECT email, full_name, member_code FROM coworking_members WHERE member_code = ? OR id = ?", [member_id, member_id], async (err, member) => {
+            if (err || !member) return res.status(400).json({ error: 'Invalid Member ID' });
+
+            // 2. Initialize Paystack
+            const { initializePayment } = require('../utils/paystack');
+            const data = await initializePayment(member.email, amount, {
+                custom_fields: [
+                    { display_name: "Member Code", variable_name: "member_code", value: member.member_code },
+                    { display_name: "Desk Number", variable_name: "desk_number", value: desk_number },
+                    { display_name: "Booking Date", variable_name: "booking_date", value: booking_date }
+                ]
+            });
+
+            // 3. Create Booking (Status: pending_payment)
+            const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type, payment_reference, amount_paid, status) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment')`;
+
+            db.run(sql, [member.id || member_id, desk_number, booking_date, booking_type, desk_type, data.reference, amount], function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+
+                // Return authorization URL to frontend
+                res.json({
+                    message: 'payment_required',
+                    booking_id: this.lastID,
+                    authorization_url: data.authorization_url,
+                    reference: data.reference
+                });
+            });
+        });
+    } catch (error) {
+        console.error("Payment init error:", error);
+        res.status(500).json({ error: 'Payment initialization failed' });
+    }
 });
 
 // Book meeting room
@@ -1441,6 +1471,46 @@ async function processSuccessfulPayment(reference) {
             });
     });
 }
+
+// Verify Payment (Generic)
+router.get('/pay/verify/:reference', async (req, res) => {
+    const reference = req.params.reference;
+
+    try {
+        const { verifyPayment } = require('../utils/paystack');
+        const paymentData = await verifyPayment(reference);
+
+        if (paymentData.status === 'success') {
+            // Update Desk Booking if this reference belongs to one
+            db.get("SELECT * FROM desk_bookings WHERE payment_reference = ?", [reference], (err, booking) => {
+                if (!err && booking) {
+                    db.run("UPDATE desk_bookings SET status = 'confirmed', amount_paid = ? WHERE id = ?",
+                        [paymentData.amount / 100, booking.id],
+                        function (error) {
+                            if (!error) {
+                                // Send Confirmation Email
+                                db.get("SELECT email, full_name FROM coworking_members WHERE id = ?", [booking.member_id], (err, member) => {
+                                    if (member) {
+                                        const emailUtil = require('../utils/email');
+                                        emailUtil.sendEmail(member.email, 'deskBookingConfirmed',
+                                            [member.full_name, booking.desk_number, booking.booking_date, booking.id]);
+                                    }
+                                });
+                            }
+                        }
+                    );
+                }
+            });
+
+            res.json({ status: 'success', message: 'Payment verified successfully' });
+        } else {
+            res.json({ status: 'failed', message: 'Payment verification failed' });
+        }
+    } catch (error) {
+        console.error("Payment verification error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 router.get('/payments/verify/:reference', async (req, res) => {
     try {
