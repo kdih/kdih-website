@@ -1819,24 +1819,7 @@ async function processSuccessfulPayment(reference) {
                     function (err) {
                         if (this.changes > 0) {
                             logger.info(`Desk booking confirmed for payment ${reference}`);
-
-                            // Send SMS notification
-                            db.get(`
-                                SELECT db.*, cm.full_name, cm.phone_number 
-                                FROM desk_bookings db 
-                                JOIN coworking_members cm ON db.member_id = cm.id 
-                                WHERE db.payment_reference = ?
-                            `, [reference], (err, booking) => {
-                                if (booking && booking.phone_number) {
-                                    const sms = require('../utils/sms');
-                                    sms.sendPaymentConfirmationSMS(
-                                        booking.phone_number,
-                                        booking.full_name,
-                                        `Desk ${booking.desk_number} (${booking.booking_date})`,
-                                        booking.amount_paid
-                                    ).catch(err => logger.error('SMS send error:', err));
-                                }
-                            });
+                            // Email notification will be sent by existing email system
                         }
                     }
                 );
