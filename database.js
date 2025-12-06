@@ -217,6 +217,16 @@ function initDatabase() {
                             console.log('Migrating desk_bookings: Adding booking_type column...');
                             db.run("ALTER TABLE desk_bookings ADD COLUMN booking_type TEXT");
                         }
+                        // Check payment_reference
+                        if (!columns.some(c => c.name === 'payment_reference')) {
+                            console.log('Migrating desk_bookings: Adding payment_reference column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN payment_reference TEXT");
+                        }
+                        // Check amount_paid
+                        if (!columns.some(c => c.name === 'amount_paid')) {
+                            console.log('Migrating desk_bookings: Adding amount_paid column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN amount_paid DECIMAL(10,2)");
+                        }
                     }
                 });
             }
