@@ -485,6 +485,70 @@ router.post('/change-password', requireAuth, async (req, res) => {
     }
 });
 
+// Register new user
+router.post('/auth/register', async (req, res) => {
+    try {
+        const { username, email, password, full_name, role } = req.body;
+        const bcrypt = require('bcrypt');
+        const logger = require('../utils/logger');
+        const { sendEmail } = require('../utils/email'); // Import sendEmail helper
+
+        // Validation
+        if (!username || !email || !password || !full_name) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+        }
+
+        // Check availability (Email first for "Duplicate User" logic)
+        db.get("SELECT * FROM users WHERE email = ?", [email], async (err, existingUser) => {
+            if (err) return res.status(500).json({ error: 'Database error' });
+
+            if (existingUser) {
+                // User exists - Return actionable feedback
+                return res.status(409).json({
+                    error: 'User already exists',
+                    message: 'This email is already registered. Please login to update your plan or add courses.',
+                    redirect: '/member/login.html' // Front-end can use this to redirect
+                });
+            }
+
+            // Check username
+            db.get("SELECT id FROM users WHERE username = ?", [username], async (err, existingUsername) => {
+                if (existingUsername) return res.status(400).json({ error: 'Username is taken' });
+
+                // Create User
+                const hashedPassword = await bcrypt.hash(password, 10);
+                const userRole = role || 'member'; // Default to member
+
+                const sql = `INSERT INTO users (username, email, password, full_name, role, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))`;
+
+                db.run(sql, [username, email, hashedPassword, full_name, userRole], function (err) {
+                    if (err) {
+                        logger.error(`Registration error: ${err.message}`);
+                        return res.status(500).json({ error: 'Registration failed' });
+                    }
+
+                    const userId = this.lastID;
+
+                    // Send Welcome Email
+                    sendEmail(email, 'welcome', [full_name, 'General Membership']).catch(e => logger.error(`Email failed: ${e.message}`));
+
+                    logger.info(`New user registered: ${username} (${email})`);
+                    res.status(201).json({ message: 'Registration successful', userId });
+                });
+            });
+        });
+
+    } catch (error) {
+        const logger = require('../utils/logger');
+        logger.error(`Registration exception: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Update Profile endpoint (requires authentication)
 router.put('/profile', requireAuth, async (req, res) => {
     try {
@@ -812,27 +876,39 @@ router.patch('/admin/startups/:id', requireAuth, (req, res) => {
 router.post('/coworking/register', (req, res) => {
     const { full_name, email, phone, membership_type, start_date, end_date } = req.body;
 
-    // Generate Custom Member ID: KDIH-YYYY-XXXX
-    const year = new Date().getFullYear();
+    // Check if email already exists
+    db.get("SELECT member_code FROM coworking_members WHERE email = ?", [email], (err, row) => {
+        if (err) return res.status(500).json({ error: 'Database check failed' });
 
-    // Get count to determine next number
-    db.get("SELECT COUNT(*) as count FROM coworking_members", [], (err, row) => {
-        if (err) return res.status(500).json({ error: 'Database error generating ID' });
+        if (row) {
+            return res.status(409).json({
+                error: 'Member already exists',
+                message: `You are already registered with Member ID: ${row.member_code}. Please use it to book directly.`
+            });
+        }
 
-        const nextNum = (row.count + 1).toString().padStart(4, '0');
-        const member_code = `KDIH-${year}-${nextNum}`;
+        // Generate Custom Member ID: KDIH-YYYY-XXXX
+        const year = new Date().getFullYear();
 
-        const sql = `INSERT INTO coworking_members (full_name, member_code, email, phone, membership_type, start_date, end_date) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        // Get count to determine next number
+        db.get("SELECT COUNT(*) as count FROM coworking_members", [], (err, rowCount) => {
+            if (err) return res.status(500).json({ error: 'Database error generating ID' });
 
-        db.run(sql, [full_name, member_code, email, phone, membership_type, start_date, end_date], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
+            const nextNum = (rowCount.count + 1).toString().padStart(4, '0');
+            const member_code = `KDIH-${year}-${nextNum}`;
 
-            // Send Email Confirmation
-            const emailUtil = require('../utils/email');
-            emailUtil.sendEmail(email, 'coworkingRegistration', [full_name, member_code, membership_type, start_date, end_date]);
+            const sql = `INSERT INTO coworking_members (full_name, member_code, email, phone, membership_type, start_date, end_date) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-            res.json({ message: 'success', member_id: this.lastID, member_code: member_code });
+            db.run(sql, [full_name, member_code, email, phone, membership_type, start_date, end_date], function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+
+                // Send Email Confirmation
+                const emailUtil = require('../utils/email');
+                emailUtil.sendEmail(email, 'coworkingRegistration', [full_name, member_code, membership_type, start_date, end_date]);
+
+                res.json({ message: 'success', member_id: this.lastID, member_code: member_code });
+            });
         });
     });
 });

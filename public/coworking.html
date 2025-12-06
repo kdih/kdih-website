@@ -558,6 +558,11 @@
                     document.getElementById('member-id').textContent = result.member_code;
                     document.getElementById('membership-success').classList.add('show');
                     e.target.reset();
+                } else if (response.status === 409) {
+                    // Duplicate User
+                    alert(result.message); // "You are already registered..."
+                } else {
+                    alert(`Registration failed: ${result.error}`);
                 }
             } catch (error) {
                 alert('Error registering membership. Please try again.');
