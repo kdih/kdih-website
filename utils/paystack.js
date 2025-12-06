@@ -116,8 +116,33 @@ function verifyWebhookSignature(rawBody, signature) {
     return hash === signature;
 }
 
+// Calculate Paystack transaction fee
+// Nigeria: 1.5% + ₦100, capped at ₦2,000
+function calculatePaystackFee(amount) {
+    const percentageFee = amount * 0.015; // 1.5%
+    const flatFee = 100; // ₦100
+    const totalFee = percentageFee + flatFee;
+
+    // Cap at ₦2,000
+    return Math.min(Math.ceil(totalFee), 2000);
+}
+
+// Add Paystack fee to amount and return breakdown
+function addPaystackFee(amount) {
+    const fee = calculatePaystackFee(amount);
+    const total = amount + fee;
+
+    return {
+        original: amount,
+        fee: fee,
+        total: total
+    };
+}
+
 module.exports = {
     initializePayment,
     verifyPayment,
-    verifyWebhookSignature
+    verifyWebhookSignature,
+    calculatePaystackFee,
+    addPaystackFee
 };

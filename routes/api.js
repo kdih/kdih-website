@@ -923,36 +923,43 @@ router.post('/coworking/register', (req, res) => {
 router.post('/coworking/book-desk', async (req, res) => {
     const { member_id, desk_number, booking_date, booking_type } = req.body;
     const desk_type = 'Hot Desk';
-    const amount = 2000; // Fixed price (TODO: Make dynamic based on booking_type)
+    const baseAmount = 2000; // Base price (TODO: Make dynamic based on booking_type)
 
     try {
         // 1. Get user email for payment
         db.get("SELECT email, full_name, member_code FROM coworking_members WHERE member_code = ? OR id = ?", [member_id, member_id], async (err, member) => {
             if (err || !member) return res.status(400).json({ error: 'Invalid Member ID' });
 
-            // 2. Initialize Paystack
-            const { initializePayment } = require('../utils/paystack');
-            const data = await initializePayment(member.email, amount, {
+            // 2. Calculate total with Paystack fees
+            const { addPaystackFee, initializePayment } = require('../utils/paystack');
+            const paymentBreakdown = addPaystackFee(baseAmount);
+
+            // 3. Initialize Paystack with total amount (including fees)
+            const data = await initializePayment(member.email, paymentBreakdown.total, {
                 custom_fields: [
                     { display_name: "Member Code", variable_name: "member_code", value: member.member_code },
                     { display_name: "Desk Number", variable_name: "desk_number", value: desk_number },
-                    { display_name: "Booking Date", variable_name: "booking_date", value: booking_date }
+                    { display_name: "Booking Date", variable_name: "booking_date", value: booking_date },
+                    { display_name: "Base Amount", variable_name: "base_amount", value: `₦${baseAmount}` },
+                    { display_name: "Service Fee", variable_name: "service_fee", value: `₦${paymentBreakdown.fee}` },
+                    { display_name: "Total", variable_name: "total", value: `₦${paymentBreakdown.total}` }
                 ]
             });
 
-            // 3. Create Booking (Status: pending_payment)
+            // 4. Create Booking (Status: pending_payment)
             const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type, payment_reference, amount_paid, status) 
                          VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment')`;
 
-            db.run(sql, [member.id || member_id, desk_number, booking_date, booking_type, desk_type, data.reference, amount], function (err) {
+            db.run(sql, [member.id || member_id, desk_number, booking_date, booking_type, desk_type, data.reference, paymentBreakdown.total], function (err) {
                 if (err) return res.status(500).json({ error: err.message });
 
-                // Return authorization URL to frontend
+                // Return authorization URL and breakdown to frontend
                 res.json({
                     message: 'payment_required',
                     booking_id: this.lastID,
                     authorization_url: data.authorization_url,
-                    reference: data.reference
+                    reference: data.reference,
+                    payment_breakdown: paymentBreakdown
                 });
             });
         });
