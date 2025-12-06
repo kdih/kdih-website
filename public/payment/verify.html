@@ -89,7 +89,7 @@
             }
 
             try {
-                const response = await fetch(`/api/pay/verify/${reference}`);
+                const response = await fetch(`/api/payments/verify/${reference}`);
                 const data = await response.json();
 
                 if (data.status === 'success') {
