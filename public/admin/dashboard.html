@@ -1163,6 +1163,9 @@
                             <td>${member.gender || 'N/A'}</td>
                             <td>${member.interest || 'N/A'}</td>
                             <td>
+                                <button class="action-btn" onclick="showEmailModal('${member.email}', '${(member.full_name || member.username || 'Member').replace(/'/g, "\\'")}')">
+                                    <i class="ph-fill ph-envelope"></i> Email
+                                </button>
                                 <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">Delete</button>
                             </td>
                         </tr>
@@ -1683,6 +1686,57 @@
             }
         }
 
+        // ===== EMAIL FUNCTIONS =====
+
+        function showEmailModal(toEmail, subjectPrefix = '', recipientName = '') {
+            const modal = document.getElementById('email-modal');
+            const form = document.getElementById('email-form');
+
+            // Pre-fill recipient email
+            form.querySelector('[name="to"]').value = toEmail;
+
+            // Pre-fill subject if provided
+            if (subjectPrefix) {
+                form.querySelector('[name="subject"]').value = subjectPrefix;
+            } else {
+                form.querySelector('[name="subject"]').value = '';
+            }
+
+            // Clear message
+            form.querySelector('[name="message"]').value = '';
+
+            // Show modal
+            modal.classList.add('show');
+        }
+
+        async function handleSendEmail(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/admin/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Email sent successfully to ${data.to}`);
+                    closeModal('email-modal');
+                    form.reset();
+                } else {
+                    alert(result.error || 'Failed to send email');
+                }
+            } catch (error) {
+                console.error('Error sending email:', error);
+                alert('Error sending email');
+            }
+        }
+
         async function logout() {
             try {
                 await fetch('/api/logout', { method: 'POST' });
@@ -1744,13 +1798,18 @@
 
                 const list = document.getElementById('registrations-list');
                 if (data.data && data.data.length > 0) {
-                    list.innerHTML = data.data.map(reg => `
+                    list.innerHTML = data.messages.map(msg => `
                         <tr>
-                            <td>${reg.firstname} ${reg.surname}</td>
-                            <td>${reg.email_personal}</td>
-                            <td>${reg.gender || 'N/A'}</td>
-                            <td>${reg.course_title}</td>
-                            <td>${new Date(reg.created_at).toLocaleDateString()}</td>
+                            <td>${msg.name}</td>
+                            <td>${msg.email}</td>
+                            <td>${msg.subject}</td>
+                            <td>${msg.message.substring(0, 50)}...</td>
+                            <td>${new Date(msg.created_at).toLocaleString()}</td>
+                            <td>
+                                <button class="action-btn success" onclick="showEmailModal('${msg.email}', 'Re: ${msg.subject.replace(/'/g, "\\'")}', '${msg.name}')">
+                                    <i class="ph-fill ph-arrow-u-up-left"></i> Reply
+                                </button>
+                            </td>
                         </tr>
                     `).join('');
                 } else {
@@ -2372,6 +2431,31 @@
                     <textarea name="purpose" rows="2" placeholder="Meeting purpose..."></textarea>
                 </div>
                 <button type="submit" class="btn">Assign Room</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="email-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Send Email</h2>
+                <button class="close-btn" onclick="closeModal('email-modal')">&times;</button>
+            </div>
+            <form id="email-form" onsubmit="handleSendEmail(event)">
+                <div class="form-group">
+                    <label>To *</label>
+                    <input type="email" name="to" required readonly style="background: var(--primary);">
+                </div>
+                <div class="form-group">
+                    <label>Subject *</label>
+                    <input type="text" name="subject" required placeholder="Email subject">
+                </div>
+                <div class="form-group">
+                    <label>Message *</label>
+                    <textarea name="message" rows="10" required placeholder="Your message here..."></textarea>
+                </div>
+                <button type="submit" class="btn">Send Email</button>
             </form>
         </div>
     </div>

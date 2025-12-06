@@ -2733,25 +2733,37 @@ router.post('/admin/payments/manual', requireAuth, async (req, res) => {
 // Send Manual Email (Admin only)
 router.post('/admin/send-email', requireAuth, async (req, res) => {
     try {
-        const { email, template, ...params } = req.body;
-        const logger = require('../utils/logger');
-
-        // Validate template
-        const validTemplates = ['welcome', 'courseEnrollment', 'eventRegistration', 'paymentConfirmation'];
-        if (!validTemplates.includes(template)) {
-            return res.status(400).json({ error: 'Invalid email template' });
+        // Check admin permission
+        if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+            return res.status(403).json({ error: 'Admin access required' });
         }
 
-        // Send email
-        await sendEmail(email, template, ...Object.values(params));
+        const { to, subject, message, template, ...params } = req.body;
+        const email = require('../utils/email');
 
-        logger.info(`Admin manually sent ${template} email to: ${email}`);
+        // Support both custom emails and template-based emails
+        if (template) {
+            // Template-based email (existing functionality)
+            const validTemplates = ['welcome', 'courseEnrollment', 'eventRegistration', 'paymentConfirmation'];
+            if (!validTemplates.includes(template)) {
+                return res.status(400).json({ error: 'Invalid email template' });
+            }
+            await email.sendEmail(to, template, ...Object.values(params));
+            logger.info(`Admin sent ${template} template to: ${to}`);
+        } else if (subject && message) {
+            // Custom free-form email
+            await email.sendCustomEmail(to, subject, message);
+            logger.info(`Admin sent custom email to: ${to}`);
+        } else {
+            return res.status(400).json({ error: 'Either provide template or subject+message' });
+        }
+
         res.json({
             message: 'Email sent successfully',
-            email: email,
-            template: template
+            to: to
         });
     } catch (error) {
+        logger.error(`Email sending error: ${error.message}`);
         res.status(500).json({ error: 'Email sending failed: ' + error.message });
     }
 });

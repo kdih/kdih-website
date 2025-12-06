@@ -349,8 +349,49 @@ async function testEmailConfig() {
     }
 }
 
+/**
+ * Send custom free-form email
+ */
+async function sendCustomEmail(to, subject, messageBody) {
+    if (!emailConfigured || !transporter) {
+        logger.warn('Email service not configured. Email not sent.');
+        return { success: false, error: 'Email service not configured' };
+    }
+
+    try {
+        const mailOptions = {
+            from: `"KDIH" <${process.env.EMAIL_USER}>`,
+            to: to,
+            subject: subject,
+            text: messageBody,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: #1e3a8a; padding: 20px; text-align: center;">
+                        <h1 style="color: white; margin: 0;">KDIH</h1>
+                    </div>
+                    <div style="padding: 30px; background: #f9fafb;">
+                        <div style="white-space: pre-wrap;">${messageBody.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    <div style="background: #e5e7eb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
+                        <p>This email was sent from Kano Digital Innovation Hub</p>
+                        <p>© ${new Date().getFullYear()} KDIH. All rights reserved.</p>
+                    </div>
+                </div>
+            `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        logger.info(`Custom email sent to ${to}: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error) {
+        logger.error(`Custom email sending failed: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+}
+
 module.exports = {
     sendEmail,
     testEmailConfig,
+    sendCustomEmail,
     emailTemplates
 };
