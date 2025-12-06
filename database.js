@@ -430,6 +430,26 @@ function initDatabase() {
                 // Auto-migration: Check for check_in_time and check_out_time columns
                 db.all("PRAGMA table_info(meeting_room_bookings)", [], (err, columns) => {
                     if (!err && columns) {
+                        // Check guest_name
+                        if (!columns.some(c => c.name === 'guest_name')) {
+                            console.log('Migrating meeting_room_bookings: Adding guest_name column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN guest_name TEXT");
+                        }
+                        // Check guest_email
+                        if (!columns.some(c => c.name === 'guest_email')) {
+                            console.log('Migrating meeting_room_bookings: Adding guest_email column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN guest_email TEXT");
+                        }
+                        // Check guest_phone
+                        if (!columns.some(c => c.name === 'guest_phone')) {
+                            console.log('Migrating meeting_room_bookings: Adding guest_phone column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN guest_phone TEXT");
+                        }
+                        // Check guest_organization
+                        if (!columns.some(c => c.name === 'guest_organization')) {
+                            console.log('Migrating meeting_room_bookings: Adding guest_organization column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN guest_organization TEXT");
+                        }
                         // Check check_in_time
                         if (!columns.some(c => c.name === 'check_in_time')) {
                             console.log('Migrating meeting_room_bookings: Adding check_in_time column...');
