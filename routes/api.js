@@ -1998,10 +1998,12 @@ async function processSuccessfulPayment(reference) {
                                 });
                         }
                     } catch (e) {
-                        console.error('Error processing payment metadata:', e);
+                        console.error('Error processing payment metadata:', e)
                     }
-                    resolve(payment);
-                });
+                }
+
+                resolve(payment);
+            });
         });
     });
 }
