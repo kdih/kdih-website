@@ -149,11 +149,23 @@ function initDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (!err) {
+                // Check for missing columns and migrate safely
                 db.all("PRAGMA table_info(coworking_members)", [], (err, columns) => {
                     if (!err && columns) {
                         if (!columns.some(c => c.name === 'member_code')) {
-                            console.log('Migrating coworking_members: Adding member_code...');
-                            db.run("ALTER TABLE coworking_members ADD COLUMN member_code TEXT UNIQUE");
+                            console.log('Migrating coworking_members: Adding member_code column...');
+                            // SQLite ALTER TABLE ADD COLUMN cannot easily add UNIQUE constraint if data exists
+                            // So we add column first, then create an index
+                            db.run("ALTER TABLE coworking_members ADD COLUMN member_code TEXT", (err) => {
+                                if (err) {
+                                    console.error('Migration Error (adding member_code):', err.message);
+                                } else {
+                                    console.log('Migrating coworking_members: Creating unique index for member_code...');
+                                    db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_coworking_members_member_code ON coworking_members(member_code)", (err) => {
+                                        if (err) console.error('Migration Error (index):', err.message);
+                                    });
+                                }
+                            });
                         }
                     }
                 });
