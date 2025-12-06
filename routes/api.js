@@ -1884,7 +1884,57 @@ async function processSuccessfulPayment(reference) {
                     function (err) {
                         if (this.changes > 0) {
                             logger.info(`Desk booking confirmed for payment ${reference}`);
-                            // Email notification will be sent by existing email system
+
+                            // Generate and email receipt
+                            db.get(`
+                                SELECT db.*, cm.full_name, cm.email, cm.phone_number 
+                                FROM desk_bookings db 
+                                JOIN coworking_members cm ON db.member_id = cm.id 
+                                WHERE db.payment_reference = ?
+                            `, [reference], async (err, booking) => {
+                                if (booking && booking.email) {
+                                    try {
+                                        const pdfReceipt = require('../utils/pdf-receipt');
+                                        const email = require('../utils/email');
+
+                                        // Generate receipt PDF
+                                        const receiptBuffer = await pdfReceipt.generateBookingReceipt({
+                                            type: 'desk',
+                                            customer: {
+                                                name: booking.full_name,
+                                                email: booking.email,
+                                                phone: booking.phone_number
+                                            },
+                                            booking: {
+                                                id: booking.id,
+                                                desk_room: booking.desk_number,
+                                                date: booking.booking_date,
+                                                booking_type: booking.booking_type
+                                            },
+                                            payment: {
+                                                amount: booking.amount_paid,
+                                                reference: reference,
+                                                date: new Date().toLocaleDateString()
+                                            }
+                                        });
+
+                                        // Email receipt
+                                        const message = `Dear ${booking.full_name},\n\nThank you for your payment! Your desk booking at KDIH has been confirmed.\n\nPlease find your receipt attached to this email.\n\nBooking Details:\n- Desk: ${booking.desk_number}\n- Date: ${booking.booking_date}\n- Type: ${booking.booking_type}\n- Amount: ₦${booking.amount_paid}\n\nWe look forward to seeing you!\n\nBest regards,\nKDIH Team`;
+
+                                        await email.sendEmailWithAttachment(
+                                            booking.email,
+                                            'KDIH Booking Receipt - Payment Confirmed',
+                                            message,
+                                            receiptBuffer,
+                                            `KDIH-Receipt-${reference}.pdf`
+                                        );
+
+                                        logger.info(`Receipt emailed to ${booking.email}`);
+                                    } catch (error) {
+                                        logger.error('Receipt generation/email error:', error);
+                                    }
+                                }
+                            });
                         }
                     }
                 );
