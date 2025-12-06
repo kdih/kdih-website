@@ -106,6 +106,8 @@ function initDatabase() {
                         const hashedPassword = await bcrypt.hash('admin123', 10);
                         db.run("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
                             ['admin', hashedPassword, 'admin@kdih.org', 'admin']);
+                        db.run("INSERT INTO users (username, password, email, role, full_name) VALUES (?, ?, ?, ?, ?)",
+                            ['admin', hashedPassword, 'admin@kdih.org', 'admin', 'Admin User']);
                         console.log('Seeded admin user with hashed password.');
                     }
                 });
@@ -143,6 +145,7 @@ function initDatabase() {
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
             membership_type TEXT NOT NULL,
+            gender TEXT,
             start_date DATE NOT NULL,
             end_date DATE NOT NULL,
             status TEXT DEFAULT 'active',
@@ -166,6 +169,10 @@ function initDatabase() {
                                     });
                                 }
                             });
+                        }
+                        if (!columns.some(c => c.name === 'gender')) {
+                            console.log('Migrating coworking_members: Adding gender column...');
+                            db.run("ALTER TABLE coworking_members ADD COLUMN gender TEXT");
                         }
                     }
                 });

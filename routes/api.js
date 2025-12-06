@@ -488,7 +488,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
 // Register new user
 router.post('/auth/register', async (req, res) => {
     try {
-        const { username, email, password, full_name, role } = req.body;
+        const { username, email, password, full_name, role, gender } = req.body;
         const bcrypt = require('bcrypt');
         const logger = require('../utils/logger');
         const { sendEmail } = require('../utils/email'); // Import sendEmail helper
@@ -523,9 +523,9 @@ router.post('/auth/register', async (req, res) => {
                 const hashedPassword = await bcrypt.hash(password, 10);
                 const userRole = role || 'member'; // Default to member
 
-                const sql = `INSERT INTO users (username, email, password, full_name, role, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))`;
+                const sql = `INSERT INTO users (username, email, password, full_name, role, gender, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`;
 
-                db.run(sql, [username, email, hashedPassword, full_name, userRole], function (err) {
+                db.run(sql, [username, email, hashedPassword, full_name, userRole, gender], function (err) {
                     if (err) {
                         logger.error(`Registration error: ${err.message}`);
                         return res.status(500).json({ error: 'Registration failed' });
@@ -874,7 +874,7 @@ router.patch('/admin/startups/:id', requireAuth, (req, res) => {
 
 // Register as co-working member
 router.post('/coworking/register', (req, res) => {
-    const { full_name, email, phone, membership_type, start_date, end_date } = req.body;
+    const { full_name, email, phone, membership_type, gender, start_date, end_date } = req.body;
 
     // Check if email already exists
     db.get("SELECT member_code FROM coworking_members WHERE email = ?", [email], (err, row) => {
@@ -897,10 +897,10 @@ router.post('/coworking/register', (req, res) => {
             const nextNum = (rowCount.count + 1).toString().padStart(4, '0');
             const member_code = `KDIH-${year}-${nextNum}`;
 
-            const sql = `INSERT INTO coworking_members (full_name, member_code, email, phone, membership_type, start_date, end_date) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const sql = `INSERT INTO coworking_members (full_name, member_code, email, phone, membership_type, gender, start_date, end_date) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-            db.run(sql, [full_name, member_code, email, phone, membership_type, start_date, end_date], function (err) {
+            db.run(sql, [full_name, member_code, email, phone, membership_type, gender, start_date, end_date], function (err) {
                 if (err) return res.status(500).json({ error: err.message });
 
                 // Send Email Confirmation
