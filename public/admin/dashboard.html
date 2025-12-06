@@ -531,6 +531,7 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
+                                <th>Gender</th>
                                 <th>Interest</th>
                                 <th>Actions</th>
                             </tr>
@@ -597,6 +598,7 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Gender</th>
                                 <th>Course</th>
                                 <th>Date</th>
                             </tr>
@@ -1003,6 +1005,7 @@
                 thead.innerHTML = `
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Gender</th>
                     <th>Type</th>
                     <th>Enrollments</th>
                     <th>Status</th>
@@ -1016,7 +1019,9 @@
                                 <div style="font-weight: 600;">${member.full_name || 'N/A'}</div>
                                 <div style="font-size: 0.8rem; color: var(--text-muted);">Joined: ${new Date(member.created_at).toLocaleDateString()}</div>
                             </td>
+
                             <td>${member.email}</td>
+                            <td>${member.gender || 'N/A'}</td>
                             <td><span class="badge badge-warning">${member.member_type || 'student'}</span></td>
                             <td>
                                 <div style="font-size: 0.85rem;">
@@ -1060,6 +1065,7 @@
                             <td>${member.full_name || member.username || 'N/A'}</td>
                             <td>${member.email}</td>
                             <td>${member.phone || 'N/A'}</td>
+                            <td>${member.gender || 'N/A'}</td>
                             <td>${member.interest || 'N/A'}</td>
                             <td>
                                 <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">Delete</button>
@@ -1396,6 +1402,7 @@
                         <tr>
                             <td>${reg.firstname} ${reg.surname}</td>
                             <td>${reg.email_personal}</td>
+                            <td>${reg.gender || 'N/A'}</td>
                             <td>${reg.course_title}</td>
                             <td>${new Date(reg.created_at).toLocaleDateString()}</td>
                         </tr>

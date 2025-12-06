@@ -114,6 +114,16 @@ function initDatabase() {
             }
         });
 
+        // Auto-migration for users table
+        db.all("PRAGMA table_info(users)", [], (err, columns) => {
+            if (!err && columns) {
+                if (!columns.some(c => c.name === 'gender')) {
+                    console.log('Migrating users: Adding gender column...');
+                    db.run("ALTER TABLE users ADD COLUMN gender TEXT");
+                }
+            }
+        });
+
         // Password Resets Table
         db.run(`CREATE TABLE IF NOT EXISTS password_resets (
             email TEXT,

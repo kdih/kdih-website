@@ -284,6 +284,19 @@ const emailTemplates = {
                 <p>Happy working!<br>The KDIH Team</p>
             </div>
         `
+    }),
+
+    contactAcknowledgment: (name) => ({
+        subject: 'We received your message - KDIH',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Thank You for Contacting KDIH</h2>
+                <p>Dear ${name},</p>
+                <p>We have received your message and appreciate you reaching out to us.</p>
+                <p>Our team will review your inquiry and get back to you as soon as possible.</p>
+                <p>Best regards,<br>The KDIH Team</p>
+            </div>
+        `
     })
 };
 

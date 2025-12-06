@@ -170,6 +170,12 @@ router.post('/contact', (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
+
+        // Send contact acknowledgment email
+        sendEmail(email, 'contactAcknowledgment', [name]).catch(err => {
+            console.error('Failed to send contact acknowledgment email:', err);
+        });
+
         res.json({ message: 'success', id: this.lastID });
     });
 });
@@ -1092,7 +1098,7 @@ router.post('/coworking/check-all-rooms', (req, res) => {
 router.get('/coworking/available-desks/:date', (req, res) => {
     const date = req.params.date;
     // Desk is booked if confirmed AND NOT checked out
-    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status = 'confirmed' AND check_out_time IS NULL";
+    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status = 'confirmed'";
 
     db.all(sql, [date], (err, booked) => {
         if (err) return res.status(500).json({ error: err.message });
