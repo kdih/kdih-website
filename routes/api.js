@@ -969,6 +969,118 @@ router.post('/coworking/book-desk', async (req, res) => {
     }
 });
 
+// Admin: Manually assign desk to member (no payment required)
+router.post('/admin/coworking/assign-desk', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { member_code, desk_number, booking_date, booking_type, notes } = req.body;
+
+    // 1. Get member by code
+    db.get("SELECT id, email, full_name FROM coworking_members WHERE member_code = ?", [member_code], (err, member) => {
+        if (err || !member) {
+            return res.status(400).json({ error: 'Invalid member code' });
+        }
+
+        // 2. Check if desk is available
+        db.get(
+            "SELECT COUNT(*) as count FROM desk_bookings WHERE desk_number = ? AND booking_date = ? AND status IN ('confirmed', 'in_use')",
+            [desk_number, booking_date],
+            (err, result) => {
+                if (err) return res.status(500).json({ error: err.message });
+
+                if (result.count > 0) {
+                    return res.status(400).json({ error: 'Desk is already booked for this date' });
+                }
+
+                // 3. Create booking (admin assigned, no payment)
+                const sql = `INSERT INTO desk_bookings 
+                    (member_id, desk_number, booking_date, booking_type, desk_type, status, amount_paid) 
+                    VALUES (?, ?, ?, ?, 'Hot Desk', 'confirmed', 0)`;
+
+                db.run(sql, [member.id, desk_number, booking_date, booking_type || 'Daily'], function (err) {
+                    if (err) return res.status(500).json({ error: err.message });
+
+                    logger.info(`Admin assigned desk ${desk_number} to member ${member_code}`);
+
+                    res.json({
+                        message: 'Desk assigned successfully',
+                        booking_id: this.lastID,
+                        member_name: member.full_name,
+                        desk_number,
+                        booking_date
+                    });
+                });
+            }
+        );
+    });
+});
+
+// Check-in: Member starts using desk
+router.post('/coworking/check-in/:booking_id', (req, res) => {
+    const { booking_id } = req.params;
+
+    db.get("SELECT * FROM desk_bookings WHERE id = ?", [booking_id], (err, booking) => {
+        if (err || !booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (booking.check_in_time) {
+            return res.status(400).json({ error: 'Already checked in' });
+        }
+
+        const sql = `UPDATE desk_bookings 
+                     SET check_in_time = CURRENT_TIMESTAMP, status = 'in_use' 
+                     WHERE id = ?`;
+
+        db.run(sql, [booking_id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            logger.info(`Check-in successful for booking ${booking_id}`);
+            res.json({
+                message: 'Checked in successfully',
+                booking_id,
+                check_in_time: new Date().toISOString()
+            });
+        });
+    });
+});
+
+// Check-out: Member finishes using desk
+router.post('/coworking/check-out/:booking_id', (req, res) => {
+    const { booking_id } = req.params;
+
+    db.get("SELECT * FROM desk_bookings WHERE id = ?", [booking_id], (err, booking) => {
+        if (err || !booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (!booking.check_in_time) {
+            return res.status(400).json({ error: 'Must check in first' });
+        }
+
+        if (booking.check_out_time) {
+            return res.status(400).json({ error: 'Already checked out' });
+        }
+
+        const sql = `UPDATE desk_bookings 
+                     SET check_out_time = CURRENT_TIMESTAMP, status = 'completed' 
+                     WHERE id = ?`;
+
+        db.run(sql, [booking_id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            logger.info(`Check-out successful for booking ${booking_id}`);
+            res.json({
+                message: 'Checked out successfully',
+                booking_id,
+                check_out_time: new Date().toISOString()
+            });
+        });
+    });
+});
+
 // Book meeting room
 router.post('/coworking/book-room', (req, res) => {
     const { guest_name, guest_email, guest_phone, guest_organization, room_name, booking_date, start_time, end_time, purpose } = req.body;
@@ -1104,8 +1216,9 @@ router.post('/coworking/check-all-rooms', (req, res) => {
 // Get desk availability for a date
 router.get('/coworking/available-desks/:date', (req, res) => {
     const date = req.params.date;
-    // Desk is booked if confirmed AND NOT checked out
-    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status = 'confirmed'";
+    // Desk is unavailable if status is 'confirmed' or 'in_use' (not 'completed')
+    // Desks with status 'completed' (checked out) are available for reassignment
+    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status IN ('confirmed', 'in_use')";
 
     db.all(sql, [date], (err, booked) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -1196,6 +1309,37 @@ router.delete('/admin/members/:id', requireAuth, (req, res) => {
     db.run("DELETE FROM members WHERE id = ?", [req.params.id], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ message: 'success' });
+    });
+});
+
+// Get all desk bookings (Admin)
+router.get('/admin/coworking/bookings', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const sql = `
+        SELECT 
+            db.id,
+            db.desk_number,
+            db.booking_date,
+            db.booking_type,
+            db.status,
+            db.check_in_time,
+            db.check_out_time,
+            db.amount_paid,
+            cm.member_code,
+            cm.full_name,
+            cm.email
+        FROM desk_bookings db
+        LEFT JOIN coworking_members cm ON db.member_id = cm.id
+        WHERE db.booking_date >= date('now', '-7 days')
+        ORDER BY db.booking_date DESC, db.created_at DESC
+    `;
+
+    db.all(sql, [], (err, bookings) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: bookings });
     });
 });
 

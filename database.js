@@ -227,6 +227,16 @@ function initDatabase() {
                             console.log('Migrating desk_bookings: Adding amount_paid column...');
                             db.run("ALTER TABLE desk_bookings ADD COLUMN amount_paid DECIMAL(10,2)");
                         }
+                        // Check check_in_time
+                        if (!columns.some(c => c.name === 'check_in_time')) {
+                            console.log('Migrating desk_bookings: Adding check_in_time column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN check_in_time DATETIME");
+                        }
+                        // Check check_out_time
+                        if (!columns.some(c => c.name === 'check_out_time')) {
+                            console.log('Migrating desk_bookings: Adding check_out_time column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN check_out_time DATETIME");
+                        }
                     }
                 });
             }
