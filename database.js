@@ -414,16 +414,36 @@ function initDatabase() {
 
         db.run(`CREATE TABLE IF NOT EXISTS meeting_room_bookings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            member_id INTEGER,
+            guest_name TEXT,
+            guest_email TEXT,
+            guest_phone TEXT,
+            guest_organization TEXT,
             room_name TEXT,
             booking_date DATE,
             start_time TIME,
             end_time TIME,
             purpose TEXT,
             status TEXT DEFAULT 'confirmed',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (member_id) REFERENCES coworking_members(id)
-        )`);
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`, (err) => {
+            if (!err) {
+                // Auto-migration: Check for check_in_time and check_out_time columns
+                db.all("PRAGMA table_info(meeting_room_bookings)", [], (err, columns) => {
+                    if (!err && columns) {
+                        // Check check_in_time
+                        if (!columns.some(c => c.name === 'check_in_time')) {
+                            console.log('Migrating meeting_room_bookings: Adding check_in_time column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN check_in_time DATETIME");
+                        }
+                        // Check check_out_time
+                        if (!columns.some(c => c.name === 'check_out_time')) {
+                            console.log('Migrating meeting_room_bookings: Adding check_out_time column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN check_out_time DATETIME");
+                        }
+                    }
+                });
+            }
+        });
 
         // ===== STARTUP INCUBATION =====
 

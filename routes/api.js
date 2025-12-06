@@ -1081,6 +1081,148 @@ router.post('/coworking/check-out/:booking_id', (req, res) => {
     });
 });
 
+// ===== MEETING ROOM MANAGEMENT =====
+
+// Admin: Manually assign meeting room (no payment required)
+router.post('/admin/coworking/assign-room', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { guest_name, guest_email, guest_phone, guest_organization, room_name, booking_date, start_time, end_time, purpose } = req.body;
+
+    // Check if room is available for the time slot
+    db.get(
+        `SELECT COUNT(*) as count FROM meeting_room_bookings 
+         WHERE room_name = ? AND booking_date = ? AND status IN ('confirmed', 'in_use')
+         AND ((start_time <= ? AND end_time > ?) OR (start_time < ? AND end_time >= ?) OR (start_time >= ? AND end_time <= ?))`,
+        [room_name, booking_date, start_time, start_time, end_time, end_time, start_time, end_time],
+        (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            if (result.count > 0) {
+                return res.status(400).json({ error: 'Room is already booked for this time slot' });
+            }
+
+            // Create booking (admin assigned, no payment)
+            const sql = `INSERT INTO meeting_room_bookings 
+                (guest_name, guest_email, guest_phone, guest_organization, room_name, booking_date, start_time, end_time, purpose, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'confirmed')`;
+
+            db.run(sql, [guest_name, guest_email, guest_phone, guest_organization, room_name, booking_date, start_time, end_time, purpose], function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+
+                logger.info(`Admin assigned ${room_name} to ${guest_name}`);
+
+                res.json({
+                    message: 'Room assigned successfully',
+                    booking_id: this.lastID,
+                    guest_name,
+                    room_name,
+                    booking_date
+                });
+            });
+        }
+    );
+});
+
+// Check-in: Guest starts using room
+router.post('/coworking/room-check-in/:booking_id', (req, res) => {
+    const { booking_id } = req.params;
+
+    db.get("SELECT * FROM meeting_room_bookings WHERE id = ?", [booking_id], (err, booking) => {
+        if (err || !booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (booking.check_in_time) {
+            return res.status(400).json({ error: 'Already checked in' });
+        }
+
+        const sql = `UPDATE meeting_room_bookings 
+                     SET check_in_time = CURRENT_TIMESTAMP, status = 'in_use' 
+                     WHERE id = ?`;
+
+        db.run(sql, [booking_id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            logger.info(`Room check-in successful for booking ${booking_id}`);
+            res.json({
+                message: 'Checked in successfully',
+                booking_id,
+                check_in_time: new Date().toISOString()
+            });
+        });
+    });
+});
+
+// Check-out: Guest finishes using room
+router.post('/coworking/room-check-out/:booking_id', (req, res) => {
+    const { booking_id } = req.params;
+
+    db.get("SELECT * FROM meeting_room_bookings WHERE id = ?", [booking_id], (err, booking) => {
+        if (err || !booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (!booking.check_in_time) {
+            return res.status(400).json({ error: 'Must check in first' });
+        }
+
+        if (booking.check_out_time) {
+            return res.status(400).json({ error: 'Already checked out' });
+        }
+
+        const sql = `UPDATE meeting_room_bookings 
+                     SET check_out_time = CURRENT_TIMESTAMP, status = 'completed' 
+                     WHERE id = ?`;
+
+        db.run(sql, [booking_id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            logger.info(`Room check-out successful for booking ${booking_id}`);
+            res.json({
+                message: 'Checked out successfully',
+                booking_id,
+                check_out_time: new Date().toISOString()
+            });
+        });
+    });
+});
+
+// Get all room bookings (Admin)
+router.get('/admin/coworking/room-bookings', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const sql = `
+        SELECT 
+            id,
+            guest_name,
+            guest_email,
+            guest_phone,
+            guest_organization,
+            room_name,
+            booking_date,
+            start_time,
+            end_time,
+            purpose,
+            status,
+            check_in_time,
+            check_out_time,
+            created_at
+        FROM meeting_room_bookings
+        WHERE booking_date >= date('now', '-7 days')
+        ORDER BY booking_date DESC, start_time DESC
+    `;
+
+    db.all(sql, [], (err, bookings) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: bookings });
+    });
+});
+
 // Book meeting room
 router.post('/coworking/book-room', (req, res) => {
     const { guest_name, guest_email, guest_phone, guest_organization, room_name, booking_date, start_time, end_time, purpose } = req.body;

@@ -689,6 +689,36 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Meeting Room Bookings Section -->
+                <div class="section-header" style="margin-top: 3rem;">
+                    <h2>Meeting Room Bookings</h2>
+                    <button class="btn-primary" onclick="showAssignRoomModal()">
+                        <i class="ph-fill ph-plus"></i> Assign Room
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Guest</th>
+                                <th>Room</th>
+                                <th>Status</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="room-bookings-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">Loading room bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Admins Tab (Super Admin Only) -->
@@ -985,6 +1015,7 @@
                     break;
                 case 'coworking':
                     loadBookings();
+                    loadRoomBookings();
                     break;
                 case 'services':
                     loadServices();
@@ -1500,6 +1531,129 @@
                 if (response.ok) {
                     alert('Member checked out successfully');
                     loadBookings();
+                } else {
+                    alert(data.error || 'Check-out failed');
+                }
+            } catch (error) {
+                console.error('Error checking out:', error);
+                alert('Error during check-out');
+            }
+        }
+
+        // ===== MEETING ROOM MANAGEMENT FUNCTIONS =====
+
+        async function loadRoomBookings() {
+            try {
+                const response = await fetch('/api/admin/coworking/room-bookings');
+                const data = await response.json();
+
+                const tbody = document.getElementById('room-bookings-tbody');
+
+                if (data.data && data.data.length > 0) {
+                    tbody.innerHTML = data.data.map(booking => `
+                        <tr>
+                            <td>${booking.booking_date}</td>
+                            <td>${booking.start_time} - ${booking.end_time}</td>
+                            <td>
+                                <div style="font-weight: 600;">${booking.guest_name || 'N/A'}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">${booking.guest_email || ''}</div>
+                            </td>
+                            <td><span class="badge">${booking.room_name}</span></td>
+                            <td><span class="status-badge status-${booking.status}">${booking.status}</span></td>
+                            <td>${booking.check_in_time ? new Date(booking.check_in_time).toLocaleTimeString() : '-'}</td>
+                            <td>${booking.check_out_time ? new Date(booking.check_out_time).toLocaleTimeString() : '-'}</td>
+                            <td>
+                                ${!booking.check_in_time ?
+                            `<button class="action-btn success" onclick="handleRoomCheckIn(${booking.id})">
+                                        <i class="ph-fill ph-sign-in"></i> Check In
+                                    </button>` :
+                            !booking.check_out_time ?
+                                `<button class="action-btn danger" onclick="handleRoomCheckOut(${booking.id})">
+                                        <i class="ph-fill ph-sign-out"></i> Check Out
+                                    </button>` :
+                                '<span style="color: var(--success);">✓ Completed</span>'
+                        }
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No room bookings found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading room bookings:', error);
+                document.getElementById('room-bookings-tbody').innerHTML =
+                    '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading room bookings</td></tr>';
+            }
+        }
+
+        function showAssignRoomModal() {
+            document.getElementById('assign-room-modal').classList.add('active');
+        }
+
+        async function handleAssignRoom(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/admin/coworking/assign-room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Room assigned successfully to ${result.guest_name}`);
+                    closeModal('assign-room-modal');
+                    form.reset();
+                    loadRoomBookings();
+                } else {
+                    alert(result.error || 'Failed to assign room');
+                }
+            } catch (error) {
+                console.error('Error assigning room:', error);
+                alert('Error assigning room');
+            }
+        }
+
+        async function handleRoomCheckIn(bookingId) {
+            if (!confirm('Check in this guest?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/room-check-in/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Guest checked in successfully');
+                    loadRoomBookings();
+                } else {
+                    alert(data.error || 'Check-in failed');
+                }
+            } catch (error) {
+                console.error('Error checking in:', error);
+                alert('Error during check-in');
+            }
+        }
+
+        async function handleRoomCheckOut(bookingId) {
+            if (!confirm('Check out this guest?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/room-check-out/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Guest checked out successfully');
+                    loadRoomBookings();
                 } else {
                     alert(data.error || 'Check-out failed');
                 }
@@ -2143,6 +2297,61 @@
                     </select>
                 </div>
                 <button type="submit" class="btn">Assign Desk</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Room Modal -->
+    <div id="assign-room-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Meeting Room</h2>
+                <button class="close-btn" onclick="closeModal('assign-room-modal')">&times;</button>
+            </div>
+            <form id="assign-room-form" onsubmit="handleAssignRoom(event)">
+                <div class="form-group">
+                    <label>Guest Name *</label>
+                    <input type="text" name="guest_name" required placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label>Guest Email *</label>
+                    <input type="email" name="guest_email" required placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Guest Phone</label>
+                    <input type="tel" name="guest_phone" placeholder="+234...">
+                </div>
+                <div class="form-group">
+                    <label>Organization</label>
+                    <input type="text" name="guest_organization" placeholder="Company/Organization">
+                </div>
+                <div class="form-group">
+                    <label>Room *</label>
+                    <select name="room_name" required>
+                        <option value="">Select Room</option>
+                        <option value="Conference Room A">Conference Room A (10 pax)</option>
+                        <option value="Conference Room B">Conference Room B (6 pax)</option>
+                        <option value="Meeting Pod 1">Meeting Pod 1 (4 pax)</option>
+                        <option value="Meeting Pod 2">Meeting Pod 2 (4 pax)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Booking Date *</label>
+                    <input type="date" name="booking_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Time *</label>
+                    <input type="time" name="start_time" required>
+                </div>
+                <div class="form-group">
+                    <label>End Time *</label>
+                    <input type="time" name="end_time" required>
+                </div>
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <textarea name="purpose" rows="2" placeholder="Meeting purpose..."></textarea>
+                </div>
+                <button type="submit" class="btn">Assign Room</button>
             </form>
         </div>
     </div>
