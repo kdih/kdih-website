@@ -947,8 +947,8 @@ router.post('/coworking/book-desk', async (req, res) => {
             });
 
             // 4. Create Booking (Status: pending_payment)
-            const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type, payment_reference, amount_paid, status) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment')`;
+            const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type, payment_reference, amount_paid, status, expires_at) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment', datetime('now', '+3 hours'))`;
 
             db.run(sql, [member.id || member_id, desk_number, booking_date, booking_type, desk_type, data.reference, paymentBreakdown.total], function (err) {
                 if (err) return res.status(500).json({ error: err.message });
@@ -1797,28 +1797,76 @@ router.post('/payments/initialize', async (req, res) => {
 async function processSuccessfulPayment(reference) {
     return new Promise((resolve, reject) => {
         // 1. Update payment status
-        db.run(`UPDATE payments SET status = ?, paid_at = datetime('now') WHERE reference = ?`,
-            ['success', reference], function (err) {
-                if (err) return reject(err);
+        db.run("UPDATE payments SET status = 'success', paid_at = CURRENT_TIMESTAMP WHERE reference = ?", [reference], function (err) {
+            if (err) {
+                logger.error('Error updating payment:', err);
+                return reject(err);
+            }
 
-                // 2. Get payment details to find enrollment info
-                db.get('SELECT * FROM payments WHERE reference = ?', [reference], (err, payment) => {
-                    if (err || !payment) return resolve(payment);
+            // 2. Get payment details
+            db.get("SELECT * FROM payments WHERE reference = ?", [reference], (err, payment) => {
+                if (err || !payment) {
+                    logger.error('Payment not found:', reference);
+                    return reject(err);
+                }
 
+                // 3. Update desk bookings
+                db.run(
+                    `UPDATE desk_bookings 
+                     SET status = 'confirmed', payment_confirmed_at = CURRENT_TIMESTAMP, expires_at = NULL 
+                     WHERE payment_reference = ? AND status = 'pending_payment'`,
+                    [reference],
+                    function (err) {
+                        if (this.changes > 0) {
+                            logger.info(`Desk booking confirmed for payment ${reference}`);
+
+                            // Send SMS notification
+                            db.get(`
+                                SELECT db.*, cm.full_name, cm.phone_number 
+                                FROM desk_bookings db 
+                                JOIN coworking_members cm ON db.member_id = cm.id 
+                                WHERE db.payment_reference = ?
+                            `, [reference], (err, booking) => {
+                                if (booking && booking.phone_number) {
+                                    const sms = require('../utils/sms');
+                                    sms.sendPaymentConfirmationSMS(
+                                        booking.phone_number,
+                                        booking.full_name,
+                                        `Desk ${booking.desk_number} (${booking.booking_date})`,
+                                        booking.amount_paid
+                                    ).catch(err => logger.error('SMS send error:', err));
+                                }
+                            });
+                        }
+                    }
+                );
+
+                // 4. Update room bookings
+                db.run(
+                    `UPDATE meeting_room_bookings 
+                     SET status = 'confirmed', payment_confirmed_at = CURRENT_TIMESTAMP, expires_at = NULL 
+                     WHERE payment_reference = ? AND status = 'pending_payment'`,
+                    [reference],
+                    function (err) {
+                        if (this.changes > 0) {
+                            logger.info(`Room booking confirmed for payment ${reference}`);
+                        }
+                    }
+                );
+
+                // 5. Auto-enroll in LMS if course registration
+                if (payment.service_type === 'course_enrollment') {
                     try {
                         const metadata = JSON.parse(payment.metadata || '{}');
+                        const enrollmentId = metadata.enrollment_id;
 
-                        // If this is a course enrollment payment
-                        if (metadata.enrollment_id) {
-                            const enrollmentId = metadata.enrollment_id;
-
-                            // 3. Update course_registrations status
+                        if (enrollmentId) {
+                            // Update course_registrations status
                             db.run('UPDATE course_registrations SET payment_status = ? WHERE id = ?',
                                 ['paid', enrollmentId], (err) => {
-                                    if (err) console.error('Error updating registration status:', err);
+                                    if (err) logger.error('Error updating registration status:', err);
 
-                                    // 4. Create member_enrollment record (LMS Access)
-                                    // First get course details
+                                    // Create member_enrollment record (LMS Access)
                                     db.get(`
                                         SELECT cr.email_personal, cr.course_title, c.id as course_id, c.duration_weeks 
                                         FROM course_registrations cr
@@ -1851,7 +1899,7 @@ async function processSuccessfulPayment(reference) {
                     }
                     resolve(payment);
                 });
-            });
+        });
     });
 }
 

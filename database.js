@@ -237,6 +237,16 @@ function initDatabase() {
                             console.log('Migrating desk_bookings: Adding check_out_time column...');
                             db.run("ALTER TABLE desk_bookings ADD COLUMN check_out_time DATETIME");
                         }
+                        // Check expires_at
+                        if (!columns.some(c => c.name === 'expires_at')) {
+                            console.log('Migrating desk_bookings: Adding expires_at column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN expires_at DATETIME");
+                        }
+                        // Check payment_confirmed_at
+                        if (!columns.some(c => c.name === 'payment_confirmed_at')) {
+                            console.log('Migrating desk_bookings: Adding payment_confirmed_at column...');
+                            db.run("ALTER TABLE desk_bookings ADD COLUMN payment_confirmed_at DATETIME");
+                        }
                     }
                 });
             }
@@ -459,6 +469,16 @@ function initDatabase() {
                         if (!columns.some(c => c.name === 'check_out_time')) {
                             console.log('Migrating meeting_room_bookings: Adding check_out_time column...');
                             db.run("ALTER TABLE meeting_room_bookings ADD COLUMN check_out_time DATETIME");
+                        }
+                        // Check expires_at
+                        if (!columns.some(c => c.name === 'expires_at')) {
+                            console.log('Migrating meeting_room_bookings: Adding expires_at column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN expires_at DATETIME");
+                        }
+                        // Check payment_confirmed_at  
+                        if (!columns.some(c => c.name === 'payment_confirmed_at')) {
+                            console.log('Migrating meeting_room_bookings: Adding payment_confirmed_at column...');
+                            db.run("ALTER TABLE meeting_room_bookings ADD COLUMN payment_confirmed_at DATETIME");
                         }
                     }
                 });
