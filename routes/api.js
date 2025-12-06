@@ -1918,18 +1918,23 @@ async function processSuccessfulPayment(reference) {
                                             }
                                         });
 
-                                        // Email receipt
-                                        const message = `Dear ${booking.full_name},\n\nThank you for your payment! Your desk booking at KDIH has been confirmed.\n\nPlease find your receipt attached to this email.\n\nBooking Details:\n- Desk: ${booking.desk_number}\n- Date: ${booking.booking_date}\n- Type: ${booking.booking_type}\n- Amount: ₦${booking.amount_paid}\n\nWe look forward to seeing you!\n\nBest regards,\nKDIH Team`;
+                                        // Only email if receipt was generated
+                                        if (receiptBuffer) {
+                                            // Email receipt
+                                            const message = `Dear ${booking.full_name},\n\nThank you for your payment! Your desk booking at KDIH has been confirmed.\n\nPlease find your receipt attached to this email.\n\nBooking Details:\n- Desk: ${booking.desk_number}\n- Date: ${booking.booking_date}\n- Type: ${booking.booking_type}\n- Amount: ₦${booking.amount_paid}\n\nWe look forward to seeing you!\n\nBest regards,\nKDIH Team`;
 
-                                        await email.sendEmailWithAttachment(
-                                            booking.email,
-                                            'KDIH Booking Receipt - Payment Confirmed',
-                                            message,
-                                            receiptBuffer,
-                                            `KDIH-Receipt-${reference}.pdf`
-                                        );
+                                            await email.sendEmailWithAttachment(
+                                                booking.email,
+                                                'KDIH Booking Receipt - Payment Confirmed',
+                                                message,
+                                                receiptBuffer,
+                                                `KDIH-Receipt-${reference}.pdf`
+                                            );
 
-                                        logger.info(`Receipt emailed to ${booking.email}`);
+                                            logger.info(`Receipt emailed to ${booking.email}`);
+                                        } else {
+                                            logger.warn('Receipt not generated - PDFKit unavailable');
+                                        }
                                     } catch (error) {
                                         logger.error('Receipt generation/email error:', error);
                                     }

@@ -1,4 +1,14 @@
-const PDFDocument = require('pdfkit');
+let PDFDocument;
+let pdfAvailable = false;
+
+try {
+    PDFDocument = require('pdfkit');
+    pdfAvailable = true;
+} catch (error) {
+    console.warn('PDFKit not available. PDF generation will be disabled.');
+    pdfAvailable = false;
+}
+
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
@@ -13,6 +23,12 @@ const logger = require('./logger');
  * @returns {Promise<Buffer>} PDF buffer
  */
 async function generateBookingReceipt(data) {
+    // Return null if PDFKit not available
+    if (!pdfAvailable) {
+        logger.warn('PDF generation skipped - PDFKit not available');
+        return null;
+    }
+
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ size: 'A4', margin: 50 });
