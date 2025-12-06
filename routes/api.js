@@ -1464,19 +1464,25 @@ router.post('/payments/initialize', async (req, res) => {
     try {
         const { email: userEmail, amount, payment_type, metadata } = req.body;
 
-        const paymentData = await paystack.initializePayment(userEmail, amount, {
+        // Calculate total with Paystack fees
+        const paymentBreakdown = paystack.addPaystackFee(amount);
+
+        const paymentData = await paystack.initializePayment(userEmail, paymentBreakdown.total, {
             ...metadata,
-            payment_type
+            payment_type,
+            base_amount: amount,
+            service_fee: paymentBreakdown.fee,
+            total_amount: paymentBreakdown.total
         });
 
-        // Save payment record
+        // Save payment record with total amount
         const sql = `INSERT INTO payments (reference, user_id, amount, payment_type, status, metadata) 
                      VALUES (?, ?, ?, ?, ?, ?)`;
 
         db.run(sql, [
             paymentData.reference,
             metadata.user_id || null,
-            amount,
+            paymentBreakdown.total, // Store total amount including fees
             payment_type,
             'pending',
             JSON.stringify(metadata)
@@ -1491,7 +1497,8 @@ router.post('/payments/initialize', async (req, res) => {
             message: 'success',
             authorization_url: paymentData.authorization_url,
             access_code: paymentData.access_code,
-            reference: paymentData.reference
+            reference: paymentData.reference,
+            payment_breakdown: paymentBreakdown
         });
     } catch (error) {
         logger.error(`Payment initialization error: ${error.message}`);
