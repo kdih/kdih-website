@@ -948,7 +948,7 @@ router.post('/coworking/book-desk', async (req, res) => {
 
             // 4. Create Booking (Status: pending_payment)
             const sql = `INSERT INTO desk_bookings (member_id, desk_number, booking_date, booking_type, desk_type, payment_reference, amount_paid, status, expires_at) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment', datetime('now', '+3 hours'))`;
+                         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending_payment', datetime('now', '+5 hours'))`;
 
             db.run(sql, [member.id || member_id, desk_number, booking_date, booking_type, desk_type, data.reference, paymentBreakdown.total], function (err) {
                 if (err) return res.status(500).json({ error: err.message });
