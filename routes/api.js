@@ -1088,7 +1088,7 @@ router.get('/admin/coworking/expired-bookings', requireAuth, (req, res) => {
     }
 
     const deskQuery = `
-        SELECT db.*, cm.full_name, cm.email, cm.phone_number
+        SELECT db.*, cm.full_name, cm.email, cm.phone
         FROM desk_bookings db
         JOIN coworking_members cm ON db.member_id = cm.id
         WHERE db.expires_at < datetime('now') AND db.status = 'pending_payment'
