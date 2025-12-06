@@ -622,9 +622,11 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Gender</th>
                                 <th>Course</th>
-                                <th>Date</th>
+                                <th>Schedule</th>
+                                <th>Payment Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="registrations-list"></tbody>
@@ -2010,22 +2012,23 @@
 
                 const list = document.getElementById('registrations-list');
                 if (data.data && data.data.length > 0) {
-                    list.innerHTML = data.messages.map(msg => `
+                    list.innerHTML = data.data.map(reg => `
                         <tr>
-                            <td>${msg.name}</td>
-                            <td>${msg.email}</td>
-                            <td>${msg.subject}</td>
-                            <td>${msg.message.substring(0, 50)}...</td>
-                            <td>${new Date(msg.created_at).toLocaleString()}</td>
+                            <td>${reg.firstname} ${reg.surname}</td>
+                            <td>${reg.email_personal}</td>
+                            <td>${reg.course_title}</td>
+                            <td>${reg.schedule}</td>
+                            <td><span class="badge badge-${reg.payment_status === 'paid' ? 'success' : 'warning'}">${reg.payment_status}</span></td>
+                            <td>${new Date(reg.created_at).toLocaleString()}</td>
                             <td>
-                                <button class="action-btn success" onclick="showEmailModal('${msg.email}', 'Re: ${msg.subject.replace(/'/g, "\\'")}', '${msg.name}')">
+                                <button class="action-btn success" onclick="showEmailModal('${reg.email_personal}', 'Re: ${reg.course_title} Registration', '${reg.firstname} ${reg.surname}')">
                                     <i class="ph-fill ph-arrow-u-up-left"></i> Reply
                                 </button>
                             </td>
                         </tr>
                     `).join('');
                 } else {
-                    list.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="ph ph-notebook"></i><p>No registrations yet</p></td></tr>';
+                    list.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="ph ph-notebook"></i><p>No registrations yet</p></td></tr>';
                 }
             } catch (error) {
                 console.error('Error loading registrations:', error);
