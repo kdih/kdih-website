@@ -302,6 +302,23 @@
                 </div>
                 <button type="submit" class="btn">Register Membership</button>
             </form>
+            <div class="membership-form-card"
+                style="margin-top: 2rem; border-top: 2px solid #e2e8f0; padding-top: 2rem;">
+                <h3>Manage My Desk</h3>
+                <p style="margin-bottom: 1rem; color: #64748b;">Enter your Member ID to see your active bookings and
+                    check in/out.</p>
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <input type="text" id="manage-member-code" placeholder="Enter Member ID (e.g. KDIH-2025-001)"
+                        style="flex: 1;">
+                    <button class="btn btn-primary"
+                        onclick="loadMyBookings(document.getElementById('manage-member-code').value)">Load
+                        Bookings</button>
+                </div>
+                <div id="active-bookings" style="margin-top: 1.5rem; display: none;">
+                    <!-- JS renders bookings here -->
+                </div>
+            </div>
+
             <div id="membership-success" class="success-message">
                 <h3>✓ Membership Registered Successfully!</h3>
                 <p>Your member ID: <strong id="member-id"></strong></p>
@@ -695,6 +712,70 @@
 
         // Initialize
         loadDesks();
+        // Check for active bookings on load
+        async function loadMyBookings(memberCode) {
+            if (!memberCode) return;
+            try {
+                const res = await fetch(`/api/coworking/my-bookings/${memberCode}`);
+                const data = await res.json();
+
+                if (data.status === 'success' && data.bookings.length > 0) {
+                    const bookingContainer = document.getElementById('active-bookings');
+                    if (bookingContainer) {
+                        bookingContainer.innerHTML = '<h3>My Active Bookings</h3>';
+
+                        data.bookings.forEach(booking => {
+                            const isCheckedIn = booking.check_in_time && !booking.check_out_time;
+                            const isCompleted = booking.check_out_time;
+
+                            if (isCompleted) return; // Don't show completed bookings
+
+                            const el = document.createElement('div');
+                            el.className = 'booking-card';
+                            el.style.cssText = 'background: #f8fafc; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;';
+
+                            el.innerHTML = `
+                                <div>
+                                    <strong>${booking.desk_number}</strong> (${new Date(booking.booking_date).toLocaleDateString()})<br>
+                                    <span style="font-size: 0.9em; color: ${isCheckedIn ? '#10b981' : '#64748b'}">
+                                        ${isCheckedIn ? 'Currently Occupied 🟢' : 'Reserved - Waiting for Check-in 🕒'}
+                                    </span>
+                                </div>
+                                <button onclick="${isCheckedIn ? `checkOut(${booking.id}, '${memberCode}')` : `checkIn(${booking.id}, '${memberCode}')`}" 
+                                    class="btn" style="background: ${isCheckedIn ? '#ef4444' : '#2563eb'}; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                    ${isCheckedIn ? 'Check Out' : 'Check In'}
+                                </button>
+                            `;
+                            bookingContainer.appendChild(el);
+                        });
+                        bookingContainer.style.display = 'block';
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading bookings:', e);
+            }
+        }
+
+        async function checkIn(id, code) {
+            if (!confirm('Start using this desk now?')) return;
+            await fetch('/api/coworking/check-in', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ booking_id: id, member_code: code })
+            });
+            loadMyBookings(code);
+        }
+
+        async function checkOut(id, code) {
+            if (!confirm('Finished for the day? This will release the desk.')) return;
+            await fetch('/api/coworking/check-out', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ booking_id: id, member_code: code })
+            });
+            loadMyBookings(code);
+            loadDesks(); // Refresh desk grid
+        }
     </script>
 </body>
 

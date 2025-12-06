@@ -1015,7 +1015,8 @@ router.post('/coworking/check-all-rooms', (req, res) => {
 // Get desk availability for a date
 router.get('/coworking/available-desks/:date', (req, res) => {
     const date = req.params.date;
-    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status = 'confirmed'";
+    // Desk is booked if confirmed AND NOT checked out
+    const sql = "SELECT desk_number FROM desk_bookings WHERE booking_date = ? AND status = 'confirmed' AND check_out_time IS NULL";
 
     db.all(sql, [date], (err, booked) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -2490,6 +2491,56 @@ router.get('/member/payments', requireMemberAuth, (req, res) => {
             message: 'success',
             data: payments
         });
+    });
+});
+
+// Check-in (Start Usage)
+router.post('/coworking/check-in', async (req, res) => {
+    const { booking_id, member_code } = req.body;
+
+    db.get("SELECT * FROM desk_bookings JOIN coworking_members ON desk_bookings.member_id = coworking_members.id WHERE desk_bookings.id = ? AND coworking_members.member_code = ?",
+        [booking_id, member_code], (err, booking) => {
+            if (err || !booking) return res.status(404).json({ error: 'Booking not found or unauthorized' });
+
+            if (booking.check_in_time) return res.status(400).json({ error: 'Already checked in' });
+
+            db.run("UPDATE desk_bookings SET check_in_time = CURRENT_TIMESTAMP WHERE id = ?", [booking_id], (err) => {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ status: 'success', message: 'Checked in successfully. Desk usage started.' });
+            });
+        });
+});
+
+// Check-out (End Usage & Release Desk)
+router.post('/coworking/check-out', async (req, res) => {
+    const { booking_id, member_code } = req.body;
+
+    db.get("SELECT * FROM desk_bookings JOIN coworking_members ON desk_bookings.member_id = coworking_members.id WHERE desk_bookings.id = ? AND coworking_members.member_code = ?",
+        [booking_id, member_code], (err, booking) => {
+            if (err || !booking) return res.status(404).json({ error: 'Booking not found or unauthorized' });
+
+            if (!booking.check_in_time) return res.status(400).json({ error: 'Must check in first' });
+            if (booking.check_out_time) return res.status(400).json({ error: 'Already checked out' });
+
+            db.run("UPDATE desk_bookings SET check_out_time = CURRENT_TIMESTAMP WHERE id = ?", [booking_id], (err) => {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ status: 'success', message: 'Checked out. Desk is now available for others.' });
+            });
+        });
+});
+
+// My Bookings (For Dashboard)
+router.get('/coworking/my-bookings/:member_code', (req, res) => {
+    const member_code = req.params.member_code;
+
+    const sql = `SELECT db.* FROM desk_bookings db 
+                 JOIN coworking_members cm ON db.member_id = cm.id 
+                 WHERE cm.member_code = ? AND db.status = 'confirmed' 
+                 ORDER BY db.booking_date DESC LIMIT 5`;
+
+    db.all(sql, [member_code], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ status: 'success', bookings: rows });
     });
 });
 
