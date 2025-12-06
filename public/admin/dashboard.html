@@ -739,6 +739,46 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Expired Bookings Section -->
+                <div class="section-header"
+                    style="margin-top: 3rem; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ Expired Bookings <span id="expired-count"
+                            style="background: #ef4444; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.9rem; margin-left: 0.5rem;">0</span>
+                    </h2>
+                    <button class="btn-danger" onclick="cancelAllExpired()" style="display: none;" id="cancel-all-btn">
+                        Cancel All Expired
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-expired" onchange="toggleAllExpired(this)">
+                                </th>
+                                <th>Type</th>
+                                <th>ID</th>
+                                <th>Member/Guest</th>
+                                <th>Desk/Room</th>
+                                <th>Date</th>
+                                <th>Expired</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expired-bookings-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button class="btn" onclick="cancelSelectedExpired()" style="display: none;"
+                            id="cancel-selected-btn">
+                            Cancel Selected
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Admins Tab (Super Admin Only) -->
@@ -1036,6 +1076,7 @@
                 case 'coworking':
                     loadBookings();
                     loadRoomBookings();
+                    loadExpiredBookings();
                     break;
                 case 'services':
                     loadServices();
@@ -1683,6 +1724,177 @@
             } catch (error) {
                 console.error('Error checking out:', error);
                 alert('Error during check-out');
+            }
+        }
+
+        // ===== EXPIRED BOOKINGS FUNCTIONS =====
+
+        async function loadExpiredBookings() {
+            try {
+                const response = await fetch('/api/admin/coworking/expired-bookings');
+                const data = await response.json();
+
+                const tbody = document.getElementById('expired-bookings-tbody');
+                const countBadge = document.getElementById('expired-count');
+                const cancelAllBtn = document.getElementById('cancel-all-btn');
+                const cancelSelectedBtn = document.getElementById('cancel-selected-btn');
+
+                const desks = data.data.desks || [];
+                const rooms = data.data.rooms || [];
+                const totalExpired = desks.length + rooms.length;
+
+                countBadge.textContent = totalExpired;
+                cancelAllBtn.style.display = totalExpired > 0 ? 'block' : 'none';
+
+                if (totalExpired === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--success);">✓ No expired bookings</td></tr>';
+                    cancelSelectedBtn.style.display = 'none';
+                    return;
+                }
+
+                const rows = [];
+
+                // Add desk bookings
+                desks.forEach(desk => {
+                    const expiredHours = Math.floor((new Date() - new Date(desk.expires_at)) / 3600000);
+                    rows.push(`
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td><input type="checkbox" class="expired-checkbox" data-id="${desk.id}" data-type="desk"></td>
+                            <td><span class="badge badge-primary">Desk</span></td>
+                            <td>#${desk.id}</td>
+                            <td>${desk.full_name}</td>
+                            <td>${desk.desk_number}</td>
+                            <td>${desk.booking_date}</td>
+                            <td style="color: #ef4444;">${expiredHours}h ago</td>
+                            <td>
+                                <button class="action-btn danger" onclick="cancelSingleBooking(${desk.id}, 'desk')">
+                                    <i class="ph-fill ph-x"></i> Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                // Add room bookings
+                rooms.forEach(room => {
+                    const expiredHours = Math.floor((new Date() - new Date(room.expires_at)) / 3600000);
+                    rows.push(`
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td><input type="checkbox" class="expired-checkbox" data-id="${room.id}" data-type="room"></td>
+                            <td><span class="badge badge-warning">Room</span></td>
+                            <td>#${room.id}</td>
+                            <td>${room.guest_name}</td>
+                            <td>${room.room_name}</td>
+                            <td>${room.booking_date}</td>
+                            <td style="color: #ef4444;">${expiredHours}h ago</td>
+                            <td>
+                                <button class="action-btn danger" onclick="cancelSingleBooking(${room.id}, 'room')">
+                                    <i class="ph-fill ph-x"></i> Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                tbody.innerHTML = rows.join('');
+
+                // Show/hide cancel selected button based on checkboxes
+                document.querySelectorAll('.expired-checkbox').forEach(cb => {
+                    cb.addEventListener('change', updateCancelSelectedButton);
+                });
+
+            } catch (error) {
+                console.error('Error loading expired bookings:', error);
+                document.getElementById('expired-bookings-tbody').innerHTML =
+                    '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading expired bookings</td></tr>';
+            }
+        }
+
+        function toggleAllExpired(checkbox) {
+            document.querySelectorAll('.expired-checkbox').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+            updateCancelSelectedButton();
+        }
+
+        function updateCancelSelectedButton() {
+            const selected = document.querySelectorAll('.expired-checkbox:checked').length;
+            const btn = document.getElementById('cancel-selected-btn');
+            btn.style.display = selected > 0 ? 'block' : 'none';
+            btn.textContent = `Cancel Selected (${selected})`;
+        }
+
+        async function cancelSingleBooking(id, type) {
+            if (!confirm(`Cancel this ${type} booking?`)) return;
+            await cancelBookings([id], type);
+        }
+
+        async function cancelSelectedExpired() {
+            const checkboxes = document.querySelectorAll('.expired-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            if (!confirm(`Cancel ${checkboxes.length} selected booking(s)?`)) return;
+
+            const deskIds = [];
+            const roomIds = [];
+
+            checkboxes.forEach(cb => {
+                const id = parseInt(cb.dataset.id);
+                if (cb.dataset.type === 'desk') {
+                    deskIds.push(id);
+                } else {
+                    roomIds.push(id);
+                }
+            });
+
+            if (deskIds.length > 0) await cancelBookings(deskIds, 'desk');
+            if (roomIds.length > 0) await cancelBookings(roomIds, 'room');
+        }
+
+        async function cancelAllExpired() {
+            const checkboxes = document.querySelectorAll('.expired-checkbox');
+            if (checkboxes.length === 0) return;
+
+            if (!confirm(`Cancel ALL ${checkboxes.length} expired booking(s)?`)) return;
+
+            const deskIds = [];
+            const roomIds = [];
+
+            checkboxes.forEach(cb => {
+                const id = parseInt(cb.dataset.id);
+                if (cb.dataset.type === 'desk') {
+                    deskIds.push(id);
+                } else {
+                    roomIds.push(id);
+                }
+            });
+
+            if (deskIds.length > 0) await cancelBookings(deskIds, 'desk');
+            if (roomIds.length > 0) await cancelBookings(roomIds, 'room');
+        }
+
+        async function cancelBookings(ids, type) {
+            try {
+                const response = await fetch('/api/admin/coworking/cancel-bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ booking_ids: ids, booking_type: type })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`${result.cancelled_count} booking(s) cancelled successfully`);
+                    // Reload all booking tables
+                    loadBookings();
+                    loadRoomBookings();
+                    loadExpiredBookings();
+                } else {
+                    alert(result.error || 'Failed to cancel bookings');
+                }
+            } catch (error) {
+                console.error('Error cancelling bookings:', error);
+                alert('Error cancelling bookings');
             }
         }
 

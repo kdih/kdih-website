@@ -1081,6 +1081,71 @@ router.post('/coworking/check-out/:booking_id', (req, res) => {
     });
 });
 
+// Get Expired Bookings (Admin)
+router.get('/admin/coworking/expired-bookings', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const deskQuery = `
+        SELECT db.*, cm.full_name, cm.email, cm.phone_number
+        FROM desk_bookings db
+        JOIN coworking_members cm ON db.member_id = cm.id
+        WHERE db.expires_at < datetime('now') AND db.status = 'pending_payment'
+        ORDER BY db.expires_at DESC
+    `;
+
+    const roomQuery = `
+        SELECT *
+        FROM meeting_room_bookings
+        WHERE expires_at < datetime('now') AND status = 'pending_payment'
+        ORDER BY expires_at DESC
+    `;
+
+    db.all(deskQuery, [], (err, desks) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        db.all(roomQuery, [], (err, rooms) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            res.json({
+                message: 'success',
+                data: {
+                    desks: desks || [],
+                    rooms: rooms || []
+                }
+            });
+        });
+    });
+});
+
+// Cancel Bookings (Admin)
+router.post('/admin/coworking/cancel-bookings', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { booking_ids, booking_type } = req.body;
+
+    if (!booking_ids || !Array.isArray(booking_ids) || booking_ids.length === 0) {
+        return res.status(400).json({ error: 'booking_ids array required' });
+    }
+
+    const table = booking_type === 'room' ? 'meeting_room_bookings' : 'desk_bookings';
+    const placeholders = booking_ids.map(() => '?').join(',');
+    const sql = `UPDATE ${table} SET status = 'cancelled_unpaid' WHERE id IN (${placeholders})`;
+
+    db.run(sql, booking_ids, function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+
+        logger.info(`Admin cancelled ${this.changes} ${booking_type} bookings`);
+        res.json({
+            message: 'Bookings cancelled successfully',
+            cancelled_count: this.changes
+        });
+    });
+});
+
 // ===== MEETING ROOM MANAGEMENT =====
 
 // Admin: Manually assign meeting room (no payment required)
