@@ -425,6 +425,10 @@
                 <i class="ph-fill ph-chart-bar"></i>
                 <span>Analytics</span>
             </div>
+            <div class="nav-item" onclick="switchTab('coworking')">
+                <i class="ph-fill ph-desk"></i>
+                <span>Coworking</span>
+            </div>
             <div class="nav-item" onclick="switchTab('services')">
                 <i class="ph-fill ph-briefcase"></i>
                 <span>Services</span>
@@ -651,6 +655,38 @@
                             </tr>
                         </thead>
                         <tbody id="startups-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Coworking Tab -->
+            <div id="coworking-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Coworking Desk Management</h2>
+                    <button class="btn-primary" onclick="showAssignDeskModal()">
+                        <i class="ph-fill ph-plus"></i> Assign Desk
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Member</th>
+                                <th>Desk</th>
+                                <th>Status</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">Loading bookings...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -910,6 +946,8 @@
                 events: 'Events',
                 startups: 'Startup Applications',
                 analytics: 'Analytics',
+                coworking: 'Coworking Management',
+                services: 'Services',
                 admins: 'Manage Admins',
                 settings: 'Settings'
             };
@@ -944,6 +982,12 @@
                     break;
                 case 'analytics':
                     loadAnalytics();
+                    break;
+                case 'coworking':
+                    loadBookings();
+                    break;
+                case 'services':
+                    loadServices();
                     break;
                 case 'admins':
                     loadAdmins();
@@ -1334,6 +1378,134 @@
                 else alert('Error deleting message');
             } catch (err) {
                 alert('Error deleting message');
+            }
+        }
+
+        // ===== COWORKING MANAGEMENT FUNCTIONS =====
+
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/admin/coworking/bookings');
+                const data = await response.json();
+
+                const tbody = document.getElementById('bookings-tbody');
+
+                if (data.data && data.data.length > 0) {
+                    tbody.innerHTML = data.data.map(booking => `
+                        <tr>
+                            <td>${booking.booking_date}</td>
+                            <td>
+                                <div style="font-weight: 600;">${booking.full_name || 'N/A'}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">${booking.member_code || ''}</div>
+                            </td>
+                            <td><span class="badge">${booking.desk_number}</span></td>
+                            <td><span class="status-badge status-${booking.status}">${booking.status}</span></td>
+                            <td>${booking.check_in_time ? new Date(booking.check_in_time).toLocaleTimeString() : '-'}</td>
+                            <td>${booking.check_out_time ? new Date(booking.check_out_time).toLocaleTimeString() : '-'}</td>
+                            <td>₦${booking.amount_paid || 0}</td>
+                            <td>
+                                ${!booking.check_in_time ?
+                            `<button class="action-btn success" onclick="handleCheckIn(${booking.id})">
+                                        <i class="ph-fill ph-sign-in"></i> Check In
+                                    </button>` :
+                            !booking.check_out_time ?
+                                `<button class="action-btn danger" onclick="handleCheckOut(${booking.id})">
+                                        <i class="ph-fill ph-sign-out"></i> Check Out
+                                    </button>` :
+                                '<span style="color: var(--success);">✓ Completed</span>'
+                        }
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No bookings found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('bookings-tbody').innerHTML =
+                    '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading bookings</td></tr>';
+            }
+        }
+
+        function showAssignDeskModal() {
+            const select = document.querySelector('#assign-desk-form select[name="desk_number"]');
+            select.innerHTML = '<option value="">Select Desk</option>';
+            for (let i = 1; i <= 20; i++) {
+                select.innerHTML += `<option value="DESK-${i}">DESK-${i}</option>`;
+            }
+            document.getElementById('assign-desk-modal').classList.add('active');
+        }
+
+        async function handleAssignDesk(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/admin/coworking/assign-desk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Desk assigned successfully to ${result.member_name}`);
+                    closeModal('assign-desk-modal');
+                    form.reset();
+                    loadBookings();
+                } else {
+                    alert(result.error || 'Failed to assign desk');
+                }
+            } catch (error) {
+                console.error('Error assigning desk:', error);
+                alert('Error assigning desk');
+            }
+        }
+
+        async function handleCheckIn(bookingId) {
+            if (!confirm('Check in this member?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/check-in/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Member checked in successfully');
+                    loadBookings();
+                } else {
+                    alert(data.error || 'Check-in failed');
+                }
+            } catch (error) {
+                console.error('Error checking in:', error);
+                alert('Error during check-in');
+            }
+        }
+
+        async function handleCheckOut(bookingId) {
+            if (!confirm('Check out this member?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/check-out/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Member checked out successfully');
+                    loadBookings();
+                } else {
+                    alert(data.error || 'Check-out failed');
+                }
+            } catch (error) {
+                console.error('Error checking out:', error);
+                alert('Error during check-out');
             }
         }
 
@@ -1937,6 +2109,40 @@
                     <textarea name="description" rows="3" required></textarea>
                 </div>
                 <button type="submit" class="btn">Update Service</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Desk Modal -->
+    <div id="assign-desk-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Desk Manually</h2>
+                <button class="close-btn" onclick="closeModal('assign-desk-modal')">&times;</button>
+            </div>
+            <form id="assign-desk-form" onsubmit="handleAssignDesk(event)">
+                <div class="form-group">
+                    <label>Member Code *</label>
+                    <input type="text" name="member_code" required placeholder="e.g., KDIH-2025-0001">
+                </div>
+                <div class="form-group">
+                    <label>Desk Number *</label>
+                    <select name="desk_number" required>
+                        <option value="">Select Desk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Booking Date *</label>
+                    <input type="date" name="booking_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Booking Type *</label>
+                    <select name="booking_type" required>
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Assign Desk</button>
             </form>
         </div>
     </div>
