@@ -226,6 +226,30 @@
             color: var(--primary);
         }
 
+        /* Login Button Styling */
+        .nav-links a.cta,
+        .login-trigger.cta {
+            background: #10b981;
+            color: white !important;
+            padding: 0.625rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a.cta:hover,
+        .login-trigger.cta:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        }
+
+        .nav-links a.cta::after,
+        .login-trigger.cta::after {
+            display: none;
+        }
+
         /* --- Hero Section --- */
         .hero {
             position: relative;
