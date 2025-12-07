@@ -232,12 +232,17 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
                 if (response.ok) {
-                    window.location.href = '/member/dashboard.html';
+                    // Check if must change password
+                    if (result.must_change_password) {
+                        window.location.href = '/member/change-password.html';
+                    } else {
+                        window.location.href = '/member/dashboard.html';
+                    }
                 } else {
-                    errorMsg.textContent = data.error || 'Login failed. Please check your credentials.';
+                    errorMsg.textContent = result.error || 'Login failed. Please check your credentials.';
                     errorMsg.style.display = 'block';
                 }
             } catch (error) {

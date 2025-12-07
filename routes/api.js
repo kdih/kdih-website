@@ -2565,11 +2565,13 @@ router.post('/member/login', async (req, res) => {
                 id: member.id,
                 email: member.email,
                 full_name: member.full_name,
-                member_type: member.member_type
+                member_type: member.member_type,
+                must_change_password: member.must_change_password || 0
             };
 
             res.json({
                 message: 'Login successful',
+                must_change_password: member.must_change_password === 1,
                 member: {
                     id: member.id,
                     full_name: member.full_name,
@@ -2753,6 +2755,55 @@ router.post('/member/book-desk', requireMemberAuth, (req, res) => {
             booking_id: this.lastID
         });
     });
+});
+
+// Member Change Password
+router.put('/member/change-password', requireMemberAuth, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const memberId = req.session.member.id;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Current and new passwords are required' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    try {
+        // Get current member data
+        db.get('SELECT * FROM members WHERE id = ?', [memberId], async (err, member) => {
+            if (err || !member) {
+                return res.status(500).json({ error: 'Server error' });
+            }
+
+            // Verify current password
+            const bcrypt = require('bcrypt');
+            const match = await bcrypt.compare(currentPassword, member.password);
+
+            if (!match) {
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+
+            // Hash new password
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            // Update password and clear must_change_password flag
+            const sql = 'UPDATE members SET password = ?, must_change_password = 0 WHERE id = ?';
+            db.run(sql, [hashedPassword, memberId], (err) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Failed to update password' });
+                }
+
+                // Update session
+                req.session.member.must_change_password = 0;
+
+                res.json({ message: 'Password changed successfully' });
+            });
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
 // Get Member Profile
