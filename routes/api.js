@@ -2595,6 +2595,95 @@ router.post('/member/logout', (req, res) => {
     });
 });
 
+// Member Forgot Password
+router.post('/member/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    try {
+        // Check if member exists
+        db.get('SELECT * FROM members WHERE email = ?', [email], async (err, member) => {
+            if (err) {
+                return res.status(500).json({ error: 'Server error' });
+            }
+
+            // Always return success to prevent email enumeration
+            if (!member) {
+                return res.json({ message: 'If that email exists, a password reset link has been sent.' });
+            }
+
+            // Generate reset token
+            const crypto = require('crypto');
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const resetExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+            // Save token to database
+            db.run('UPDATE members SET reset_token = ?, reset_token_expiry = ? WHERE id = ?',
+                [resetToken, resetExpiry.toISOString(), member.id],
+                async (err) => {
+                    if (err) {
+                        return res.status(500).json({ error: 'Failed to generate reset token' });
+                    }
+
+                    // Send reset email
+                    const { sendEmail } = require('../utils/email');
+                    await sendEmail(email, 'memberPasswordReset', [member.full_name, resetToken]);
+
+                    res.json({ message: 'If that email exists, a password reset link has been sent.' });
+                }
+            );
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Member Reset Password
+router.post('/member/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    try {
+        // Find member with valid token
+        db.get('SELECT * FROM members WHERE reset_token = ? AND reset_token_expiry > datetime("now")',
+            [token],
+            async (err, member) => {
+                if (err || !member) {
+                    return res.status(400).json({ error: 'Invalid or expired reset token' });
+                }
+
+                // Hash new password
+                const bcrypt = require('bcrypt');
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+                // Update password and clear token
+                db.run('UPDATE members SET password = ?, reset_token = NULL, reset_token_expiry = NULL, must_change_password = 0 WHERE id = ?',
+                    [hashedPassword, member.id],
+                    (err) => {
+                        if (err) {
+                            return res.status(500).json({ error: 'Failed to reset password' });
+                        }
+
+                        res.json({ message: 'Password reset successfully' });
+                    }
+                );
+            }
+        );
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Check Member Session
 router.get('/member/check-session', (req, res) => {
     if (req.session.member) {

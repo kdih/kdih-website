@@ -292,7 +292,12 @@ const emailTemplates = {
                 </ul>
 
                 <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
-                <p>Best regards,<br>The KDIH Team</p>
+                <p style="margin-top: 30px; color: #64748b; font-size: 14px;">This link is valid for <strong>1 hour</strong>.</p>
+                <p style="color: #64748b; font-size: 14px;">If you didn't request this password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                    <p style="color: #94a3b8; font-size: 13px; margin: 0;">For security reasons, this link will expire after 1 hour. If you need a new link, visit the forgot password page again.</p>
+                </div>
+                <p style="margin-top: 20px;">Best regards,<br>The KDIH Team</p>
             </div>
         `
     }),
