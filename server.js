@@ -9,6 +9,7 @@ const compression = require('compression');
 const path = require('path');
 const apiRoutes = require('./routes/api');
 const logger = require('./utils/logger');
+const backup = require('./utils/backup');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -157,28 +158,29 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json(errorResponse);
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-    console.log(`Server is running on port ${PORT}`);
-});
+// Start server only if not in test mode
+let server;
+if (process.env.NODE_ENV !== 'test') {
+    server = app.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+        console.log(`Server is running on port ${PORT}`);
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    logger.info('SIGTERM signal received: closing HTTP server');
-    server.close(() => {
-        logger.info('HTTP server closed');
-        process.exit(0);
+        // Initialize backup scheduler
+        backup.scheduleBackups();
     });
-});
 
-process.on('SIGINT', () => {
-    logger.info('SIGINT signal received: closing HTTP server');
-    server.close(() => {
-        logger.info('HTTP server closed');
-        process.exit(0);
-    });
-});
+    // Graceful shutdown
+    const gracefulShutdown = () => {
+        logger.info('Shutting down gracefully...');
+        server.close(() => {
+            logger.info('Server closed');
+            process.exit(0);
+        });
+    };
+
+    process.on('SIGTERM', gracefulShutdown);
+    process.on('SIGINT', gracefulShutdown);
+}
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {

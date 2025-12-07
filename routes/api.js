@@ -3091,4 +3091,160 @@ router.get('/coworking/my-bookings/:member_code', (req, res) => {
     });
 });
 
+// ===== BACKUP ENDPOINTS =====
+
+const backup = require('../utils/backup');
+
+// Create manual backup
+router.post('/admin/backup/create', requireAuth, async (req, res) => {
+    try {
+        const result = await backup.createBackup();
+        res.json({
+            message: 'Backup created successfully',
+            backup: result
+        });
+    } catch (error) {
+        console.error('Backup creation error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// List all backups
+router.get('/admin/backup/list', requireAuth, async (req, res) => {
+    try {
+        const backups = await backup.listBackups();
+        const storage = await backup.getStorageInfo();
+        res.json({
+            message: 'success',
+            backups,
+            storage
+        });
+    } catch (error) {
+        console.error('List backups error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Restore from backup
+router.post('/admin/backup/restore', requireAuth, async (req, res) => {
+    try {
+        const { filename } = req.body;
+        if (!filename) {
+            return res.status(400).json({ error: 'Filename is required' });
+        }
+
+        const result = await backup.restoreBackup(filename);
+        res.json({
+            message: 'Restore completed successfully',
+            result
+        });
+    } catch (error) {
+        console.error('Restore error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete backup
+router.delete('/admin/backup/:filename', requireAuth, async (req, res) => {
+    try {
+        const { filename } = req.params;
+        await backup.deleteBackup(filename);
+        res.json({ message: 'Backup deleted successfully' });
+    } catch (error) {
+        console.error('Delete backup error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Download backup
+router.get('/admin/backup/download/:filename', requireAuth, async (req, res) => {
+    try {
+        const { filename } = req.params;
+        const path = require('path');
+        const backupPath = path.join(backup.BACKUP_DIR, filename);
+        const fs = require('fs');
+
+        if (!fs.existsSync(backupPath)) {
+            return res.status(404).json({ error: 'Backup not found' });
+        }
+
+        res.download(backupPath, filename);
+    } catch (error) {
+        console.error('Download backup error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== NEW ANALYTICS ENDPOINTS =====
+
+const analytics = require('../utils/analytics');
+
+// Get overview analytics
+router.get('/analytics/overview', requireAuth, async (req, res) => {
+    try {
+        const data = await analytics.getOverviewAnalytics();
+        res.json({ message: 'success', data });
+    } catch (error) {
+        console.error('Analytics overview error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get revenue analytics
+router.get('/analytics/revenue', requireAuth, async (req, res) => {
+    try {
+        const period = req.query.period || '30d';
+        const data = await analytics.getRevenueAnalytics(period);
+        res.json({ message: 'success', data, period });
+    } catch (error) {
+        console.error('Revenue analytics error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get conversion funnel
+router.get('/analytics/conversion-funnel', requireAuth, async (req, res) => {
+    try {
+        const data = await analytics.getConversionFunnel();
+        res.json({ message: 'success', data });
+    } catch (error) {
+        console.error('Conversion funnel error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get user growth analytics
+router.get('/analytics/user-growth', requireAuth, async (req, res) => {
+    try {
+        const period = req.query.period || '30d';
+        const data = await analytics.getUserGrowth(period);
+        res.json({ message: 'success', data, period });
+    } catch (error) {
+        console.error('User growth analytics error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get coworking analytics
+router.get('/analytics/coworking-stats', requireAuth, async (req, res) => {
+    try {
+        const data = await analytics.getCoworkingAnalytics();
+        res.json({ message: 'success', data });
+    } catch (error) {
+        console.error('Coworking analytics error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get course performance analytics
+router.get('/analytics/course-performance', requireAuth, async (req, res) => {
+    try {
+        const data = await analytics.getCoursePerformance();
+        res.json({ message: 'success', data });
+    } catch (error) {
+        console.error('Course performance error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
