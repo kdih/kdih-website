@@ -1691,14 +1691,29 @@ router.get('/admin/members/:id/dashboard', requireAuth, (req, res) => {
                     if (!err && lmsEnrollments) {
                         dashboardData.lms_enrollments = lmsEnrollments.map(enr => {
                             let expected_completion = null;
+                            let auto_progress = 0;
+
                             if (enr.duration_weeks && enr.enrollment_date && !enr.completion_date) {
                                 const enrollDate = new Date(enr.enrollment_date);
                                 expected_completion = new Date(enrollDate);
                                 expected_completion.setDate(expected_completion.getDate() + (enr.duration_weeks * 7));
+
+                                // Calculate automatic progress based on time elapsed
+                                const today = new Date();
+                                const totalDays = enr.duration_weeks * 7;
+                                const daysElapsed = Math.floor((today - enrollDate) / (1000 * 60 * 60 * 24));
+
+                                // Progress percentage (0-100), capped at 100%
+                                auto_progress = Math.min(100, Math.max(0, Math.round((daysElapsed / totalDays) * 100)));
+                            } else if (enr.completion_date) {
+                                // If completed, progress is 100%
+                                auto_progress = 100;
                             }
+
                             return {
                                 ...enr,
-                                expected_completion_date: expected_completion ? expected_completion.toISOString() : null
+                                expected_completion_date: expected_completion ? expected_completion.toISOString() : null,
+                                progress_percentage: auto_progress  // Override with auto-calculated progress
                             };
                         });
                     }
