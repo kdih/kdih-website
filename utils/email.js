@@ -281,7 +281,18 @@ const emailTemplates = {
                 <p>You have successfully booked <strong>${deskNumber}</strong> for ${date}.</p>
                 <p><strong>Booking ID:</strong> ${bookingId}</p>
                 <p>Please check in at the front desk when you arrive.</p>
-                <p>Happy working!<br>The KDIH Team</p>
+                </div>
+
+                <p><strong>What you can do in your member portal:</strong></p>
+                <ul>
+                    <li>View and access enrolled courses</li>
+                    <li>Book co-working desks and meeting rooms</li>
+                    <li>Manage your profile</li>
+                    <li>Track your progress</li>
+                </ul>
+
+                <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
+                <p>Best regards,<br>The KDIH Team</p>
             </div>
         `
     }),

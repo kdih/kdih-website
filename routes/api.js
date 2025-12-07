@@ -2859,8 +2859,8 @@ router.post('/admin/members/quick-add', requireAuth, async (req, res) => {
                 return res.status(500).json({ error: 'Member creation failed. Email might already exist.' });
             }
 
-            // Send welcome email
-            sendEmail(email, 'welcome', full_name).catch(err => {
+            // Send welcome email with credentials
+            sendEmail(email, 'memberAccountCreated', [full_name, email, tempPassword]).catch(err => {
                 logger.error('Failed to send welcome email:', err);
             });
 
