@@ -585,6 +585,44 @@ function initDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
+        // ===== GALLERY =====
+        db.run(`CREATE TABLE IF NOT EXISTS gallery (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            image_url TEXT NOT NULL,
+            category TEXT DEFAULT 'community',
+            sort_order INTEGER DEFAULT 0,
+            is_featured INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`, (err) => {
+            if (!err) {
+                // Seed gallery with existing images if empty
+                db.get("SELECT count(*) as count FROM gallery", (err, row) => {
+                    if (!err && row && row.count === 0) {
+                        const galleryItems = [
+                            { title: 'Executive Meeting Room', description: 'State-of-the-art facilities for team collaboration.', image_url: '/images/gallery/meeting-room.png', category: 'facilities', sort_order: 1 },
+                            { title: 'Community Lounge', description: 'A relaxing space to connect and unwind.', image_url: '/images/gallery/lounge.png', category: 'facilities', sort_order: 2 },
+                            { title: 'Co-working Space', description: 'Modern desks and ergonomic seating for productivity.', image_url: '/images/gallery/meeting-room.png', category: 'facilities', sort_order: 3 },
+                            { title: 'Coding Workshop', description: 'Hands-on training sessions for aspiring developers.', image_url: '/images/gallery/tech-workshop.png', category: 'events', sort_order: 4 },
+                            { title: 'Tech Networking Night', description: 'Connecting innovators, founders, and investors.', image_url: '/images/gallery/networking.png', category: 'events', sort_order: 5 },
+                            { title: 'Demo Day Presentation', description: 'Students showcasing their final projects.', image_url: '/images/gallery/presentation.png', category: 'events', sort_order: 6 },
+                            { title: 'Mentorship Session', description: 'One-on-one guidance from experienced mentors.', image_url: '/images/gallery/community-mentorship.png', category: 'community', sort_order: 7, is_featured: 1 },
+                            { title: 'Team Collaboration', description: 'Members working together on innovative projects.', image_url: '/images/gallery/tech-workshop.png', category: 'community', sort_order: 8 },
+                            { title: 'Study Group', description: 'Peer learning and knowledge sharing.', image_url: '/images/gallery/networking.png', category: 'community', sort_order: 9 }
+                        ];
+
+                        const insertGallery = db.prepare("INSERT INTO gallery (title, description, image_url, category, sort_order, is_featured) VALUES (?, ?, ?, ?, ?, ?)");
+                        galleryItems.forEach(g => insertGallery.run(g.title, g.description, g.image_url, g.category, g.sort_order, g.is_featured || 0));
+                        insertGallery.finalize();
+                        console.log('Seeded gallery data.');
+                    }
+                });
+            }
+        });
+
         // Seed Data (only if empty)
         db.get("SELECT count(*) as count FROM services", (err, row) => {
             if (row.count === 0) {

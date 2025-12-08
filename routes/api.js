@@ -801,6 +801,110 @@ router.post('/events/:id/register', (req, res) => {
     });
 });
 
+// ===== GALLERY ENDPOINTS =====
+
+// Get all gallery items (public)
+router.get('/gallery', (req, res) => {
+    const { category, featured } = req.query;
+
+    let sql = "SELECT * FROM gallery WHERE status = 'active'";
+    const params = [];
+
+    if (category && category !== 'all') {
+        sql += " AND category = ?";
+        params.push(category);
+    }
+
+    if (featured === 'true') {
+        sql += " AND is_featured = 1";
+    }
+
+    sql += " ORDER BY sort_order ASC, created_at DESC";
+
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', data: rows });
+    });
+});
+
+// Get single gallery item
+router.get('/gallery/:id', (req, res) => {
+    const galleryId = req.params.id;
+
+    db.get("SELECT * FROM gallery WHERE id = ?", [galleryId], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Gallery item not found' });
+        res.json({ message: 'success', data: row });
+    });
+});
+
+// Create gallery item (Admin only)
+router.post('/gallery', requireAuth, (req, res) => {
+    const { title, description, image_url, category, sort_order, is_featured } = req.body;
+
+    if (!title || !image_url) {
+        return res.status(400).json({ error: 'Title and image URL are required' });
+    }
+
+    const sql = `INSERT INTO gallery (title, description, image_url, category, sort_order, is_featured) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [title, description, image_url, category || 'community', sort_order || 0, is_featured ? 1 : 0], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'success', id: this.lastID });
+    });
+});
+
+// Update gallery item (Admin only)
+router.put('/gallery/:id', requireAuth, (req, res) => {
+    const galleryId = req.params.id;
+    const { title, description, image_url, category, sort_order, is_featured, status } = req.body;
+
+    const sql = `UPDATE gallery 
+                 SET title = ?, description = ?, image_url = ?, category = ?, 
+                     sort_order = ?, is_featured = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE id = ?`;
+
+    db.run(sql, [title, description, image_url, category, sort_order || 0, is_featured ? 1 : 0, status || 'active', galleryId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Gallery item not found' });
+        res.json({ message: 'success', changes: this.changes });
+    });
+});
+
+// Delete gallery item (Admin only)
+router.delete('/gallery/:id', requireAuth, (req, res) => {
+    const galleryId = req.params.id;
+
+    db.run("DELETE FROM gallery WHERE id = ?", [galleryId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Gallery item not found' });
+        res.json({ message: 'success', changes: this.changes });
+    });
+});
+
+// Reorder gallery items (Admin only)
+router.post('/gallery/reorder', requireAuth, (req, res) => {
+    const { items } = req.body; // Array of { id, sort_order }
+
+    if (!items || !Array.isArray(items)) {
+        return res.status(400).json({ error: 'Items array is required' });
+    }
+
+    const updatePromises = items.map(item => {
+        return new Promise((resolve, reject) => {
+            db.run("UPDATE gallery SET sort_order = ? WHERE id = ?", [item.sort_order, item.id], function (err) {
+                if (err) reject(err);
+                else resolve(this.changes);
+            });
+        });
+    });
+
+    Promise.all(updatePromises)
+        .then(results => res.json({ message: 'success', updated: results.length }))
+        .catch(err => res.status(500).json({ error: err.message }));
+});
+
 // ===== CERTIFICATES ENDPOINTS =====
 
 // Generate certificate
