@@ -459,7 +459,7 @@
                 <i class="ph-fill ph-database"></i>
                 <span>Backups</span>
             </div>
-            <div class="nav-item" onclick="switchTab('careers')">
+            <div class="nav-item" id="careers-nav" onclick="switchTab('careers')" style="display: none;">
                 <i class="ph-fill ph-briefcase"></i>
                 <span>Careers</span>
             </div>
@@ -1299,9 +1299,10 @@
                 document.getElementById('user-name').textContent = data.user.username;
                 document.getElementById('user-role').textContent = data.user.role === 'super_admin' ? 'Super Admin' : 'Admin';
 
-                // Show Admins tab only for super admins
+                // Show super-admin only sections
                 if (data.user.role === 'super_admin') {
                     document.getElementById('admins-nav').style.display = 'flex';
+                    document.getElementById('careers-nav').style.display = 'flex';
                 }
             } catch (error) {
                 window.location.href = '/admin/login.html';
