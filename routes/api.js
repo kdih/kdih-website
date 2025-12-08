@@ -3531,67 +3531,71 @@ router.put('/admin/careers/applications/:id', requireAuth, (req, res) => {
 // ===== JOB MANAGEMENT (Super Admin Only) =====
 
 // Create new job posting
-router.post('/admin/jobs', requireSuperAdmin, async (req, res) => {
-    try {
-        const {
-            title, department, employment_type, location, salary_info,
-            application_deadline, description, responsibilities, requirements, status
-        } = req.body;
+router.post('/admin/jobs', requireSuperAdmin, (req, res) => {
+    const {
+        title, department, employment_type, location, salary_info,
+        application_deadline, description, responsibilities, requirements, status
+    } = req.body;
 
-        // Validate required fields
-        if (!title || !employment_type) {
-            return res.status(400).json({ error: 'Title and employment type are required' });
+    // Validate required fields
+    if (!title || !employment_type) {
+        return res.status(400).json({ error: 'Title and employment type are required' });
+    }
+
+    const sql = `
+        INSERT INTO jobs (
+            title, department, employment_type, location, salary_info,
+            application_deadline, description, responsibilities, requirements,
+            status, created_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const params = [
+        title,
+        department || null,
+        employment_type,
+        location || 'Katsina, Nigeria',
+        salary_info || null,
+        application_deadline || null,
+        description || null,
+        JSON.stringify(responsibilities || []),
+        JSON.stringify(requirements || []),
+        status || 'draft',
+        req.session.user.id
+    ];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            logger.error('Error creating job:', err);
+            return res.status(500).json({ error: 'Failed to create job' });
         }
 
-        const db = await initializeDatabase();
-        const result = await db.run(`
-            INSERT INTO jobs (
-                title, department, employment_type, location, salary_info,
-                application_deadline, description, responsibilities, requirements,
-                status, created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
-            title,
-            department || null,
-            employment_type,
-            location || 'Katsina, Nigeria',
-            salary_info || null,
-            application_deadline || null,
-            description || null,
-            JSON.stringify(responsibilities || []),
-            JSON.stringify(requirements || []),
-            status || 'draft',
-            req.session.user.id
-        ]);
-
         logger.info(`Job created: ${title} by admin ID ${req.session.user.id}`);
-
         res.json({
             success: true,
             message: 'Job created successfully',
-            jobId: result.lastID
+            jobId: this.lastID
         });
-    } catch (error) {
-        logger.error('Error creating job:', error);
-        res.status(500).json({ error: 'Failed to create job' });
-    }
+    });
 });
 
 // Get all jobs (admin view - includes drafts)
-router.get('/admin/jobs', requireSuperAdmin, async (req, res) => {
-    try {
-        const db = await initializeDatabase();
-        const jobs = await db.all(`
-            SELECT 
-                j.*,
-                a.username as created_by_name,
-                COUNT(DISTINCT ja.id) as applications_count
-            FROM jobs j
-            LEFT JOIN admins a ON j.created_by = a.id
-            LEFT JOIN job_applications ja ON j.title = ja.position
-            GROUP BY j.id
-            ORDER BY j.created_at DESC
-        `);
+router.get('/admin/jobs', requireSuperAdmin, (req, res) => {
+    const sql = `
+        SELECT 
+            j.*,
+            u.username as created_by_name,
+            (SELECT COUNT(*) FROM job_applications ja WHERE ja.position = j.title) as applications_count
+        FROM jobs j
+        LEFT JOIN users u ON j.created_by = u.id
+        ORDER BY j.created_at DESC
+    `;
+
+    db.all(sql, [], (err, jobs) => {
+        if (err) {
+            logger.error('Error fetching jobs:', err);
+            return res.status(500).json({ error: 'Failed to fetch jobs' });
+        }
 
         // Parse JSON fields
         const processedJobs = jobs.map(job => ({
@@ -3601,17 +3605,18 @@ router.get('/admin/jobs', requireSuperAdmin, async (req, res) => {
         }));
 
         res.json(processedJobs);
-    } catch (error) {
-        logger.error('Error fetching jobs:', error);
-        res.status(500).json({ error: 'Failed to fetch jobs' });
-    }
+    });
 });
 
 // Get single job by ID
-router.get('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
-    try {
-        const db = await initializeDatabase();
-        const job = await db.get('SELECT * FROM jobs WHERE id = ?', [req.params.id]);
+router.get('/admin/jobs/:id', requireSuperAdmin, (req, res) => {
+    const sql = 'SELECT * FROM jobs WHERE id = ?';
+
+    db.get(sql, [req.params.id], (err, job) => {
+        if (err) {
+            logger.error('Error fetching job:', err);
+            return res.status(500).json({ error: 'Failed to fetch job' });
+        }
 
         if (!job) {
             return res.status(404).json({ error: 'Job not found' });
@@ -3621,29 +3626,28 @@ router.get('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
         job.requirements = JSON.parse(job.requirements || '[]');
 
         res.json(job);
-    } catch (error) {
-        logger.error('Error fetching job:', error);
-        res.status(500).json({ error: 'Failed to fetch job' });
-    }
+    });
 });
 
 // Update job posting
-router.put('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
-    try {
-        const {
-            title, department, employment_type, location, salary_info,
-            application_deadline, description, responsibilities, requirements, status
-        } = req.body;
+router.put('/admin/jobs/:id', requireSuperAdmin, (req, res) => {
+    const {
+        title, department, employment_type, location, salary_info,
+        application_deadline, description, responsibilities, requirements, status
+    } = req.body;
 
-        const db = await initializeDatabase();
+    // First check if job exists
+    db.get('SELECT id FROM jobs WHERE id = ?', [req.params.id], (err, existing) => {
+        if (err) {
+            logger.error('Error checking job:', err);
+            return res.status(500).json({ error: 'Failed to update job' });
+        }
 
-        // Check if job exists
-        const existing = await db.get('SELECT id FROM jobs WHERE id = ?', [req.params.id]);
         if (!existing) {
             return res.status(404).json({ error: 'Job not found' });
         }
 
-        await db.run(`
+        const sql = `
             UPDATE jobs SET
                 title = ?,
                 department = ?,
@@ -3657,7 +3661,9 @@ router.put('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
                 status = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
-        `, [
+        `;
+
+        const params = [
             title,
             department,
             employment_type,
@@ -3669,58 +3675,68 @@ router.put('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
             JSON.stringify(requirements || []),
             status,
             req.params.id
-        ]);
+        ];
 
-        logger.info(`Job updated: ID ${req.params.id} by admin ID ${req.session.user.id}`);
+        db.run(sql, params, function (err) {
+            if (err) {
+                logger.error('Error updating job:', err);
+                return res.status(500).json({ error: 'Failed to update job' });
+            }
 
-        res.json({
-            success: true,
-            message: 'Job updated successfully'
+            logger.info(`Job updated: ID ${req.params.id} by admin ID ${req.session.user.id}`);
+            res.json({
+                success: true,
+                message: 'Job updated successfully'
+            });
         });
-    } catch (error) {
-        logger.error('Error updating job:', error);
-        res.status(500).json({ error: 'Failed to update job' });
-    }
+    });
 });
 
 // Delete job posting
-router.delete('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
-    try {
-        const db = await initializeDatabase();
+router.delete('/admin/jobs/:id', requireSuperAdmin, (req, res) => {
+    // First check if job exists
+    db.get('SELECT id, title FROM jobs WHERE id = ?', [req.params.id], (err, existing) => {
+        if (err) {
+            logger.error('Error checking job:', err);
+            return res.status(500).json({ error: 'Failed to delete job' });
+        }
 
-        // Check if job exists
-        const existing = await db.get('SELECT id, title FROM jobs WHERE id = ?', [req.params.id]);
         if (!existing) {
             return res.status(404).json({ error: 'Job not found' });
         }
 
-        await db.run('DELETE FROM jobs WHERE id = ?', [req.params.id]);
+        db.run('DELETE FROM jobs WHERE id = ?', [req.params.id], function (err) {
+            if (err) {
+                logger.error('Error deleting job:', err);
+                return res.status(500).json({ error: 'Failed to delete job' });
+            }
 
-        logger.info(`Job deleted: ${existing.title} (ID ${req.params.id}) by admin ID ${req.session.user.id}`);
-
-        res.json({
-            success: true,
-            message: 'Job deleted successfully'
+            logger.info(`Job deleted: ${existing.title} (ID ${req.params.id}) by admin ID ${req.session.user.id}`);
+            res.json({
+                success: true,
+                message: 'Job deleted successfully'
+            });
         });
-    } catch (error) {
-        logger.error('Error deleting job:', error);
-        res.status(500).json({ error: 'Failed to delete job' });
-    }
+    });
 });
 
 // Public endpoint - Get active jobs for careers page
-router.get('/jobs/active', async (req, res) => {
-    try {
-        const db = await initializeDatabase();
-        const jobs = await db.all(`
-            SELECT 
-                id, title, department, employment_type, location,
-                salary_info, application_deadline, description,
-                responsibilities, requirements, created_at
-            FROM jobs
-            WHERE status = 'active'
-            ORDER BY created_at DESC
-        `);
+router.get('/jobs/active', (req, res) => {
+    const sql = `
+        SELECT 
+            id, title, department, employment_type, location,
+            salary_info, application_deadline, description,
+            responsibilities, requirements, created_at
+        FROM jobs
+        WHERE status = 'active'
+        ORDER BY created_at DESC
+    `;
+
+    db.all(sql, [], (err, jobs) => {
+        if (err) {
+            logger.error('Error fetching active jobs:', err);
+            return res.status(500).json({ error: 'Failed to fetch jobs' });
+        }
 
         // Parse JSON fields
         const processedJobs = jobs.map(job => ({
@@ -3730,10 +3746,8 @@ router.get('/jobs/active', async (req, res) => {
         }));
 
         res.json(processedJobs);
-    } catch (error) {
-        logger.error('Error fetching active jobs:', error);
-        res.status(500).json({ error: 'Failed to fetch jobs' });
-    }
+    });
 });
 
 module.exports = router;
+
