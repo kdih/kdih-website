@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database');
 const { sendEmail } = require('../utils/email');
+const { upload } = require('../utils/upload');
 
 // Middleware for authentication
 const requireAuth = (req, res, next) => {
