@@ -10,6 +10,7 @@ const path = require('path');
 const apiRoutes = require('./routes/api');
 const logger = require('./utils/logger');
 const backup = require('./utils/backup');
+const sanitizer = require('./utils/sanitizer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -76,6 +77,10 @@ app.use(bodyParser.json({
     }
 }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// XSS Sanitization middleware - sanitize all incoming data
+app.use(sanitizer.sanitizeBody);
+app.use(sanitizer.sanitizeQuery);
 
 // Session configuration
 app.use(session({
