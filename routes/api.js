@@ -3528,4 +3528,212 @@ router.put('/admin/careers/applications/:id', requireAuth, (req, res) => {
     });
 });
 
+// ===== JOB MANAGEMENT (Super Admin Only) =====
+
+// Create new job posting
+router.post('/admin/jobs', requireSuperAdmin, async (req, res) => {
+    try {
+        const {
+            title, department, employment_type, location, salary_info,
+            application_deadline, description, responsibilities, requirements, status
+        } = req.body;
+
+        // Validate required fields
+        if (!title || !employment_type) {
+            return res.status(400).json({ error: 'Title and employment type are required' });
+        }
+
+        const db = await initializeDatabase();
+        const result = await db.run(`
+            INSERT INTO jobs (
+                title, department, employment_type, location, salary_info,
+                application_deadline, description, responsibilities, requirements,
+                status, created_by
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            title,
+            department || null,
+            employment_type,
+            location || 'Katsina, Nigeria',
+            salary_info || null,
+            application_deadline || null,
+            description || null,
+            JSON.stringify(responsibilities || []),
+            JSON.stringify(requirements || []),
+            status || 'draft',
+            req.session.user.id
+        ]);
+
+        logger.info(`Job created: ${title} by admin ID ${req.session.user.id}`);
+
+        res.json({
+            success: true,
+            message: 'Job created successfully',
+            jobId: result.lastID
+        });
+    } catch (error) {
+        logger.error('Error creating job:', error);
+        res.status(500).json({ error: 'Failed to create job' });
+    }
+});
+
+// Get all jobs (admin view - includes drafts)
+router.get('/admin/jobs', requireSuperAdmin, async (req, res) => {
+    try {
+        const db = await initializeDatabase();
+        const jobs = await db.all(`
+            SELECT 
+                j.*,
+                a.username as created_by_name,
+                COUNT(DISTINCT ja.id) as applications_count
+            FROM jobs j
+            LEFT JOIN admins a ON j.created_by = a.id
+            LEFT JOIN job_applications ja ON j.title = ja.position
+            GROUP BY j.id
+            ORDER BY j.created_at DESC
+        `);
+
+        // Parse JSON fields
+        const processedJobs = jobs.map(job => ({
+            ...job,
+            responsibilities: JSON.parse(job.responsibilities || '[]'),
+            requirements: JSON.parse(job.requirements || '[]')
+        }));
+
+        res.json(processedJobs);
+    } catch (error) {
+        logger.error('Error fetching jobs:', error);
+        res.status(500).json({ error: 'Failed to fetch jobs' });
+    }
+});
+
+// Get single job by ID
+router.get('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
+    try {
+        const db = await initializeDatabase();
+        const job = await db.get('SELECT * FROM jobs WHERE id = ?', [req.params.id]);
+
+        if (!job) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        job.responsibilities = JSON.parse(job.responsibilities || '[]');
+        job.requirements = JSON.parse(job.requirements || '[]');
+
+        res.json(job);
+    } catch (error) {
+        logger.error('Error fetching job:', error);
+        res.status(500).json({ error: 'Failed to fetch job' });
+    }
+});
+
+// Update job posting
+router.put('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
+    try {
+        const {
+            title, department, employment_type, location, salary_info,
+            application_deadline, description, responsibilities, requirements, status
+        } = req.body;
+
+        const db = await initializeDatabase();
+
+        // Check if job exists
+        const existing = await db.get('SELECT id FROM jobs WHERE id = ?', [req.params.id]);
+        if (!existing) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        await db.run(`
+            UPDATE jobs SET
+                title = ?,
+                department = ?,
+                employment_type = ?,
+                location = ?,
+                salary_info = ?,
+                application_deadline = ?,
+                description = ?,
+                responsibilities = ?,
+                requirements = ?,
+                status = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `, [
+            title,
+            department,
+            employment_type,
+            location,
+            salary_info,
+            application_deadline,
+            description,
+            JSON.stringify(responsibilities || []),
+            JSON.stringify(requirements || []),
+            status,
+            req.params.id
+        ]);
+
+        logger.info(`Job updated: ID ${req.params.id} by admin ID ${req.session.user.id}`);
+
+        res.json({
+            success: true,
+            message: 'Job updated successfully'
+        });
+    } catch (error) {
+        logger.error('Error updating job:', error);
+        res.status(500).json({ error: 'Failed to update job' });
+    }
+});
+
+// Delete job posting
+router.delete('/admin/jobs/:id', requireSuperAdmin, async (req, res) => {
+    try {
+        const db = await initializeDatabase();
+
+        // Check if job exists
+        const existing = await db.get('SELECT id, title FROM jobs WHERE id = ?', [req.params.id]);
+        if (!existing) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        await db.run('DELETE FROM jobs WHERE id = ?', [req.params.id]);
+
+        logger.info(`Job deleted: ${existing.title} (ID ${req.params.id}) by admin ID ${req.session.user.id}`);
+
+        res.json({
+            success: true,
+            message: 'Job deleted successfully'
+        });
+    } catch (error) {
+        logger.error('Error deleting job:', error);
+        res.status(500).json({ error: 'Failed to delete job' });
+    }
+});
+
+// Public endpoint - Get active jobs for careers page
+router.get('/jobs/active', async (req, res) => {
+    try {
+        const db = await initializeDatabase();
+        const jobs = await db.all(`
+            SELECT 
+                id, title, department, employment_type, location,
+                salary_info, application_deadline, description,
+                responsibilities, requirements, created_at
+            FROM jobs
+            WHERE status = 'active'
+            ORDER BY created_at DESC
+        `);
+
+        // Parse JSON fields
+        const processedJobs = jobs.map(job => ({
+            ...job,
+            responsibilities: JSON.parse(job.responsibilities || '[]'),
+            requirements: JSON.parse(job.requirements || '[]')
+        }));
+
+        res.json(processedJobs);
+    } catch (error) {
+        logger.error('Error fetching active jobs:', error);
+        res.status(500).json({ error: 'Failed to fetch jobs' });
+    }
+});
+
 module.exports = router;

@@ -359,6 +359,26 @@ function initDatabase() {
             notes TEXT
         )`);
 
+        // ===== JOBS (for dynamic job postings) =====
+
+        db.run(`CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            department TEXT,
+            employment_type TEXT NOT NULL,
+            location TEXT DEFAULT 'Katsina, Nigeria',
+            salary_info TEXT,
+            application_deadline DATE,
+            description TEXT,
+            responsibilities TEXT,
+            requirements TEXT,
+            status TEXT DEFAULT 'draft',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_by INTEGER,
+            FOREIGN KEY (created_by) REFERENCES admins(id)
+        )`);
+
         // ===== EVENTS & WORKSHOPS =====
 
         db.run(`CREATE TABLE IF NOT EXISTS events (
