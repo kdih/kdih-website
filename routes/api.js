@@ -3402,4 +3402,129 @@ router.get('/analytics/course-performance', requireAuth, async (req, res) => {
     }
 });
 
+// ===== CAREERS / JOB APPLICATIONS =====
+
+// Submit job application
+router.post('/careers/apply', upload.fields([
+    { name: 'cv', maxCount: 1 },
+    { name: 'portfolio', maxCount: 1 }
+]), (req, res) => {
+    const { position, full_name, email, phone, location, experience, cover_letter } = req.body;
+
+    // Validation
+    if (!position || !full_name || !email || !phone || !cover_letter) {
+        return res.status(400).json({ error: 'Required fields missing' });
+    }
+
+    if (!req.files || !req.files.cv) {
+        return res.status(400).json({ error: 'CV file is required' });
+    }
+
+    const cvPath = req.files.cv[0].path;
+    const portfolioPath = req.files.portfolio ? req.files.portfolio[0].path : null;
+
+    const sql = `INSERT INTO job_applications 
+        (position, full_name, email, phone, location, experience, cover_letter, cv_path, portfolio_path) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [position, full_name, email, phone, location, experience, cover_letter, cvPath, portfolioPath], function (err) {
+        if (err) {
+            console.error('Error saving job application:', err);
+            return res.status(500).json({ error: 'Failed to submit application' });
+        }
+
+        // Send email notification to admin
+        sendEmail(
+            'info@kdih.org',
+            'New Job Application Received',
+            `
+                <h2>New Job Application</h2>
+                <p><strong>Position:</strong> ${position}</p>
+                <p><strong>Applicant:</strong> ${full_name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phone}</p>
+                <p><strong>Location:</strong> ${location || 'Not provided'}</p>
+                <p><strong>Experience:</strong> ${experience || 'Not provided'} years</p>
+                <p><strong>Cover Letter:</strong></p>
+                <p>${cover_letter}</p>
+                <p><strong>Application ID:</strong> ${this.lastID}</p>
+                <p>Review application in the admin dashboard.</p>
+            `
+        ).catch(err => console.error('Failed to send notification email:', err));
+
+        // Send confirmation to applicant
+        sendEmail(
+            email,
+            'Application Received - KDIH',
+            `
+                <h2>Thank You for Applying!</h2>
+                <p>Dear ${full_name},</p>
+                <p>We've received your application for the <strong>${position}</strong> position at Katsina Digital Innovation Hub.</p>
+                <p>Our team will review your application and get back to you soon.</p>
+                <p><strong>What's Next?</strong></p>
+                <ul>
+                    <li>Our HR team will review your application</li>
+                    <li>Shortlisted candidates will be contacted for interviews</li>
+                    <li>Expect to hear from us within 2 weeks</li>
+                </ul>
+                <p>If you have any questions, feel free to contact us at info@kdih.org</p>
+                <p>Best regards,<br>The KDIH Team</p>
+            `
+        ).catch(err => console.error('Failed to send confirmation email:', err));
+
+        res.json({
+            message: 'Application submitted successfully',
+            applicationId: this.lastID
+        });
+    });
+});
+
+// Get all job applications (Admin)
+router.get('/admin/careers/applications', requireAuth, (req, res) => {
+    const { status, position } = req.query;
+    let sql = 'SELECT * FROM job_applications WHERE 1=1';
+    const params = [];
+
+    if (status) {
+        sql += ' AND status = ?';
+        params.push(status);
+    }
+
+    if (position) {
+        sql += ' AND position LIKE ?';
+        params.push(`%${position}%`);
+    }
+
+    sql += ' ORDER BY created_at DESC';
+
+    db.all(sql, params, (err, applications) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'success', data: applications });
+    });
+});
+
+// Update application status (Admin)
+router.put('/admin/careers/applications/:id', requireAuth, (req, res) => {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    const sql = `UPDATE job_applications 
+        SET status = ?, notes = ?, reviewed_at = datetime('now'), reviewed_by = ? 
+        WHERE id = ?`;
+
+    db.run(sql, [status, notes, req.session.user.id, id], function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+
+        res.json({ message: 'Application updated successfully' });
+    });
+});
+
 module.exports = router;

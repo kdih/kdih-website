@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">67.12% </span>
+                <span class="strong">69.44% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>49/73</span>
+                <span class='fraction'>50/72</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">35.71% </span>
+                <span class="strong">41.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/14</span>
+                <span class='fraction'>5/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">67.12% </span>
+                <span class="strong">69.44% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>49/73</span>
+                <span class='fraction'>50/72</span>
             </div>
         
             
@@ -258,8 +258,8 @@
 <a name='L193'></a><a href='#L193'>193</a>
 <a name='L194'></a><a href='#L194'>194</a>
 <a name='L195'></a><a href='#L195'>195</a>
-<a name='L196'></a><a href='#L196'>196</a>
-<a name='L197'></a><a href='#L197'>197</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">7x</span>
+<a name='L196'></a><a href='#L196'>196</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-yes">7x</span>
@@ -426,11 +426,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -442,6 +437,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -466,6 +464,7 @@ const compression = require('compression');
 const path = require('path');
 const apiRoutes = require('./routes/api');
 const logger = require('./utils/logger');
+const backup = require('./utils/backup');
 &nbsp;
 const app = express();
 const PORT = process.env.PORT || <span class="branch-1 cbranch-no" title="branch not covered" >3000;</span>
@@ -620,24 +619,22 @@ let server;
 <span class="cstat-no" title="statement not covered" >    server = app.listen(PORT, <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        logger.info(`Server is running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);</span>
 <span class="cstat-no" title="statement not covered" >        console.log(`Server is running on port ${PORT}`);</span>
+&nbsp;
+        // Initialize backup scheduler
+<span class="cstat-no" title="statement not covered" >        backup.scheduleBackups();</span>
     });
 &nbsp;
     // Graceful shutdown
-<span class="cstat-no" title="statement not covered" >    process.on('SIGTERM', <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        logger.info('SIGTERM signal received: closing HTTP server');</span>
+    const gracefulShutdown = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        logger.info('Shutting down gracefully...');</span>
 <span class="cstat-no" title="statement not covered" >        server.close(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            logger.info('HTTP server closed');</span>
+<span class="cstat-no" title="statement not covered" >            logger.info('Server closed');</span>
 <span class="cstat-no" title="statement not covered" >            process.exit(0);</span>
         });
-    });
+    };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    process.on('SIGINT', <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        logger.info('SIGINT signal received: closing HTTP server');</span>
-<span class="cstat-no" title="statement not covered" >        server.close(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            logger.info('HTTP server closed');</span>
-<span class="cstat-no" title="statement not covered" >            process.exit(0);</span>
-        });
-    });
+<span class="cstat-no" title="statement not covered" >    process.on('SIGTERM', gracefulShutdown);</span>
+<span class="cstat-no" title="statement not covered" >    process.on('SIGINT', gracefulShutdown);</span>
 }
 &nbsp;
 // Handle uncaught exceptions
@@ -658,7 +655,7 @@ module.exports = app;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-07T13:27:26.375Z
+                at 2025-12-07T19:46:28.428Z
             </div>
         <script src="../prettify.js"></script>
         <script>

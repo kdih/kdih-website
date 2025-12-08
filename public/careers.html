@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers at KDIH | Join Our Team</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Join the Katsina Digital Innovation Hub team! We're hiring talented individuals for tech, operations, and training positions.">
+    <meta name="keywords" content="KDIH jobs, tech jobs Katsina, digital innovation careers, Nigeria tech jobs">
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --accent-glow: #3b82f6;
+            --secondary: #06b6d4;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 6rem 0 4rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            color: white;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Jobs Grid */
+        .jobs-section {
+            padding: 4rem 0;
+        }
+
+        .section-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .section-intro h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .jobs-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .job-title h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            background: var(--bg-light);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        .meta-badge i {
+            font-size: 1rem;
+        }
+
+        .job-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .job-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+
+        .job-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .job-section li {
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .job-section li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .apply-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .apply-btn:hover {
+            background: var(--accent-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Application Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 0.875rem 1.5rem;
+            background: var(--bg-light);
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--accent);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .file-input-label input {
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--accent-glow);
+        }
+
+        .submit-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--primary);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .job-header {
+                flex-direction: column;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="container">
+            <a href="/" class="back-btn">
+                <i class="ph ph-arrow-left"></i>
+                Back to Home
+            </a>
+            <h1>Join Our Team</h1>
+            <p>Be part of Northern Nigeria's leading digital innovation hub. Help us empower the next generation of tech
+                innovators and entrepreneurs.</p>
+        </div>
+    </div>
+
+    <!-- Jobs Section -->
+    <div class="jobs-section">
+        <div class="container">
+            <div class="section-intro">
+                <h2>Open Positions</h2>
+                <p>We're looking for passionate, talented individuals to join our growing team. Find your perfect role
+                    below!</p>
+            </div>
+
+            <div class="jobs-grid">
+                <!-- Job 1: Hub Manager -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>Hub Manager / Operations Lead</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>What You'll Do:</h4>
+                        <ul>
+                            <li>Lead and coordinate all hub operations</li>
+                            <li>Supervise teams and ensure smooth service delivery</li>
+                            <li>Oversee training, coworking, and startup programs</li>
+                            <li>Manage partnerships and stakeholder engagement</li>
+                            <li>Implement processes, policies, and growth strategies</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>3+ years in operations/tech/education/programs</li>
+                            <li>Leadership ability and strong communication</li>
+                            <li>Problem-solving mindset and team motivation skills</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn"
+                        onclick="openApplyModal('Hub Manager / Operations Lead'); return false;">
+                        Apply Now <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Job 2: Admin & Finance Officer -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>Admin & Finance Officer</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>What You'll Do:</h4>
+                        <ul>
+                            <li>Maintain financial records & receipts</li>
+                            <li>Manage registrations and enrollment data</li>
+                            <li>Prepare weekly admin and finance reports</li>
+                            <li>Support procurement and documentation</li>
+                            <li>Maintain digital and physical filing systems</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>HND/BSc in Accounting, Business Admin, Economics</li>
+                            <li>Strong Excel and documentation skills</li>
+                            <li>Accuracy and honesty are a must</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn" onclick="openApplyModal('Admin & Finance Officer'); return false;">
+                        Apply Now <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Job 3: ICT Support Officer -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>ICT / Technical Support Officer</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Responsibilities:</h4>
+                        <ul>
+                            <li>Manage computers, Wi-Fi, printers, and network</li>
+                            <li>Support technical needs during training sessions</li>
+                            <li>Handle device setup for events</li>
+                            <li>Maintain system backups and basic cybersecurity</li>
+                            <li>Provide on-site troubleshooting</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>OND/HND/BSc in ICT, Computer Science, Engineering</li>
+                            <li>Experience in IT support or lab setup</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn"
+                        onclick="openApplyModal('ICT / Technical Support Officer'); return false;">
+                        Apply Now <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Job 4: Programs & Training Coordinator -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>Programs & Training Coordinator</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Your Tasks:</h4>
+                        <ul>
+                            <li>Plan and coordinate all training & workshops</li>
+                            <li>Communicate with trainers, mentors & participants</li>
+                            <li>Manage attendance, schedules, and logistics</li>
+                            <li>Oversee incubation-related activities</li>
+                            <li>Support certificates, reporting & curriculum planning</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>You Should Have:</h4>
+                        <ul>
+                            <li>Experience coordinating programs or trainings</li>
+                            <li>Excellent communication & organization skills</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn"
+                        onclick="openApplyModal('Programs & Training Coordinator'); return false;">
+                        Apply Now <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Job 5: Front Desk Officer -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>Front Desk / Customer & Member Services Officer</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>You'll Handle:</h4>
+                        <ul>
+                            <li>Visitor reception & inquiries</li>
+                            <li>Coworking bookings and class registrations</li>
+                            <li>Phone calls, emails, and customer support</li>
+                            <li>Front desk organization and admin tasks</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>Good communication skills</li>
+                            <li>Customer-friendly attitude</li>
+                            <li>Basic computer skills</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn"
+                        onclick="openApplyModal('Front Desk / Customer & Member Services Officer'); return false;">
+                        Apply Now <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Job 6: Trainers & Consultants -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>Part-Time Trainers & Consultants</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Part-time / Contract</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Rolling Application</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Per Session</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Areas We're Recruiting For:</h4>
+                        <ul>
+                            <li>Data Analytics</li>
+                            <li>Cybersecurity</li>
+                            <li>Web Development</li>
+                            <li>UI/UX Design</li>
+                            <li>Digital Marketing</li>
+                            <li>Python Programming</li>
+                            <li>ICT Consulting</li>
+                            <li>Business/Entrepreneurship</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>You Should Have:</h4>
+                        <ul>
+                            <li>Proven skills and training experience</li>
+                            <li>Ability to deliver hands-on practical sessions</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn"
+                        onclick="openApplyModal('Part-Time Trainer / Consultant'); return false;">
+                        Apply with CV + Portfolio <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Job 7: Facility Assistant -->
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>Facility & Operations Assistant</h3>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Key Tasks:</h4>
+                        <ul>
+                            <li>Maintain cleanliness and order</li>
+                            <li>Support event setup and logistics</li>
+                            <li>Assist with power (generator/inverter)</li>
+                            <li>Manage utilities and supplies</li>
+                        </ul>
+                    </div>
+
+                    <div class="job-section">
+                        <h4>Requirements:</h4>
+                        <ul>
+                            <li>Good work ethic</li>
+                            <li>Basic technical understanding is a plus</li>
+                        </ul>
+                    </div>
+
+                    <a href="#" class="apply-btn"
+                        onclick="openApplyModal('Facility & Operations Assistant'); return false;">
+                        Apply Now <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+        <div class="container">
+            <h2>Questions About These Positions?</h2>
+            <p>We're here to help. Reach out to us for more information.</p>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="ph ph-envelope"></i>
+                    info@kdih.org
+                </div>
+                <div class="contact-item">
+                    <i class="ph ph-envelope"></i>
+                    katsinadigitalhub@gmail.com
+                </div>
+                <div class="contact-item">
+                    <i class="ph ph-phone"></i>
+                    +234 701 111 4441
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Modal -->
+    <div class="modal" id="applyModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeApplyModal()">
+                <i class="ph ph-x"></i>
+            </button>
+            <h2 id="modalTitle">Apply for Position</h2>
+            <p style="color: var(--text-light); margin-bottom: 2rem;">Fill out the form below to submit your
+                application.</p>
+
+            <form id="applicationForm">
+                <input type="hidden" id="positionApplying" name="position">
+
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" name="full_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Current Location *</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">Years of Relevant Experience</label>
+                    <input type="number" id="experience" name="experience" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="coverLetter">Why do you want to join KDIH? *</label>
+                    <textarea id="coverLetter" name="cover_letter" required
+                        placeholder="Tell us about yourself and why you're a great fit for this role..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>CV/Resume (PDF or DOC) *</label>
+                    <div class="file-input-wrapper">
+                        <label class="file-input-label">
+                            <i class="ph ph-upload-simple"></i>
+                            <span id="cvFileName">Click to upload CV</span>
+                            <input type="file" id="cvFile" name="cv" accept=".pdf,.doc,.docx" required
+                                onchange="updateFileName(this, 'cvFileName')">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Portfolio/Additional Documents (Optional)</label>
+                    <div class="file-input-wrapper">
+                        <label class="file-input-label">
+                            <i class="ph ph-upload-simple"></i>
+                            <span id="portfolioFileName">Click to upload (optional)</span>
+                            <input type="file" id="portfolioFile" name="portfolio" accept=".pdf,.doc,.docx"
+                                onchange="updateFileName(this, 'portfolioFileName')">
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openApplyModal(position) {
+            document.getElementById('applyModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = `Apply for ${position}`;
+            document.getElementById('positionApplying').value = position;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeApplyModal() {
+            document.getElementById('applyModal').classList.remove('active');
+            document.getElementById('applicationForm').reset();
+            document.getElementById('cvFileName').textContent = 'Click to upload CV';
+            document.getElementById('portfolioFileName').textContent = 'Click to upload (optional)';
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateFileName(input, spanId) {
+            const span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = input.files[0].name;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('applicationForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch('/api/careers/apply', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Application submitted successfully! We\'ll review your application and get back to you soon.');
+                    closeApplyModal();
+                } else {
+                    alert('❌ ' + (result.error || 'Failed to submit application. Please try again.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ An error occurred. Please try again or email your application directly to info@kdih.org');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('applyModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeApplyModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

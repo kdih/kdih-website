@@ -106,8 +106,6 @@ function initDatabase() {
                         const hashedPassword = await bcrypt.hash('admin123', 10);
                         db.run("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
                             ['admin', hashedPassword, 'admin@kdih.org', 'admin']);
-                        db.run("INSERT INTO users (username, password, email, role, full_name) VALUES (?, ?, ?, ?, ?)",
-                            ['admin', hashedPassword, 'admin@kdih.org', 'admin', 'Admin User']);
                         console.log('Seeded admin user with hashed password.');
                     }
                 });
@@ -339,6 +337,26 @@ function initDatabase() {
             verification_code TEXT UNIQUE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (course_id) REFERENCES courses(id)
+        )`);
+
+        // ===== JOB APPLICATIONS =====
+
+        db.run(`CREATE TABLE IF NOT EXISTS job_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            position TEXT NOT NULL,
+            full_name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            location TEXT,
+            experience INTEGER,
+            cover_letter TEXT,
+            cv_path TEXT,
+            portfolio_path TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            reviewed_at DATETIME,
+            reviewed_by INTEGER,
+            notes TEXT
         )`);
 
         // ===== EVENTS & WORKSHOPS =====
