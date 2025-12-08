@@ -1167,12 +1167,45 @@
                 <div class="table-container">
                     <div class="table-header">
                         <h2>Job Applications</h2>
+                        <div style="display: flex; gap: 1rem;">
+                            <select id="appPositionFilter" onchange="filterApplications()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">All Positions</option>
+                            </select>
+                            <select id="appStatusFilter" onchange="filterApplications()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="reviewed">Reviewed</option>
+                                <option value="shortlisted">Shortlisted</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
                     </div>
-                    <p style="color: #64748b; padding: 2rem; text-align: center;">
-                        Application management interface coming soon...
-                    </p>
+                    <table id="applicationsTable">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Position</th>
+                                <th>Email</th>
+                                <th>Experience</th>
+                                <th>Status</th>
+                                <th>Applied</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">
+                                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                                    <p>Loading applications...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
 
         </div>
     </div>
@@ -1392,7 +1425,91 @@
         </div>
     </div>
 
+    <!-- Application Details Modal -->
+    <div id="applicationModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Application Details</h2>
+                <button class="close-btn" onclick="closeApplicationModal()">&times;</button>
+            </div>
+            <div id="applicationDetails">
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Applicant</label>
+                            <p id="appDetailName" style="font-weight: 600; margin-top: 0.25rem;">-</p>
+                        </div>
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Position</label>
+                            <p id="appDetailPosition" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Email</label>
+                            <p id="appDetailEmail" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Phone</label>
+                            <p id="appDetailPhone" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Location</label>
+                            <p id="appDetailLocation" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Experience</label>
+                            <p id="appDetailExperience" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="color: #64748b; font-size: 0.85rem;">Cover Letter</label>
+                        <p id="appDetailCoverLetter"
+                            style="margin-top: 0.25rem; line-height: 1.6; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                            -</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">CV Document</label>
+                            <p id="appDetailCV" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                        <div>
+                            <label style="color: #64748b; font-size: 0.85rem;">Applied On</label>
+                            <p id="appDetailDate" style="margin-top: 0.25rem;">-</p>
+                        </div>
+                    </div>
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Update Status</label>
+                            <select id="appDetailStatus" style="width: 100%;">
+                                <option value="pending">Pending</option>
+                                <option value="reviewed">Reviewed</option>
+                                <option value="shortlisted">Shortlisted</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Internal Notes</label>
+                            <textarea id="appDetailNotes" rows="2"
+                                placeholder="Add notes about this applicant..."></textarea>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" class="btn-secondary" onclick="closeApplicationModal()">Close</button>
+                        <button type="button" class="btn" onclick="updateApplication()">
+                            <i class="ph ph-check"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Member Details Modal -->
+
     <div id="member-details-modal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
@@ -3760,16 +3877,188 @@
             editingJobId = null;
         }
 
-        // Hook into switchTab to load jobs when careers tab is opened
+        // Hook into switchTab to load jobs and applications when careers tab is opened
         const _originalSwitchTab = switchTab;
         window.switchTab = function (tabName) {
             _originalSwitchTab(tabName);
             if (tabName === 'careers') {
                 loadJobs();
+                loadApplications();
             }
         };
 
+        // ============ APPLICATION MANAGEMENT ============
+
+        let currentApplicationId = null;
+        let allApplications = [];
+
+        // Load all applications
+        async function loadApplications() {
+            try {
+                const response = await fetch('/api/admin/applications');
+                if (!response.ok) throw new Error('Failed to fetch applications');
+
+                allApplications = await response.json();
+                renderApplicationsTable(allApplications);
+                populatePositionFilter(allApplications);
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                document.getElementById('applicationsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #ef4444;">
+                            Failed to load applications
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Render applications table
+        function renderApplicationsTable(applications) {
+            const tbody = document.getElementById('applicationsTableBody');
+
+            if (applications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #64748b;">
+                            No applications found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = applications.map(app => `
+                <tr>
+                    <td style="font-weight: 500;">${app.full_name}</td>
+                    <td>${app.position}</td>
+                    <td><a href="mailto:${app.email}" style="color: #3b82f6;">${app.email}</a></td>
+                    <td>${app.experience || '-'} yrs</td>
+                    <td><span class="status-badge status-${app.status}">${capitalizeFirst(app.status)}</span></td>
+                    <td>${formatDate(app.created_at)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="viewApplication(${app.id})" class="btn-icon" title="View Details">
+                                <i class="ph ph-eye"></i>
+                            </button>
+                            ${app.cv_path ? `
+                                <a href="${app.cv_path}" target="_blank" class="btn-icon" title="Download CV">
+                                    <i class="ph ph-download"></i>
+                                </a>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Populate position filter dropdown
+        function populatePositionFilter(applications) {
+            const positions = [...new Set(applications.map(a => a.position))];
+            const select = document.getElementById('appPositionFilter');
+
+            // Keep first option, replace rest
+            select.innerHTML = '<option value="">All Positions</option>';
+            positions.forEach(pos => {
+                select.innerHTML += `<option value="${pos}">${pos}</option>`;
+            });
+        }
+
+        // Filter applications
+        function filterApplications() {
+            const positionFilter = document.getElementById('appPositionFilter').value;
+            const statusFilter = document.getElementById('appStatusFilter').value;
+
+            let filtered = allApplications;
+
+            if (positionFilter) {
+                filtered = filtered.filter(a => a.position === positionFilter);
+            }
+            if (statusFilter) {
+                filtered = filtered.filter(a => a.status === statusFilter);
+            }
+
+            renderApplicationsTable(filtered);
+        }
+
+        // View single application
+        async function viewApplication(id) {
+            try {
+                const response = await fetch(`/api/admin/applications/${id}`);
+                if (!response.ok) throw new Error('Failed to fetch application');
+
+                const app = await response.json();
+                currentApplicationId = id;
+
+                // Populate modal fields
+                document.getElementById('appDetailName').textContent = app.full_name;
+                document.getElementById('appDetailPosition').textContent = app.position;
+                document.getElementById('appDetailEmail').textContent = app.email;
+                document.getElementById('appDetailPhone').textContent = app.phone || '-';
+                document.getElementById('appDetailLocation').textContent = app.location || '-';
+                document.getElementById('appDetailExperience').textContent = app.experience ? `${app.experience} years` : '-';
+                document.getElementById('appDetailCoverLetter').textContent = app.cover_letter || 'No cover letter provided';
+                document.getElementById('appDetailDate').textContent = formatDate(app.created_at);
+                document.getElementById('appDetailStatus').value = app.status || 'pending';
+                document.getElementById('appDetailNotes').value = app.notes || '';
+
+                // CV download link
+                if (app.cv_path) {
+                    document.getElementById('appDetailCV').innerHTML = `
+                        <a href="${app.cv_path}" target="_blank" style="color: #3b82f6;">
+                            <i class="ph ph-download"></i> Download CV
+                        </a>
+                    `;
+                } else {
+                    document.getElementById('appDetailCV').textContent = 'Not uploaded';
+                }
+
+                // Open modal
+                document.getElementById('applicationModal').classList.add('show');
+            } catch (error) {
+                console.error('Error loading application:', error);
+                showNotification('Failed to load application details', 'error');
+            }
+        }
+
+        // Update application status/notes
+        async function updateApplication() {
+            if (!currentApplicationId) return;
+
+            const status = document.getElementById('appDetailStatus').value;
+            const notes = document.getElementById('appDetailNotes').value;
+
+            try {
+                const response = await fetch(`/api/admin/applications/${currentApplicationId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, notes })
+                });
+
+                if (!response.ok) throw new Error('Failed to update application');
+
+                showNotification('Application updated successfully', 'success');
+                closeApplicationModal();
+                loadApplications();
+            } catch (error) {
+                console.error('Error updating application:', error);
+                showNotification('Failed to update application', 'error');
+            }
+        }
+
+        // Close application modal
+        function closeApplicationModal() {
+            document.getElementById('applicationModal').classList.remove('show');
+            currentApplicationId = null;
+        }
+
+        // Helper: capitalize first letter
+        function capitalizeFirst(str) {
+            return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+        }
+
     </script>
+
 
     <script src="admin-edit.js"></script>
 </body>

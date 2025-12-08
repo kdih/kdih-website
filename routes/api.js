@@ -3749,5 +3749,137 @@ router.get('/jobs/active', (req, res) => {
     });
 });
 
+// ===== JOB APPLICATION MANAGEMENT (Super Admin Only) =====
+
+// Get all job applications
+router.get('/admin/applications', requireSuperAdmin, (req, res) => {
+    const { position, status } = req.query;
+
+    let sql = `
+        SELECT 
+            ja.*,
+            j.title as job_title
+        FROM job_applications ja
+        LEFT JOIN jobs j ON ja.position = j.title
+        ORDER BY ja.created_at DESC
+    `;
+
+    // Add filters if provided
+    const conditions = [];
+    const params = [];
+
+    if (position) {
+        conditions.push('ja.position = ?');
+        params.push(position);
+    }
+    if (status) {
+        conditions.push('ja.status = ?');
+        params.push(status);
+    }
+
+    if (conditions.length > 0) {
+        sql = `
+            SELECT 
+                ja.*,
+                j.title as job_title
+            FROM job_applications ja
+            LEFT JOIN jobs j ON ja.position = j.title
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY ja.created_at DESC
+        `;
+    }
+
+    db.all(sql, params, (err, applications) => {
+        if (err) {
+            logger.error('Error fetching applications:', err);
+            return res.status(500).json({ error: 'Failed to fetch applications' });
+        }
+        res.json(applications);
+    });
+});
+
+// Get single application by ID
+router.get('/admin/applications/:id', requireSuperAdmin, (req, res) => {
+    const sql = 'SELECT * FROM job_applications WHERE id = ?';
+
+    db.get(sql, [req.params.id], (err, application) => {
+        if (err) {
+            logger.error('Error fetching application:', err);
+            return res.status(500).json({ error: 'Failed to fetch application' });
+        }
+
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+
+        res.json(application);
+    });
+});
+
+// Update application status/notes
+router.patch('/admin/applications/:id', requireSuperAdmin, (req, res) => {
+    const { status, notes } = req.body;
+
+    // First check if application exists
+    db.get('SELECT id FROM job_applications WHERE id = ?', [req.params.id], (err, existing) => {
+        if (err) {
+            logger.error('Error checking application:', err);
+            return res.status(500).json({ error: 'Failed to update application' });
+        }
+
+        if (!existing) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+
+        const updates = [];
+        const params = [];
+
+        if (status) {
+            updates.push('status = ?');
+            params.push(status);
+            updates.push('reviewed_at = CURRENT_TIMESTAMP');
+            updates.push('reviewed_by = ?');
+            params.push(req.session.user.id);
+        }
+        if (notes !== undefined) {
+            updates.push('notes = ?');
+            params.push(notes);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'No updates provided' });
+        }
+
+        params.push(req.params.id);
+        const sql = `UPDATE job_applications SET ${updates.join(', ')} WHERE id = ?`;
+
+        db.run(sql, params, function (err) {
+            if (err) {
+                logger.error('Error updating application:', err);
+                return res.status(500).json({ error: 'Failed to update application' });
+            }
+
+            logger.info(`Application ${req.params.id} updated by admin ${req.session.user.id}`);
+            res.json({
+                success: true,
+                message: 'Application updated successfully'
+            });
+        });
+    });
+});
+
+// Get distinct positions for filter dropdown
+router.get('/admin/applications/positions', requireSuperAdmin, (req, res) => {
+    const sql = 'SELECT DISTINCT position FROM job_applications ORDER BY position';
+
+    db.all(sql, [], (err, positions) => {
+        if (err) {
+            logger.error('Error fetching positions:', err);
+            return res.status(500).json({ error: 'Failed to fetch positions' });
+        }
+        res.json(positions.map(p => p.position));
+    });
+});
+
 module.exports = router;
 
