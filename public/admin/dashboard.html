@@ -468,7 +468,6 @@
             background: #f8fafc;
             border-color: #94a3b8;
         }
-
     </style>
 </head>
 
@@ -1129,7 +1128,8 @@
                     <div class="table-header">
                         <h2>Job Postings</h2>
                         <div style="display: flex; gap: 1rem;">
-                            <select id="jobStatusFilter" onchange="filterJobs()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                            <select id="jobStatusFilter" onchange="filterJobs()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
                                 <option value="all">All Statuses</option>
                                 <option value="draft">Draft</option>
                                 <option value="active">Active</option>
@@ -1301,7 +1301,7 @@
     </div>
 
 
-    
+
     <!-- Job Form Modal -->
     <div id="jobModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
@@ -1311,7 +1311,7 @@
             </div>
             <form id="jobForm" onsubmit="saveJob(event)">
                 <input type="hidden" id="jobId" name="id">
-                
+
                 <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label for="jobTitle">Job Title *</label>
@@ -1360,13 +1360,15 @@
 
                 <div class="form-group">
                     <label for="jobDescription">Job Description</label>
-                    <textarea id="jobDescription" name="description" rows="4" placeholder="Describe the role..."></textarea>
+                    <textarea id="jobDescription" name="description" rows="4"
+                        placeholder="Describe the role..."></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Responsibilities</label>
                     <div id="responsibilitiesList"></div>
-                    <button type="button" onclick="addListItem('responsibilities')" class="btn-secondary" style="margin-top: 0.5rem;">
+                    <button type="button" onclick="addListItem('responsibilities')" class="btn-secondary"
+                        style="margin-top: 0.5rem;">
                         <i class="ph ph-plus"></i> Add Responsibility
                     </button>
                 </div>
@@ -1374,7 +1376,8 @@
                 <div class="form-group">
                     <label>Requirements</label>
                     <div id="requirementsList"></div>
-                    <button type="button" onclick="addListItem('requirements')" class="btn-secondary" style="margin-top: 0.5rem;">
+                    <button type="button" onclick="addListItem('requirements')" class="btn-secondary"
+                        style="margin-top: 0.5rem;">
                         <i class="ph ph-plus"></i> Add Requirement
                     </button>
                 </div>
@@ -1389,7 +1392,7 @@
         </div>
     </div>
 
-<!-- Member Details Modal -->
+    <!-- Member Details Modal -->
     <div id="member-details-modal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
@@ -3492,7 +3495,7 @@
             try {
                 const response = await fetch('/api/admin/jobs');
                 if (!response.ok) throw new Error('Failed to load jobs');
-                
+
                 currentJobs = await response.json();
                 renderJobsTable();
             } catch (error) {
@@ -3505,11 +3508,11 @@
         function renderJobsTable() {
             const tbody = document.getElementById('jobsTableBody');
             const filter = document.getElementById('jobStatusFilter')?.value || 'all';
-            
-            const filteredJobs = filter === 'all' 
-                ? currentJobs 
+
+            const filteredJobs = filter === 'all'
+                ? currentJobs
                 : currentJobs.filter(job => job.status === filter);
-            
+
             if (filteredJobs.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -3520,7 +3523,7 @@
                 `;
                 return;
             }
-            
+
             tbody.innerHTML = filteredJobs.map(job => `
                 <tr>
                     <td><strong>${job.title}</strong></td>
@@ -3572,16 +3575,16 @@
             document.getElementById('jobSubmitText').textContent = 'Create Job';
             document.getElementById('jobForm').reset();
             document.getElementById('jobId').value = '';
-            
+
             // Clear dynamic lists
             document.getElementById('responsibilitiesList').innerHTML = '';
             document.getElementById('requirementsList').innerHTML = '';
-            
+
             // Add one empty field for each
             addListItem('responsibilities');
             addListItem('requirements');
-            
-            document.getElementById('jobModal').classList.add('active');
+
+            document.getElementById('jobModal').classList.add('show');
         }
 
         // Edit job
@@ -3589,10 +3592,10 @@
             try {
                 const response = await fetch(`/api/admin/jobs/${jobId}`);
                 if (!response.ok) throw new Error('Failed to load job');
-                
+
                 const job = await response.json();
                 editingJobId = jobId;
-                
+
                 document.getElementById('jobModalTitle').textContent = 'Edit Job Posting';
                 document.getElementById('jobSubmitText').textContent = 'Update Job';
                 document.getElementById('jobId').value = job.id;
@@ -3604,7 +3607,7 @@
                 document.getElementById('jobDeadline').value = job.application_deadline || '';
                 document.getElementById('jobStatus').value = job.status;
                 document.getElementById('jobDescription').value = job.description || '';
-                
+
                 // Populate responsibilities
                 const respList = document.getElementById('responsibilitiesList');
                 respList.innerHTML = '';
@@ -3612,7 +3615,7 @@
                     addListItem('responsibilities', item);
                 });
                 if (job.responsibilities.length === 0) addListItem('responsibilities');
-                
+
                 // Populate requirements
                 const reqList = document.getElementById('requirementsList');
                 reqList.innerHTML = '';
@@ -3620,8 +3623,8 @@
                     addListItem('requirements', item);
                 });
                 if (job.requirements.length === 0) addListItem('requirements');
-                
-                document.getElementById('jobModal').classList.add('active');
+
+                document.getElementById('jobModal').classList.add('show');
             } catch (error) {
                 console.error('Error loading job:', error);
                 showNotification('Failed to load job details', 'error');
@@ -3632,7 +3635,7 @@
         function addListItem(listType, value = '') {
             const listId = listType === 'responsibilities' ? 'responsibilitiesList' : 'requirementsList';
             const list = document.getElementById(listId);
-            
+
             const item = document.createElement('div');
             item.className = 'list-item-input';
             item.style.cssText = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem;';
@@ -3655,19 +3658,19 @@
         // Save job (create or update)
         async function saveJob(event) {
             event.preventDefault();
-            
+
             const formData = new FormData(event.target);
-            
+
             // Collect responsibilities
             const responsibilities = Array.from(document.querySelectorAll('.responsibilities-item'))
                 .map(input => input.value.trim())
                 .filter(value => value !== '');
-            
+
             // Collect requirements
             const requirements = Array.from(document.querySelectorAll('.requirements-item'))
                 .map(input => input.value.trim())
                 .filter(value => value !== '');
-            
+
             const jobData = {
                 title: formData.get('title'),
                 department: formData.get('department'),
@@ -3680,24 +3683,24 @@
                 requirements,
                 status: formData.get('status')
             };
-            
+
             try {
-                const url = editingJobId 
+                const url = editingJobId
                     ? `/api/admin/jobs/${editingJobId}`
                     : '/api/admin/jobs';
                 const method = editingJobId ? 'PUT' : 'POST';
-                
+
                 const response = await fetch(url, {
                     method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(jobData)
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to save job');
-                
+
                 const result = await response.json();
                 showNotification(result.message || 'Job saved successfully', 'success');
-                
+
                 closeJobModal();
                 loadJobs();
             } catch (error) {
@@ -3710,18 +3713,18 @@
         async function toggleJobStatus(jobId, currentStatus) {
             const newStatus = currentStatus === 'active' ? 'draft' : 'active';
             const job = currentJobs.find(j => j.id === jobId);
-            
+
             if (!job) return;
-            
+
             try {
                 const response = await fetch(`/api/admin/jobs/${jobId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...job, status: newStatus })
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to update status');
-                
+
                 showNotification(`Job ${newStatus === 'active' ? 'published' : 'unpublished'}`, 'success');
                 loadJobs();
             } catch (error) {
@@ -3735,14 +3738,14 @@
             if (!confirm(`Are you sure you want to delete "${jobTitle}"?\n\nThis action cannot be undone.`)) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/admin/jobs/${jobId}`, {
                     method: 'DELETE'
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to delete job');
-                
+
                 showNotification('Job deleted successfully', 'success');
                 loadJobs();
             } catch (error) {
@@ -3753,13 +3756,13 @@
 
         // Close job modal
         function closeJobModal() {
-            document.getElementById('jobModal').classList.remove('active');
+            document.getElementById('jobModal').classList.remove('show');
             editingJobId = null;
         }
 
         // Hook into switchTab to load jobs when careers tab is opened
         const _originalSwitchTab = switchTab;
-        window.switchTab = function(tabName) {
+        window.switchTab = function (tabName) {
             _originalSwitchTab(tabName);
             if (tabName === 'careers') {
                 loadJobs();
