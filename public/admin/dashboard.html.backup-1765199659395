@@ -1,0 +1,3283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | KDIH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --sidebar: #1e293b;
+            --accent: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            padding: 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        .logout {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem 2rem;
+            background: var(--sidebar);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--sidebar);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--sidebar);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--sidebar);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo" style="cursor: pointer;" onclick="window.location.href='/'">
+            <i class="ph-fill ph-house" style="margin-right: 0.5rem;"></i>KDIH Admin
+        </div>
+        <div class="nav">
+            <div class="nav-item active" onclick="switchTab('overview')">
+                <i class="ph-fill ph-house"></i>
+                <span>Overview</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('members')">
+                <i class="ph-fill ph-users"></i>
+                <span>Members</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('messages')">
+                <i class="ph-fill ph-envelope"></i>
+                <span>Messages</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('courses')">
+                <i class="ph-fill ph-graduation-cap"></i>
+                <span>Courses</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('registrations')">
+                <i class="ph-fill ph-notebook"></i>
+                <span>Course Registrations</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('events')">
+                <i class="ph-fill ph-calendar"></i>
+                <span>Events</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('startups')">
+                <i class="ph-fill ph-rocket-launch"></i>
+                <span>Startup Applications</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('analytics')">
+                <i class="ph-fill ph-chart-bar"></i>
+                <span>Analytics</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('coworking')">
+                <i class="ph-fill ph-desk"></i>
+                <span>Coworking</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('services')">
+                <i class="ph-fill ph-briefcase"></i>
+                <span>Services</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('backups')">
+                <i class="ph-fill ph-database"></i>
+                <span>Backups</span>
+            </div>
+            <div class="nav-item" id="careers-nav" onclick="switchTab('careers')" style="display: none;">
+                <i class="ph-fill ph-briefcase"></i>
+                <span>Careers</span>
+            </div>
+            <div class="nav-item" id="admins-nav" onclick="switchTab('admins')" style="display: none;">
+                <i class="ph-fill ph-shield-check"></i>
+                <span>Manage Admins</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='profile.html'">
+                <i class="ph-fill ph-gear"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+        <div class="logout">
+            <button class="logout-btn" onclick="logout()">
+                <i class="ph-fill ph-sign-out"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <div class="header">
+            <h1 id="page-title">Overview</h1>
+            <div class="user-info">
+                <i class="ph-fill ph-user-circle" style="font-size: 2rem;"></i>
+                <div>
+                    <div id="user-name">Admin</div>
+                    <div id="user-role" style="font-size: 0.875rem; color: var(--text-muted);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Members</span>
+                            <i class="ph-fill ph-users stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-members">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Course Enrollments</span>
+                            <i class="ph-fill ph-graduation-cap stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-enrollments">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Upcoming Events</span>
+                            <i class="ph-fill ph-calendar stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-events">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Pending Applications</span>
+                            <i class="ph-fill ph-rocket-launch stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-applications">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-activity">
+                            <tr>
+                                <td colspan="3" class="empty-state">
+                                    <i class="ph ph-activity"></i>
+                                    <p>No recent activity</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Members Tab -->
+            <div id="members-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Members</h2>
+                        <button class="btn" onclick="showCreateMemberModal()">
+                            <i class="ph-fill ph-plus"></i> Quick Add Member
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Gender</th>
+                                <th>Interest</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div id="messages-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Contact Messages</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Courses Tab -->
+            <div id="courses-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Courses</h2>
+                        <button class="btn" onclick="showCreateCourseModal()">
+                            <i class="ph-fill ph-plus"></i> Create Course
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Track</th>
+                                <th>Duration</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Course Registrations Tab -->
+            <div id="registrations-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Course Registrations</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Course</th>
+                                <th>Schedule</th>
+                                <th>Payment Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registrations-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Events Tab -->
+            <div id="events-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Events</h2>
+                        <button class="btn" onclick="showCreateEventModal()">
+                            <i class="ph-fill ph-plus"></i> Create Event
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Attendees</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Startup Applications Tab -->
+            <div id="startups-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Startup Applications</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Startup Name</th>
+                                <th>Founder</th>
+                                <th>Industry</th>
+                                <th>Stage</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="startups-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Coworking Tab -->
+            <div id="coworking-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>Coworking Desk Management</h2>
+                    <button class="btn-primary" onclick="showAssignDeskModal()">
+                        <i class="ph-fill ph-plus"></i> Assign Desk
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Member</th>
+                                <th>Desk</th>
+                                <th>Status</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">Loading bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Meeting Room Bookings Section -->
+                <div class="section-header" style="margin-top: 3rem;">
+                    <h2>Meeting Room Bookings</h2>
+                    <button class="btn-primary" onclick="showAssignRoomModal()">
+                        <i class="ph-fill ph-plus"></i> Assign Room
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Guest</th>
+                                <th>Room</th>
+                                <th>Status</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="room-bookings-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">Loading room bookings...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Expired Bookings Section -->
+                <div class="section-header"
+                    style="margin-top: 3rem; background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 8px;">
+                    <h2 style="color: #ef4444;">⚠️ Expired Bookings <span id="expired-count"
+                            style="background: #ef4444; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.9rem; margin-left: 0.5rem;">0</span>
+                    </h2>
+                    <button class="btn-danger" onclick="cancelAllExpired()" style="display: none;" id="cancel-all-btn">
+                        Cancel All Expired
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-expired" onchange="toggleAllExpired(this)">
+                                </th>
+                                <th>Type</th>
+                                <th>ID</th>
+                                <th>Member/Guest</th>
+                                <th>Desk/Room</th>
+                                <th>Date</th>
+                                <th>Expired</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expired-bookings-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button class="btn" onclick="cancelSelectedExpired()" style="display: none;"
+                            id="cancel-selected-btn">
+                            Cancel Selected
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admins Tab (Super Admin Only) -->
+            <div id="admins-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Admin Users</h2>
+                        <button class="btn" onclick="showCreateAdminModal()">
+                            <i class="ph-fill ph-plus"></i> Create Admin
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admins-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content">
+                <!-- Period Filter -->
+                <div style="margin-bottom: 2rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
+                    <button class="btn btn-sm" onclick="loadAnalytics('7d')" id="btn-7d">7 Days</button>
+                    <button class="btn btn-sm" onclick="loadAnalytics('30d')" id="btn-30d"
+                        style="background: var(--accent);">30 Days</button>
+                    <button class="btn btn-sm" onclick="loadAnalytics('90d')" id="btn-90d">90 Days</button>
+                    <button class="btn btn-sm" onclick="loadAnalytics('1y')" id="btn-1y">1 Year</button>
+                </div>
+
+                <!-- Overview Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Revenue</span>
+                            <i class="ph-fill ph-currency-circle-dollar stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-revenue">₦0</div>
+                        <div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                            <span id="stat-revenue-change">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Members</span>
+                            <i class="ph-fill ph-users stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-total-members">0</div>
+                        <div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                            <span id="stat-members-type">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Active Courses</span>
+                            <i class="ph-fill ph-book-open stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-active-courses">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Upcoming Events</span>
+                            <i class="ph-fill ph-calendar stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-upcoming-events">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Coworking Occupancy</span>
+                            <i class="ph-fill ph-desk stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="stat-occupancy">0%</div>
+                        <div style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                            <span id="stat-occupancy-detail">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1 -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+                    <!-- Revenue Chart -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2><i class="ph-fill ph-chart-line"></i> Revenue Trend</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <canvas id="revenueChart" height="80"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Conversion Funnel -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2><i class="ph-fill ph-funnel"></i> Conversion Funnel</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <div id="conversionFunnel">
+                                <div style="text-align: center; color: var(--text-muted);">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <!-- User Growth Chart -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2><i class="ph-fill ph-trend-up"></i> User Growth</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <canvas id="userGrowthChart" height="120"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Revenue by Source -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2><i class="ph-fill ph-chart-pie"></i> Revenue by Source</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <canvas id="revenueSourceChart" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Performance Table -->
+                <div class="table-container" style="margin-top: 1.5rem;">
+                    <div class="table-header">
+                        <h2><i class="ph-fill ph-graduation-cap"></i> Course Performance</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Track</th>
+                                <th>Enrollments</th>
+                                <th>Completions</th>
+                                <th>Completion Rate</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursePerformanceTable">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <i class="ph ph-graduation-cap"></i>
+                                    <p>Loading course data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Backups Tab -->
+            <div id="backups-tab" class="tab-content">
+                <!-- Storage Info Cards -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Backups</span>
+                            <i class="ph-fill ph-files stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="backup-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Storage Used</span>
+                            <i class="ph-fill ph-hard-drives stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="backup-storage">0 MB</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Latest Backup</span>
+                            <i class="ph-fill ph-clock stat-icon"></i>
+                        </div>
+                        <div class="stat-value" style="font-size: 1rem;" id="latest-backup">Never</div>
+                    </div>
+                </div>
+
+                <!-- Backup Actions -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="createManualBackup()">
+                        <i class="ph-fill ph-floppy-disk"></i> Create Backup Now
+                    </button>
+                    <button class="btn" onclick="loadBackups()">
+                        <i class="ph-fill ph-arrow-clockwise"></i> Refresh List
+                    </button>
+                </div>
+
+                <!-- Backup List -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="ph-fill ph-database"></i> Available Backups</h2>
+                        <div style="color: var(--text-muted); font-size: 0.875rem;">
+                            Retention: 30 days | Auto-backup: Daily at 2:00 AM
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="backups-list">
+                            <tr>
+                                <td colspan="4" class="empty-state">
+                                    <i class="ph ph-database"></i>
+                                    <p>Loading backups...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Info Box -->
+                <div
+                    style="margin-top: 2rem; padding: 1rem; background: rgba(37, 99, 235, 0.1); border-radius: 8px; border-left: 4px solid var(--accent);">
+                    <h3 style="margin-bottom: 0.5rem; color: var(--accent);">
+                        <i class="ph-fill ph-info"></i> Backup Information
+                    </h3>
+                    <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+                        <li>Backups are created automatically every day at 2:00 AM</li>
+                        <li>Manual backups can be created anytime using the button above</li>
+                        <li>Backups older than 30 days are automatically deleted</li>
+                        <li>A safety backup is created automatically before any restore operation</li>
+                        <li>Download backups to store them externally for extra security</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div id="services-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Services</h2>
+                        <button class="btn" onclick="showCreateServiceModal()">
+                            <i class="ph-fill ph-plus"></i> Create Service
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Icon</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Course Modal -->
+    <div id="create-course-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Course</h2>
+                <button class="close-btn" onclick="closeModal('create-course-modal')">&times;</button>
+            </div>
+            <form id="create-course-form">
+                <div class="form-group">
+                    <label>Course Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Track *</label>
+                    <select name="track" required>
+                        <option value="">Select track</option>
+                        <option value="Technical Skills">Technical Skills</option>
+                        <option value="Business Skills">Business Skills</option>
+                        <option value="Design">Design</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Duration (weeks) *</label>
+                    <input type="number" name="duration_weeks" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" required>
+                </div>
+                <button type="submit" class="btn">Create Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Event Modal -->
+    <div id="create-event-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Event</h2>
+                <button class="close-btn" onclick="closeModal('create-event-modal')">&times;</button>
+            </div>
+            <form id="create-event-form">
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Event Type *</label>
+                    <select name="event_type" required>
+                        <option value="">Select type</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Training">Training</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date & Time *</label>
+                    <input type="datetime-local" name="event_date" required>
+                </div>
+                <div class="form-group">
+                    <label>End Date & Time *</label>
+                    <input type="datetime-local" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location *</label>
+                    <input type="text" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label>Max Attendees *</label>
+                    <input type="number" name="max_attendees" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" value="0" required>
+                </div>
+                <button type="submit" class="btn">Create Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Admin Modal (Super Admin Only) -->
+    <div id="create-admin-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Admin</h2>
+                <button class="close-btn" onclick="closeModal('create-admin-modal')">&times;</button>
+            </div>
+            <form id="create-admin-form">
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" name="username" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" name="password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Role *</label>
+                    <select name="role" required>
+                        <option value="">Select role</option>
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Create Admin</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Member Details Modal -->
+    <div id="member-details-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>Member Dashboard View</h2>
+                <button class="close-btn" onclick="closeModal('member-details-modal')">&times;</button>
+            </div>
+            <div id="member-details-content">
+                <!-- Content will be loaded dynamically -->
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                    <p>Loading member data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced admin functionality
+        let currentTab = 'overview';
+        let currentUser = null;
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tab}-tab`).classList.add('active');
+
+            // Update title
+            const titles = {
+                overview: 'Overview',
+                members: 'Members',
+                messages: 'Messages',
+                courses: 'Courses',
+                registrations: 'Course Registrations',
+                events: 'Events',
+                startups: 'Startup Applications',
+                analytics: 'Analytics',
+                coworking: 'Coworking Management',
+                services: 'Services',
+                admins: 'Manage Admins',
+                settings: 'Settings'
+            };
+            document.getElementById('page-title').textContent = titles[tab];
+
+            // Load data for tab
+            loadTabData(tab);
+        }
+
+        function loadTabData(tab) {
+            switch (tab) {
+                case 'overview':
+                    loadOverview();
+                    break;
+                case 'members':
+                    loadMembers();
+                    break;
+                case 'messages':
+                    loadMessages();
+                    break;
+                case 'courses':
+                    loadCourses();
+                    break;
+                case 'registrations':
+                    loadRegistrations();
+                    break;
+                case 'events':
+                    loadEvents();
+                    break;
+                case 'startups':
+                    loadStartups();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                case 'coworking':
+                    loadBookings();
+                    loadRoomBookings();
+                    loadExpiredBookings();
+                    break;
+                case 'services':
+                    loadServices();
+                    break;
+                case 'admins':
+                    loadAdmins();
+                    break;
+                case 'settings':
+                    // Settings content is static, no data to load
+                    break;
+            }
+        }
+
+        // Check authentication and load user info
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/check-session');
+                const data = await response.json();
+
+                if (!data.authenticated) {
+                    window.location.href = '/admin/login.html';
+                    return;
+                }
+
+                currentUser = data.user;
+                document.getElementById('user-name').textContent = data.user.username;
+                document.getElementById('user-role').textContent = data.user.role === 'super_admin' ? 'Super Admin' : 'Admin';
+
+                // Show super-admin only sections
+                if (data.user.role === 'super_admin') {
+                    document.getElementById('admins-nav').style.display = 'flex';
+                    document.getElementById('careers-nav').style.display = 'flex';
+                }
+            } catch (error) {
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        async function loadOverview() {
+            try {
+                const response = await fetch('/api/admin/analytics/dashboard');
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    document.getElementById('stat-members').textContent = data.data.active_members || 0;
+                    document.getElementById('stat-enrollments').textContent = data.data.total_students || 0;
+                    document.getElementById('stat-events').textContent = data.data.upcoming_events || 0;
+                    document.getElementById('stat-applications').textContent = data.data.pending_applications || 0;
+                }
+            } catch (error) {
+                console.error('Error loading overview:', error);
+            }
+        }
+
+        async function loadMembers() {
+            try {
+                const response = await fetch('/api/admin/members/detailed');
+                const data = await response.json();
+                const list = document.getElementById('members-list');
+
+                // Update table header to include more details
+                const thead = document.querySelector('#members-tab thead tr');
+                thead.innerHTML = `
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Type</th>
+                    <th>Enrollments</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                `;
+
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(member => `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">${member.full_name || 'N/A'}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Joined: ${new Date(member.created_at).toLocaleDateString()}</div>
+                            </td>
+
+                            <td>${member.email}</td>
+                            <td>${member.gender || 'N/A'}</td>
+                            <td><span class="badge badge-warning">${member.member_type || 'student'}</span></td>
+                            <td>
+                                <div style="font-size: 0.85rem;">
+                                    <div>Courses: ${member.lms_enrollments_count + member.course_registrations_count}</div>
+                                    <div>Memberships: ${member.active_memberships_count}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge ${member.is_active ? 'badge-success' : 'badge-danger'}">
+                                    ${member.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm" onclick="viewMemberDashboard(${member.id})" style="margin-right: 0.5rem;">
+                                    <i class="ph-fill ph-eye"></i> View
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">
+                                    <i class="ph-fill ph-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-users"></i><p>No members found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading members:', error);
+                // Fallback to basic members list if detailed endpoint fails
+                loadBasicMembers();
+            }
+        }
+
+        async function loadBasicMembers() {
+            try {
+                const response = await fetch('/api/admin/members');
+                const data = await response.json();
+                const list = document.getElementById('members-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(member => `
+                        <tr>
+                            <td>${member.full_name || member.username || 'N/A'}</td>
+                            <td>${member.email}</td>
+                            <td>${member.phone || 'N/A'}</td>
+                            <td>${member.gender || 'N/A'}</td>
+                            <td>${member.interest || 'N/A'}</td>
+                            <td>
+                                <button class="action-btn" onclick="showEmailModal('${member.email}', '${(member.full_name || member.username || 'Member').replace(/'/g, "\\'")}')">
+                                    <i class="ph-fill ph-envelope"></i> Email
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ph ph-users"></i><p>No members found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading members:', error);
+            }
+        }
+
+        async function viewMemberDashboard(memberId) {
+            const modal = document.getElementById('member-details-modal');
+            const content = document.getElementById('member-details-content');
+
+            modal.classList.add('show');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                    <p>Loading member data...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/admin/members/${memberId}/dashboard`);
+                const result = await response.json();
+
+                if (result.message === 'success') {
+                    const data = result.data;
+                    const member = data.member;
+
+                    let html = `
+                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                            <!-- Left Column: Profile -->
+                            <div>
+                                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                                        <div style="width: 80px; height: 80px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; font-weight: bold;">
+                                            ${member.full_name ? member.full_name.charAt(0).toUpperCase() : 'U'}
+                                        </div>
+                                        <h3 style="margin-bottom: 0.5rem;">${member.full_name}</h3>
+                                        <span class="badge badge-warning">${member.member_type}</span>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Email</label>
+                                        <div>${member.email}</div>
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Phone</label>
+                                        <div>${member.phone || 'N/A'}</div>
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Joined</label>
+                                        <div>${new Date(member.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem; color: var(--text-muted);">Last Login</label>
+                                        <div>${member.last_login ? new Date(member.last_login).toLocaleString() : 'Never'}</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 1.5rem; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <h4 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Payment History</h4>
+                                    ${data.payments.length > 0 ? `
+                                        <div style="max-height: 300px; overflow-y: auto;">
+                                            ${data.payments.map(p => `
+                                                <div style="padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+                                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                                        <span style="font-weight: 600;">₦${(p.amount / 100).toLocaleString()}</span>
+                                                        <span class="badge ${p.status === 'success' ? 'badge-success' : 'badge-warning'}" style="font-size: 0.7rem;">${p.status}</span>
+                                                    </div>
+                                                    <div style="color: var(--text-muted); font-size: 0.8rem;">${new Date(p.created_at).toLocaleDateString()}</div>
+                                                    <div style="color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.payment_for || 'Payment'}</div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : '<p style="color: var(--text-muted); font-size: 0.9rem;">No payments recorded</p>'}
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column: Enrollments & Memberships -->
+                            <div style="max-height: 80vh; overflow-y: auto; padding-right: 0.5rem;">
+                                <!-- Course Registrations -->
+                                <div style="margin-bottom: 2rem;">
+                                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="ph-fill ph-graduation-cap"></i> Course Enrollments
+                                    </h3>
+                                    
+                                    ${(data.course_registrations.length === 0 && data.lms_enrollments.length === 0) ?
+                            '<div class="empty-state" style="padding: 2rem; background: rgba(255,255,255,0.02); border-radius: 12px;"><p>No course enrollments</p></div>' : ''}
+                                    
+                                    ${data.course_registrations.map(reg => `
+                                        <div style="background: var(--sidebar); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem;">${reg.course_title}</h4>
+                                                    <div style="font-size: 0.9rem; color: var(--text-muted);">Registered: ${new Date(reg.created_at).toLocaleDateString()}</div>
+                                                </div>
+                                                <span class="badge ${reg.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">
+                                                    ${reg.payment_status === 'paid' ? 'Paid' : 'Payment Pending'}
+                                                </span>
+                                            </div>
+                                            
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Course Fee</div>
+                                                    <div style="font-weight: 600;">₦${(reg.fee_display / 100).toLocaleString()}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Duration</div>
+                                                    <div>${reg.duration_weeks ? reg.duration_weeks + ' weeks' : 'N/A'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Expected Completion</div>
+                                                    <div>${reg.completion_date ? new Date(reg.completion_date).toLocaleDateString() : 'N/A'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Schedule</div>
+                                                    <div>${reg.schedule || 'N/A'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                    
+                                    ${data.lms_enrollments.map(enr => `
+                                        <div style="background: var(--sidebar); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem;">${enr.course_title}</h4>
+                                                    <div style="font-size: 0.9rem; color: var(--text-muted);">Enrolled (LMS): ${new Date(enr.enrollment_date).toLocaleDateString()}</div>
+                                                </div>
+                                                <span class="badge ${enr.status === 'completed' ? 'badge-success' : 'badge-primary'}">
+                                                    ${enr.status}
+                                                </span>
+                                            </div>
+                                            
+                                            <div style="margin-bottom: 1rem;">
+                                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                                    <span>Progress</span>
+                                                    <span>${enr.progress_percentage}%</span>
+                                                </div>
+                                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
+                                                    <div style="width: ${enr.progress_percentage}%; height: 100%; background: var(--success); border-radius: 3px;"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Expected Completion</div>
+                                                    <div>${enr.expected_completion_date ? new Date(enr.expected_completion_date).toLocaleDateString() : 'N/A'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Track</div>
+                                                    <div>${enr.track || 'General'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <!-- Co-working Memberships -->
+                                <div>
+                                    <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="ph-fill ph-buildings"></i> Co-working Memberships
+                                    </h3>
+                                    
+                                    ${data.coworking_memberships.length === 0 ?
+                            '<div class="empty-state" style="padding: 2rem; background: rgba(255,255,255,0.02); border-radius: 12px;"><p>No memberships found</p></div>' : ''}
+                                    
+                                    ${data.coworking_memberships.map(mem => `
+                                        <div style="background: var(--sidebar); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                                <div>
+                                                    <h4 style="font-size: 1.1rem; color: var(--accent); margin-bottom: 0.25rem;">${mem.membership_plan} Plan</h4>
+                                                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                                                        ${new Date(mem.start_date).toLocaleDateString()} - ${new Date(mem.end_date).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                                <span class="badge ${mem.is_expired ? 'badge-danger' : (mem.is_expiring_soon ? 'badge-warning' : 'badge-success')}">
+                                                    ${mem.is_expired ? 'Expired' : (mem.is_expiring_soon ? 'Expiring Soon' : 'Active')}
+                                                </span>
+                                            </div>
+                                            
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Days Remaining</div>
+                                                    <div style="font-weight: 600; color: ${mem.days_remaining < 5 ? 'var(--danger)' : 'var(--text)'};">
+                                                        ${mem.days_remaining > 0 ? mem.days_remaining + ' days' : 'Expired'}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Auto Renew</div>
+                                                    <div>${mem.auto_renew ? 'Enabled' : 'Disabled'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Payment Status</div>
+                                                    <div style="text-transform: capitalize;">${mem.payment_status}</div>
+                                                </div>
+                                                <div>
+                                                    <div style="color: var(--text-muted);">Amount</div>
+                                                    <div>₦${(mem.payment_amount || 0).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = '<div class="empty-state"><p>Error loading member data</p></div>';
+                }
+            } catch (error) {
+                console.error('Error fetching member dashboard:', error);
+                content.innerHTML = '<div class="empty-state"><p>Error loading member data</p></div>';
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/admin/messages');
+                const data = await response.json();
+                const list = document.getElementById('messages-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(msg => `
+                        <tr>
+                            <td>${msg.name}</td>
+                            <td>${msg.email}</td>
+                            <td>${msg.message}</td>
+                            <td>${new Date(msg.timestamp).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMessage(${msg.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ph ph-envelope"></i><p>No messages found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        async function deleteMember(id) {
+            if (!confirm('Are you sure you want to delete this member?')) return;
+            try {
+                const res = await fetch(`/api/admin/members/${id}`, { method: 'DELETE' });
+                if (res.ok) loadMembers();
+                else alert('Error deleting member');
+            } catch (err) {
+                alert('Error deleting member');
+            }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('Are you sure you want to delete this message?')) return;
+            try {
+                const res = await fetch(`/api/admin/messages/${id}`, { method: 'DELETE' });
+                if (res.ok) loadMessages();
+                else alert('Error deleting message');
+            } catch (err) {
+                alert('Error deleting message');
+            }
+        }
+
+        // ===== COWORKING MANAGEMENT FUNCTIONS =====
+
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/admin/coworking/bookings');
+                const data = await response.json();
+
+                const tbody = document.getElementById('bookings-tbody');
+
+                if (data.data && data.data.length > 0) {
+                    tbody.innerHTML = data.data.map(booking => `
+                        <tr>
+                            <td>${booking.booking_date}</td>
+                            <td>
+                                <div style="font-weight: 600;">${booking.full_name || 'N/A'}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">${booking.member_code || ''}</div>
+                            </td>
+                            <td><span class="badge">${booking.desk_number}</span></td>
+                            <td><span class="status-badge status-${booking.status}">${booking.status}</span></td>
+                            <td>${booking.check_in_time ? new Date(booking.check_in_time).toLocaleTimeString() : '-'}</td>
+                            <td>${booking.check_out_time ? new Date(booking.check_out_time).toLocaleTimeString() : '-'}</td>
+                            <td>₦${booking.amount_paid || 0}</td>
+                            <td>
+                                ${!booking.check_in_time ?
+                            `<button class="action-btn success" onclick="handleCheckIn(${booking.id})">
+                                        <i class="ph-fill ph-sign-in"></i> Check In
+                                    </button>` :
+                            !booking.check_out_time ?
+                                `<button class="action-btn danger" onclick="handleCheckOut(${booking.id})">
+                                        <i class="ph-fill ph-sign-out"></i> Check Out
+                                    </button>` :
+                                '<span style="color: var(--success);">✓ Completed</span>'
+                        }
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No bookings found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('bookings-tbody').innerHTML =
+                    '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading bookings</td></tr>';
+            }
+        }
+
+        function showAssignDeskModal() {
+            const select = document.querySelector('#assign-desk-form select[name="desk_number"]');
+            select.innerHTML = '<option value="">Select Desk</option>';
+            for (let i = 1; i <= 20; i++) {
+                select.innerHTML += `<option value="DESK-${i}">DESK-${i}</option>`;
+            }
+            document.getElementById('assign-desk-modal').classList.add('show');
+        }
+
+        async function handleAssignDesk(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/admin/coworking/assign-desk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Desk assigned successfully to ${result.member_name}`);
+                    closeModal('assign-desk-modal');
+                    form.reset();
+                    loadBookings();
+                } else {
+                    alert(result.error || 'Failed to assign desk');
+                }
+            } catch (error) {
+                console.error('Error assigning desk:', error);
+                alert('Error assigning desk');
+            }
+        }
+
+        async function handleCheckIn(bookingId) {
+            if (!confirm('Check in this member?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/check-in/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Member checked in successfully');
+                    loadBookings();
+                } else {
+                    alert(data.error || 'Check-in failed');
+                }
+            } catch (error) {
+                console.error('Error checking in:', error);
+                alert('Error during check-in');
+            }
+        }
+
+        async function handleCheckOut(bookingId) {
+            if (!confirm('Check out this member?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/check-out/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Member checked out successfully');
+                    loadBookings();
+                } else {
+                    alert(data.error || 'Check-out failed');
+                }
+            } catch (error) {
+                console.error('Error checking out:', error);
+                alert('Error during check-out');
+            }
+        }
+
+        // ===== MEETING ROOM MANAGEMENT FUNCTIONS =====
+
+        async function loadRoomBookings() {
+            try {
+                const response = await fetch('/api/admin/coworking/room-bookings');
+                const data = await response.json();
+
+                const tbody = document.getElementById('room-bookings-tbody');
+
+                if (data.data && data.data.length > 0) {
+                    tbody.innerHTML = data.data.map(booking => `
+                        <tr>
+                            <td>${booking.booking_date}</td>
+                            <td>${booking.start_time} - ${booking.end_time}</td>
+                            <td>
+                                <div style="font-weight: 600;">${booking.guest_name || 'N/A'}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-muted);">${booking.guest_email || ''}</div>
+                            </td>
+                            <td><span class="badge">${booking.room_name}</span></td>
+                            <td><span class="status-badge status-${booking.status}">${booking.status}</span></td>
+                            <td>${booking.check_in_time ? new Date(booking.check_in_time).toLocaleTimeString() : '-'}</td>
+                            <td>${booking.check_out_time ? new Date(booking.check_out_time).toLocaleTimeString() : '-'}</td>
+                            <td>
+                                ${!booking.check_in_time ?
+                            `<button class="action-btn success" onclick="handleRoomCheckIn(${booking.id})">
+                                        <i class="ph-fill ph-sign-in"></i> Check In
+                                    </button>` :
+                            !booking.check_out_time ?
+                                `<button class="action-btn danger" onclick="handleRoomCheckOut(${booking.id})">
+                                        <i class="ph-fill ph-sign-out"></i> Check Out
+                                    </button>` :
+                                '<span style="color: var(--success);">✓ Completed</span>'
+                        }
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No room bookings found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading room bookings:', error);
+                document.getElementById('room-bookings-tbody').innerHTML =
+                    '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading room bookings</td></tr>';
+            }
+        }
+
+        function showAssignRoomModal() {
+            document.getElementById('assign-room-modal').classList.add('show');
+        }
+
+        async function handleAssignRoom(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/admin/coworking/assign-room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Room assigned successfully to ${result.guest_name}`);
+                    closeModal('assign-room-modal');
+                    form.reset();
+                    loadRoomBookings();
+                } else {
+                    alert(result.error || 'Failed to assign room');
+                }
+            } catch (error) {
+                console.error('Error assigning room:', error);
+                alert('Error assigning room');
+            }
+        }
+
+        async function handleRoomCheckIn(bookingId) {
+            if (!confirm('Check in this guest?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/room-check-in/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Guest checked in successfully');
+                    loadRoomBookings();
+                } else {
+                    alert(data.error || 'Check-in failed');
+                }
+            } catch (error) {
+                console.error('Error checking in:', error);
+                alert('Error during check-in');
+            }
+        }
+
+        async function handleRoomCheckOut(bookingId) {
+            if (!confirm('Check out this guest?')) return;
+
+            try {
+                const response = await fetch(`/api/coworking/room-check-out/${bookingId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Guest checked out successfully');
+                    loadRoomBookings();
+                } else {
+                    alert(data.error || 'Check-out failed');
+                }
+            } catch (error) {
+                console.error('Error checking out:', error);
+                alert('Error during check-out');
+            }
+        }
+
+        // ===== EXPIRED BOOKINGS FUNCTIONS =====
+
+        async function loadExpiredBookings() {
+            try {
+                const response = await fetch('/api/admin/coworking/expired-bookings');
+                const data = await response.json();
+
+                const tbody = document.getElementById('expired-bookings-tbody');
+                const countBadge = document.getElementById('expired-count');
+                const cancelAllBtn = document.getElementById('cancel-all-btn');
+                const cancelSelectedBtn = document.getElementById('cancel-selected-btn');
+
+                const desks = data.data.desks || [];
+                const rooms = data.data.rooms || [];
+                const totalExpired = desks.length + rooms.length;
+
+                countBadge.textContent = totalExpired;
+                cancelAllBtn.style.display = totalExpired > 0 ? 'block' : 'none';
+
+                if (totalExpired === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--success);">✓ No expired bookings</td></tr>';
+                    cancelSelectedBtn.style.display = 'none';
+                    return;
+                }
+
+                const rows = [];
+
+                // Add desk bookings
+                desks.forEach(desk => {
+                    const expiredHours = Math.floor((new Date() - new Date(desk.expires_at)) / 3600000);
+                    rows.push(`
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td><input type="checkbox" class="expired-checkbox" data-id="${desk.id}" data-type="desk"></td>
+                            <td><span class="badge badge-primary">Desk</span></td>
+                            <td>#${desk.id}</td>
+                            <td>${desk.full_name}</td>
+                            <td>${desk.desk_number}</td>
+                            <td>${desk.booking_date}</td>
+                            <td style="color: #ef4444;">${expiredHours}h ago</td>
+                            <td>
+                                <button class="action-btn danger" onclick="cancelSingleBooking(${desk.id}, 'desk')">
+                                    <i class="ph-fill ph-x"></i> Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                // Add room bookings
+                rooms.forEach(room => {
+                    const expiredHours = Math.floor((new Date() - new Date(room.expires_at)) / 3600000);
+                    rows.push(`
+                        <tr style="background: rgba(239, 68, 68, 0.05);">
+                            <td><input type="checkbox" class="expired-checkbox" data-id="${room.id}" data-type="room"></td>
+                            <td><span class="badge badge-warning">Room</span></td>
+                            <td>#${room.id}</td>
+                            <td>${room.guest_name}</td>
+                            <td>${room.room_name}</td>
+                            <td>${room.booking_date}</td>
+                            <td style="color: #ef4444;">${expiredHours}h ago</td>
+                            <td>
+                                <button class="action-btn danger" onclick="cancelSingleBooking(${room.id}, 'room')">
+                                    <i class="ph-fill ph-x"></i> Cancel
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                tbody.innerHTML = rows.join('');
+
+                // Show/hide cancel selected button based on checkboxes
+                document.querySelectorAll('.expired-checkbox').forEach(cb => {
+                    cb.addEventListener('change', updateCancelSelectedButton);
+                });
+
+            } catch (error) {
+                console.error('Error loading expired bookings:', error);
+                document.getElementById('expired-bookings-tbody').innerHTML =
+                    '<tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading expired bookings</td></tr>';
+            }
+        }
+
+        function toggleAllExpired(checkbox) {
+            document.querySelectorAll('.expired-checkbox').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+            updateCancelSelectedButton();
+        }
+
+        function updateCancelSelectedButton() {
+            const selected = document.querySelectorAll('.expired-checkbox:checked').length;
+            const btn = document.getElementById('cancel-selected-btn');
+            btn.style.display = selected > 0 ? 'block' : 'none';
+            btn.textContent = `Cancel Selected (${selected})`;
+        }
+
+        async function cancelSingleBooking(id, type) {
+            if (!confirm(`Cancel this ${type} booking?`)) return;
+            await cancelBookings([id], type);
+        }
+
+        async function cancelSelectedExpired() {
+            const checkboxes = document.querySelectorAll('.expired-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            if (!confirm(`Cancel ${checkboxes.length} selected booking(s)?`)) return;
+
+            const deskIds = [];
+            const roomIds = [];
+
+            checkboxes.forEach(cb => {
+                const id = parseInt(cb.dataset.id);
+                if (cb.dataset.type === 'desk') {
+                    deskIds.push(id);
+                } else {
+                    roomIds.push(id);
+                }
+            });
+
+            if (deskIds.length > 0) await cancelBookings(deskIds, 'desk');
+            if (roomIds.length > 0) await cancelBookings(roomIds, 'room');
+        }
+
+        async function cancelAllExpired() {
+            const checkboxes = document.querySelectorAll('.expired-checkbox');
+            if (checkboxes.length === 0) return;
+
+            if (!confirm(`Cancel ALL ${checkboxes.length} expired booking(s)?`)) return;
+
+            const deskIds = [];
+            const roomIds = [];
+
+            checkboxes.forEach(cb => {
+                const id = parseInt(cb.dataset.id);
+                if (cb.dataset.type === 'desk') {
+                    deskIds.push(id);
+                } else {
+                    roomIds.push(id);
+                }
+            });
+
+            if (deskIds.length > 0) await cancelBookings(deskIds, 'desk');
+            if (roomIds.length > 0) await cancelBookings(roomIds, 'room');
+        }
+
+        async function cancelBookings(ids, type) {
+            try {
+                const response = await fetch('/api/admin/coworking/cancel-bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ booking_ids: ids, booking_type: type })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`${result.cancelled_count} booking(s) cancelled successfully`);
+                    // Reload all booking tables
+                    loadBookings();
+                    loadRoomBookings();
+                    loadExpiredBookings();
+                } else {
+                    alert(result.error || 'Failed to cancel bookings');
+                }
+            } catch (error) {
+                console.error('Error cancelling bookings:', error);
+                alert('Error cancelling bookings');
+            }
+        }
+
+        // ===== EMAIL FUNCTIONS =====
+
+        function showEmailModal(toEmail, subjectPrefix = '', recipientName = '') {
+            const modal = document.getElementById('email-modal');
+            const form = document.getElementById('email-form');
+
+            // Pre-fill recipient email
+            form.querySelector('[name="to"]').value = toEmail;
+
+            // Pre-fill subject if provided
+            if (subjectPrefix) {
+                form.querySelector('[name="subject"]').value = subjectPrefix;
+            } else {
+                form.querySelector('[name="subject"]').value = '';
+            }
+
+            // Clear message
+            form.querySelector('[name="message"]').value = '';
+
+            // Show modal
+            modal.classList.add('show');
+        }
+
+        async function handleSendEmail(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/admin/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Email sent successfully to ${data.to}`);
+                    closeModal('email-modal');
+                    form.reset();
+                } else {
+                    alert(result.error || 'Failed to send email');
+                }
+            } catch (error) {
+                console.error('Error sending email:', error);
+                alert('Error sending email');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/admin/login.html';
+            } catch (err) {
+                console.error('Error logging out:', err);
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        async function loadCourses() {
+            try {
+                const list = document.getElementById('courses-list');
+
+                // Add fade out effect
+                list.style.opacity = '0.5';
+                list.style.transition = 'opacity 0.2s ease';
+
+                const response = await fetch('/api/courses');
+                const data = await response.json();
+
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(course => `
+                        <tr>
+                            <td>${course.title}</td>
+                            <td>${course.track || 'General'}</td>
+                            <td>${course.duration_weeks} weeks</td>
+                            <td>₦${course.price.toLocaleString()}</td>
+                            <td><span class="badge badge-success">${course.status}</span></td>
+                            <td>
+                                <button class="btn btn-sm" onclick="editCourse(${course.id})">
+                                    <i class="ph-fill ph-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCourse(${course.id}, '${course.title.replace(/'/g, "\\'")}')">
+                                    <i class="ph-fill ph-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ph ph-books"></i><p>No courses yet</p></td></tr>';
+                }
+
+                // Fade back in
+                setTimeout(() => {
+                    list.style.opacity = '1';
+                }, 50);
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                const list = document.getElementById('courses-list');
+                list.style.opacity = '1';
+            }
+        }
+
+        async function loadRegistrations() {
+            try {
+                const response = await fetch('/api/admin/registrations');
+                const data = await response.json();
+
+                const list = document.getElementById('registrations-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(reg => `
+                        <tr>
+                            <td>${reg.firstname} ${reg.surname}</td>
+                            <td>${reg.email_personal}</td>
+                            <td>${reg.course_title}</td>
+                            <td>${reg.schedule}</td>
+                            <td><span class="badge badge-${reg.payment_status === 'paid' ? 'success' : 'warning'}">${reg.payment_status}</span></td>
+                            <td>${new Date(reg.created_at).toLocaleString()}</td>
+                            <td>
+                                <button class="action-btn success" onclick="showEmailModal('${reg.email_personal}', 'Re: ${reg.course_title} Registration', '${reg.firstname} ${reg.surname}')">
+                                    <i class="ph-fill ph-arrow-u-up-left"></i> Reply
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="ph ph-notebook"></i><p>No registrations yet</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading registrations:', error);
+            }
+        }
+
+        async function loadEvents() {
+            try {
+                const list = document.getElementById('events-list');
+
+                // Add fade out effect
+                list.style.opacity = '0.5';
+                list.style.transition = 'opacity 0.2s ease';
+
+                const response = await fetch('/api/admin/events');
+                const data = await response.json();
+
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(event => `
+                        <tr>
+                            <td>${event.title}</td>
+                            <td>${event.event_type}</td>
+                            <td>${new Date(event.event_date).toLocaleDateString()}</td>
+                            <td>${event.location}</td>
+                            <td>${event.registered_count || 0}/${event.max_attendees}</td>
+                            <td>
+                                <button class="btn btn-sm" onclick="editEvent(${event.id})">
+                                    <i class="ph-fill ph-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEvent(${event.id}, '${event.title.replace(/'/g, "\\'")}')">
+                                    <i class="ph-fill ph-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-calendar"></i><p>No events yet</p></td></tr>';
+                }
+
+                // Fade back in
+                setTimeout(() => {
+                    list.style.opacity = '1';
+                }, 50);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                const list = document.getElementById('events-list');
+                list.style.opacity = '1';
+            }
+        }
+
+        async function loadStartups() {
+            try {
+                const response = await fetch('/api/admin/startups');
+                const data = await response.json();
+
+                const list = document.getElementById('startups-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(startup => `
+                        <tr>
+                            <td>${startup.startup_name}</td>
+                            <td>${startup.founder_name}</td>
+                            <td>${startup.industry}</td>
+                            <td>${startup.stage}</td>
+                            <td><span class="badge badge-warning">${startup.application_status}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="updateStartupStatus(${startup.id}, 'accepted')">Accept</button>
+                                <button class="btn btn-sm btn-danger" onclick="updateStartupStatus(${startup.id}, 'rejected')">Reject</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-rocket-launch"></i><p>No applications yet</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading startups:', error);
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/admin/analytics/dashboard');
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    document.getElementById('stat-revenue').textContent = '₦' + (data.data.total_revenue || 0).toLocaleString();
+                    document.getElementById('stat-active-courses').textContent = data.data.active_courses || 0;
+                    document.getElementById('stat-coworking').textContent = data.data.active_members || 0;
+                    document.getElementById('stat-students').textContent = data.data.total_students || 0;
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Modal functions
+        function showCreateCourseModal() {
+            document.getElementById('create-course-modal').classList.add('show');
+        }
+
+        function showCreateEventModal() {
+            document.getElementById('create-event-modal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Form submissions
+        document.getElementById('create-course-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/courses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Course created successfully!');
+                    closeModal('create-course-modal');
+                    e.target.reset();
+                    loadCourses();
+                }
+            } catch (error) {
+                alert('Error creating course');
+            }
+        });
+
+        document.getElementById('create-event-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Event created successfully!');
+                    closeModal('create-event-modal');
+                    e.target.reset();
+                    loadEvents();
+                }
+            } catch (error) {
+                alert('Error creating event');
+            }
+        });
+
+        async function updateStartupStatus(id, status) {
+            try {
+                const response = await fetch(`/api/admin/startups/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ application_status: status })
+                });
+
+                if (response.ok) {
+                    alert(`Application ${status}!`);
+                    loadStartups();
+                }
+            } catch (error) {
+                alert('Error updating status');
+            }
+        }
+
+        // Load admins (Super Admin only)
+        async function loadAdmins() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+
+                const list = document.getElementById('admins-list');
+                if (data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(admin => `
+                        <tr>
+                            <td>${admin.username}</td>
+                            <td>${admin.email || 'N/A'}</td>
+                            <td><span class="badge ${admin.role === 'super_admin' ? 'badge-success' : 'badge-warning'}">${admin.role === 'super_admin' ? 'Super Admin' : 'Admin'}</span></td>
+                            <td><span class="badge ${admin.is_active ? 'badge-success' : 'badge-danger'}">${admin.is_active ? 'Active' : 'Inactive'}</span></td>
+                            <td>${new Date(admin.created_at).toLocaleDateString()}</td>
+                            <td>
+                                ${admin.id !== currentUser.id ? `
+                                    <button class="btn btn-sm ${admin.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleAdminStatus(${admin.id}, ${admin.is_active})">
+                                        ${admin.is_active ? 'Deactivate' : 'Activate'}
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteAdmin(${admin.id}, '${admin.username}')">Delete</button>
+                                ` : '<span style="color: var(--text-muted);">Current User</span>'}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="ph ph-shield-check"></i><p>No admins found</p></td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading admins:', error);
+            }
+        }
+
+        // Modal functions
+        function showCreateAdminModal() {
+            document.getElementById('create-admin-modal').classList.add('show');
+        }
+
+        // Toggle admin status
+        async function toggleAdminStatus(id, currentStatus) {
+            const newStatus = currentStatus ? 0 : 1;
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: newStatus })
+                });
+
+                if (response.ok) {
+                    alert(`Admin ${newStatus ? 'activated' : 'deactivated'} successfully!`);
+                    loadAdmins();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Error updating admin status');
+                }
+            } catch (error) {
+                alert('Error updating admin status');
+            }
+        }
+
+        // Delete admin
+        async function deleteAdmin(id, username) {
+            if (!confirm(`Are you sure you want to delete admin "${username}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Admin deleted successfully!');
+                    loadAdmins();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Error deleting admin');
+                }
+            } catch (error) {
+                alert('Error deleting admin');
+            }
+        }
+
+        // Create admin form submission
+        document.getElementById('create-admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Admin created successfully!');
+                    closeModal('create-admin-modal');
+                    e.target.reset();
+                    loadAdmins();
+                } else {
+                    alert(result.error || 'Error creating admin');
+                }
+            } catch (error) {
+                alert('Error creating admin');
+            }
+        });
+
+        // Initialize
+        checkAuth();
+        loadOverview();
+    </script>
+    <!-- Create Member Modal (Quick Add) -->
+    <div id="create-member-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Quick Add Member</h2>
+                <button class="close-btn" onclick="closeModal('create-member-modal')">&times;</button>
+            </div>
+            <form id="create-member-form">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone">
+                </div>
+                <div class="form-group">
+                    <label>Member Type *</label>
+                    <select name="member_type" required>
+                        <option value="student">Student</option>
+                        <option value="coworking">Co-working</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <div class="alert-info"
+                    style="background: rgba(37, 99, 235, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    <i class="ph-fill ph-info"></i> A temporary password will be generated and emailed to the user.
+                </div>
+                <button type="submit" class="btn">Create Member</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Show Create Member Modal
+        function showCreateMemberModal() {
+            document.getElementById('create-member-modal').classList.add('show');
+        }
+
+        // Create Member Form Submission
+        document.getElementById('create-member-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const btn = form.querySelector('button[type="submit"]');
+
+            try {
+                btn.innerText = 'Creating...';
+                btn.disabled = true;
+
+                const res = await fetch('/api/admin/members/quick-add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (res.ok) {
+                    alert(`Member created successfully!\nEmail: ${result.email}\nTemp Password: ${result.temporary_password}`);
+                    closeModal('create-member-modal');
+                    form.reset();
+                    loadMembers(); // Refresh list
+                } else {
+                    alert(result.error || 'Failed to create member');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred');
+            } finally {
+            }
+        });
+    </script>
+    <!-- Edit Course Modal -->
+    <div id="edit-course-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Course</h2>
+                <button class="close-btn" onclick="closeModal('edit-course-modal')">&times;</button>
+            </div>
+            <form id="edit-course-form" onsubmit="handleEditCourse(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Course Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Track *</label>
+                    <select name="track" required>
+                        <option value="">Select track</option>
+                        <option value="Technical Skills">Technical Skills</option>
+                        <option value="Business Skills">Business Skills</option>
+                        <option value="Design">Design</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Duration (weeks) *</label>
+                    <input type="number" name="duration_weeks" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" required>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail URL</label>
+                    <input type="text" name="thumbnail_url">
+                </div>
+                <button type="submit" class="btn">Update Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div id="edit-event-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Event</h2>
+                <button class="close-btn" onclick="closeModal('edit-event-modal')">&times;</button>
+            </div>
+            <form id="edit-event-form" onsubmit="handleEditEvent(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Event Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Event Type *</label>
+                    <select name="event_type" required>
+                        <option value="">Select type</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Hackathon">Hackathon</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Training">Training</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date & Time *</label>
+                    <input type="datetime-local" name="event_date" required>
+                </div>
+                <div class="form-group">
+                    <label>End Date & Time *</label>
+                    <input type="datetime-local" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location *</label>
+                    <input type="text" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label>Max Attendees *</label>
+                    <input type="number" name="max_attendees" required>
+                </div>
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" name="price" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Status *</label>
+                    <select name="status" required>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail URL</label>
+                    <input type="text" name="thumbnail_url">
+                </div>
+                <button type="submit" class="btn">Update Event</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Service Modal -->
+    <div id="create-service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Service</h2>
+                <button class="close-btn" onclick="closeModal('create-service-modal')">&times;</button>
+            </div>
+            <form id="create-service-form" onsubmit="handleCreateService(event)">
+                <div class="form-group">
+                    <label>Icon (Phosphor Icon Class) *</label>
+                    <input type="text" name="icon" placeholder="ph-fill ph-rocket" required>
+                    <small style="color: var(--text-muted);">Use Phosphor icon classes (e.g., ph-fill ph-rocket)</small>
+                </div>
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Create Service</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Service Modal -->
+    <div id="edit-service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Service</h2>
+                <button class="close-btn" onclick="closeModal('edit-service-modal')">&times;</button>
+            </div>
+            <form id="edit-service-form" onsubmit="handleEditService(event)">
+                <input type="hidden" name="id">
+                <div class="form-group">
+                    <label>Icon (Phosphor Icon Class) *</label>
+                    <input type="text" name="icon" required>
+                </div>
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Update Service</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Desk Modal -->
+    <div id="assign-desk-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Desk Manually</h2>
+                <button class="close-btn" onclick="closeModal('assign-desk-modal')">&times;</button>
+            </div>
+            <form id="assign-desk-form" onsubmit="handleAssignDesk(event)">
+                <div class="form-group">
+                    <label>Member Code *</label>
+                    <input type="text" name="member_code" required placeholder="e.g., KDIH-2025-0001">
+                </div>
+                <div class="form-group">
+                    <label>Desk Number *</label>
+                    <select name="desk_number" required>
+                        <option value="">Select Desk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Booking Date *</label>
+                    <input type="date" name="booking_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Booking Type *</label>
+                    <select name="booking_type" required>
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Assign Desk</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Room Modal -->
+    <div id="assign-room-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Meeting Room</h2>
+                <button class="close-btn" onclick="closeModal('assign-room-modal')">&times;</button>
+            </div>
+            <form id="assign-room-form" onsubmit="handleAssignRoom(event)">
+                <div class="form-group">
+                    <label>Guest Name *</label>
+                    <input type="text" name="guest_name" required placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label>Guest Email *</label>
+                    <input type="email" name="guest_email" required placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Guest Phone</label>
+                    <input type="tel" name="guest_phone" placeholder="+234...">
+                </div>
+                <div class="form-group">
+                    <label>Organization</label>
+                    <input type="text" name="guest_organization" placeholder="Company/Organization">
+                </div>
+                <div class="form-group">
+                    <label>Room *</label>
+                    <select name="room_name" required>
+                        <option value="">Select Room</option>
+                        <option value="Conference Room A">Conference Room A (10 pax)</option>
+                        <option value="Conference Room B">Conference Room B (6 pax)</option>
+                        <option value="Meeting Pod 1">Meeting Pod 1 (4 pax)</option>
+                        <option value="Meeting Pod 2">Meeting Pod 2 (4 pax)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Booking Date *</label>
+                    <input type="date" name="booking_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Time *</label>
+                    <input type="time" name="start_time" required>
+                </div>
+                <div class="form-group">
+                    <label>End Time *</label>
+                    <input type="time" name="end_time" required>
+                </div>
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <textarea name="purpose" rows="2" placeholder="Meeting purpose..."></textarea>
+                </div>
+                <button type="submit" class="btn">Assign Room</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="email-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Send Email</h2>
+                <button class="close-btn" onclick="closeModal('email-modal')">&times;</button>
+            </div>
+            <form id="email-form" onsubmit="handleSendEmail(event)">
+                <div class="form-group">
+                    <label>To *</label>
+                    <input type="email" name="to" required readonly style="background: var(--primary);">
+                </div>
+                <div class="form-group">
+                    <label>Subject *</label>
+                    <input type="text" name="subject" required placeholder="Email subject">
+                </div>
+                <div class="form-group">
+                    <label>Message *</label>
+                    <textarea name="message" rows="10" required placeholder="Your message here..."></textarea>
+                </div>
+                <button type="submit" class="btn">Send Email</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard JavaScript -->
+    <script>
+        // Analytics state
+        let currentPeriod = '30d';
+        let charts = {};
+
+        // Load analytics data
+        async function loadAnalytics(period = '30d') {
+            currentPeriod = period;
+
+            // Update button states
+            ['7d', '30d', '90d', '1y'].forEach(p => {
+                const btn = document.getElementById(`btn-${p}`);
+                if (btn) {
+                    btn.style.background = p === period ? 'var(--accent)' : 'var(--sidebar)';
+                }
+            });
+
+            try {
+                // Load all analytics in parallel
+                const [overview, revenue, funnel, growth, coworking, courses] = await Promise.all([
+                    fetch('/api/analytics/overview').then(r => r.json()),
+                    fetch(`/api/analytics/revenue?period=${period}`).then(r => r.json()),
+                    fetch('/api/analytics/conversion-funnel').then(r => r.json()),
+                    fetch(`/api/analytics/user-growth?period=${period}`).then(r => r.json()),
+                    fetch('/api/analytics/coworking-stats').then(r => r.json()),
+                    fetch('/api/analytics/course-performance').then(r => r.json())
+                ]);
+
+                // Update overview cards
+                updateOverviewCards(overview.data);
+
+                // Update charts
+                updateRevenueChart(revenue.data);
+                updateConversionFunnel(funnel.data);
+                updateUserGrowthChart(growth.data);
+                updateRevenueSourceChart(revenue.data);
+                updateCoursePerformanceTable(courses.data || []);
+
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+                alert('Failed to load analytics data. Please try again.');
+            }
+        }
+
+        // Update overview cards
+        function updateOverviewCards(data) {
+            // Total Revenue
+            const revenue = data.totalRevenue?.total || 0;
+            document.getElementById('stat-revenue').textContent = `₦${revenue.toLocaleString()}`;
+            document.getElementById('stat-revenue-change').textContent = `All time`;
+
+            // Total Members
+            const members = data.totalMembers?.total || 0;
+            document.getElementById('stat-total-members').textContent = members;
+            document.getElementById('stat-members-type').textContent = `Active members`;
+
+            // Active Courses
+            const courses = data.activeCourses?.total || 0;
+            document.getElementById('stat-active-courses').textContent = courses;
+
+            // Upcoming Events
+            const events = data.upcomingEvents?.total || 0;
+            document.getElementById('stat-upcoming-events').textContent = events;
+
+            // Coworking Occupancy
+            const booked = data.coworkingOccupancy?.booked || 0;
+            const totalDesks = data.coworkingOccupancy?.total_desks || 20;
+            const occupancy = totalDesks > 0 ? ((booked / totalDesks) * 100).toFixed(1) : 0;
+            document.getElementById('stat-occupancy').textContent = `${occupancy}%`;
+            document.getElementById('stat-occupancy-detail').textContent = `${booked}/${totalDesks} desks`;
+        }
+
+        // Update revenue chart
+        function updateRevenueChart(data) {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+
+            const timeline = data.timeline || [];
+            const labels = timeline.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const revenues = timeline.map(d => d.revenue || 0);
+
+            if (charts.revenue) {
+                charts.revenue.destroy();
+            }
+
+            charts.revenue = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue (₦)',
+                        data: revenues,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => `₦${value.toLocaleString()}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update conversion funnel
+        function updateConversionFunnel(data) {
+            const container = document.getElementById('conversionFunnel');
+            if (!container || !data.stages) return;
+
+            const stages = data.stages;
+            const maxCount = Math.max(...stages.map(s => s.count));
+
+            container.innerHTML = stages.map((stage, index) => {
+                const width = maxCount > 0 ? (stage.count / maxCount * 100) : 0;
+                const convRate = data.conversionRates ? Object.values(data.conversionRates)[index] : 0;
+
+                return `
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.875rem;">${stage.name}</span>
+                            <span style="font-weight: 600;">${stage.count}</span>
+                        </div>
+                        <div style="height: 30px; background: rgba(37, 99, 235, 0.1); border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: ${width}%; background: linear-gradient(90deg, #2563eb, #3b82f6); display: flex; align-items: center; justify-content: flex-end; padding: 0 0.5rem; color: white; font-size: 0.75rem;">
+                                ${convRate ? `${convRate}%` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update user growth chart
+        function updateUserGrowthChart(data) {
+            const ctx = document.getElementById('userGrowthChart');
+            if (!ctx) return;
+
+            const timeline = data.timeline || [];
+            const labels = timeline.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const members = timeline.map(d => d.newMembers || 0);
+
+            if (charts.userGrowth) {
+                charts.userGrowth.destroy();
+            }
+
+            charts.userGrowth = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New Members',
+                        data: members,
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update revenue by source chart
+        function updateRevenueSourceChart(data) {
+            const ctx = document.getElementById('revenueSourceChart');
+            if (!ctx) return;
+
+            const bySource = data.bySource || [];
+            const labels = bySource.map(s => s.source.replace('_', ' ').toUpperCase());
+            const revenues = bySource.map(s => s.revenue || 0);
+
+            if (charts.revenueSource) {
+                charts.revenueSource.destroy();
+            }
+
+            charts.revenueSource = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: revenues,
+                        backgroundColor: [
+                            '#2563eb',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#8b5cf6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update course performance table
+        function updateCoursePerformanceTable(courses) {
+            const tbody = document.getElementById('coursePerformanceTable');
+            if (!tbody) return;
+
+            if (!courses || courses.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="ph ph-graduation-cap"></i>
+                            <p>No course data available</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = courses.map(course => `
+                <tr>
+                    <td>${course.title || 'N/A'}</td>
+                    <td>${course.track || 'N/A'}</td>
+                    <td>${course.enrollments || 0}</td>
+                    <td>${course.completions || 0}</td>
+                    <td>${course.completionRate ? course.completionRate.toFixed(1) + '%' : '0%'}</td>
+                    <td>₦${(course.revenue || 0).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ===== BACKUP FUNCTIONS =====
+
+        // Load backups list
+        async function loadBackups() {
+            try {
+                const response = await fetch('/api/admin/backup/list');
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    // Update storage info
+                    document.getElementById('backup-count').textContent = data.storage.backupCount || 0;
+                    document.getElementById('backup-storage').textContent = data.storage.totalSizeFormatted || '0 MB';
+
+                    if (data.storage.newestBackup) {
+                        const date = new Date(data.storage.newestBackup);
+                        document.getElementById('latest-backup').textContent = date.toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    } else {
+                        document.getElementById('latest-backup').textContent = 'Never';
+                    }
+
+                    // Populate backups table
+                    const tbody = document.getElementById('backups-list');
+                    if (data.backups && data.backups.length > 0) {
+                        tbody.innerHTML = data.backups.map(backup => `
+                            <tr>
+                                <td>${backup.filename}</td>
+                                <td>${backup.sizeFormatted}</td>
+                                <td>${new Date(backup.created).toLocaleString()}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" onclick="downloadBackup('${backup.filename}')">
+                                        <i class="ph-fill ph-download"></i> Download
+                                    </button>
+                                    <button class="btn btn-sm" onclick="restoreBackupConfirm('${backup.filename}')">
+                                        <i class="ph-fill ph-arrow-counter-clockwise"></i> Restore
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteBackupConfirm('${backup.filename}')">
+                                        <i class="ph-fill ph-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="empty-state">
+                                    <i class="ph ph-database"></i>
+                                    <p>No backups found. Create your first backup!</p>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load backups:', error);
+                alert('Failed to load backups. Please try again.');
+            }
+        }
+
+        // Create manual backup
+        async function createManualBackup() {
+            if (!confirm('Create a backup now?')) return;
+
+            try {
+                const response = await fetch('/api/admin/backup/create', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.message) {
+                    alert(`Backup created successfully: ${data.backup.filename}`);
+                    loadBackups(); // Refresh list
+                }
+            } catch (error) {
+                console.error('Backup creation failed:', error);
+                alert('Failed to create backup. Please try again.');
+            }
+        }
+
+        // Restore backup with confirmation
+        async function restoreBackupConfirm(filename) {
+            if (!confirm(`⚠️  WARNING: Restore database from backup?\n\nThis will replace the current database with:\n${filename}\n\nA safety backup will be created before restore.\n\nContinue?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/backup/restore', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filename })
+                });
+                const data = await response.json();
+
+                if (data.message) {
+                    alert(`✅ Restore completed!\n\nRestored from: ${data.result.restoredFrom}\nSafety backup: ${data.result.safetyBackup}\n\nPlease refresh the page.`);
+                    setTimeout(() => window.location.reload(), 2000);
+                }
+            } catch (error) {
+                console.error('Restore failed:', error);
+                alert('Failed to restore backup. Please try again.');
+            }
+        }
+
+        // Delete backup with confirmation
+        async function deleteBackupConfirm(filename) {
+            if (!confirm(`Delete backup?\n\n${filename}\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/backup/${filename}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.message) {
+                    alert('Backup deleted successfully');
+                    loadBackups(); // Refresh list
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                alert('Failed to delete backup. Please try again.');
+            }
+        }
+
+        // Download backup
+        function downloadBackup(filename) {
+            window.location.href = `/api/admin/backup/download/${filename}`;
+        }
+
+        // Initialize analytics when tab is switched
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = function (tab) {
+            originalSwitchTab(tab);
+            if (tab === 'analytics') {
+                setTimeout(() => loadAnalytics(currentPeriod), 100);
+            }
+            if (tab === 'backups') {
+                setTimeout(() => loadBackups(), 100);
+            }
+        };
+    </script>
+
+    <script src="admin-edit.js"></script>
+</body>
+
+</html>
