@@ -907,28 +907,51 @@ router.post('/gallery/reorder', requireAuth, (req, res) => {
 
 // ===== CERTIFICATES ENDPOINTS =====
 
-// Generate certificate
-router.post('/certificates/generate', requireAuth, (req, res) => {
-    const { student_id, course_id, student_name, course_title, certificate_type } = req.body;
+// Import certificate generator
+const certificateGenerator = require('../utils/certificateGenerator');
 
-    // Generate unique certificate number and verification code
-    const certificate_number = `KDIH-${Date.now()}-${student_id}`;
-    const verification_code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const issue_date = new Date().toISOString().split('T')[0];
+// Generate certificate with systematic numbering
+router.post('/certificates/generate', requireAuth, async (req, res) => {
+    try {
+        const { student_id, course_id, student_name, course_title, certificate_type } = req.body;
 
-    const sql = `INSERT INTO certificates (certificate_number, student_id, course_id, student_name, course_title, 
-                 issue_date, certificate_type, verification_code) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        // Validate required fields
+        if (!student_name || !course_title) {
+            return res.status(400).json({ error: 'Student name and course title are required' });
+        }
 
-    db.run(sql, [certificate_number, student_id, course_id, student_name, course_title, issue_date, certificate_type, verification_code], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({
-            message: 'success',
-            certificate_id: this.lastID,
-            certificate_number,
-            verification_code
+        // Generate systematic certificate number
+        const certData = await certificateGenerator.generateCertificateNumber(course_title, student_id);
+
+        const sql = `INSERT INTO certificates (certificate_number, student_id, course_id, student_name, course_title, 
+                     issue_date, certificate_type, verification_code) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        db.run(sql, [
+            certData.certificate_number,
+            student_id,
+            course_id,
+            student_name,
+            course_title,
+            certData.issue_date,
+            certificate_type || 'Completion',
+            certData.verification_code
+        ], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({
+                message: 'success',
+                certificate_id: this.lastID,
+                certificate_number: certData.certificate_number,
+                verification_code: certData.verification_code,
+                course_code: certData.course_code,
+                year: certData.year,
+                sequence: certData.sequence
+            });
         });
-    });
+    } catch (error) {
+        console.error('Error generating certificate:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Verify certificate
@@ -2398,42 +2421,67 @@ router.post('/startups/apply-with-email', async (req, res) => {
         });
 });
 
-// Enhanced certificate generation with email
+// Enhanced certificate generation with email (using systematic numbering)
 router.post('/certificates/generate-with-email', requireAuth, async (req, res) => {
-    const { student_id, course_id, student_name, student_email, course_title, certificate_type } = req.body;
+    try {
+        const { student_id, course_id, student_name, student_email, course_title, certificate_type } = req.body;
 
-    const certificate_number = `KDIH-${Date.now()}-${student_id}`;
-    const verification_code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    const issue_date = new Date().toISOString().split('T')[0];
-
-    const sql = `INSERT INTO certificates (certificate_number, student_id, course_id, student_name, course_title, 
-                 issue_date, certificate_type, verification_code) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    db.run(sql, [certificate_number, student_id, course_id, student_name, course_title, issue_date, certificate_type, verification_code], async function (err) {
-        if (err) {
-            logger.error("Certificate generation error:", err.message);
-            return res.status(500).json({ error: err.message });
+        // Validate required fields
+        if (!student_name || !course_title) {
+            return res.status(400).json({ error: 'Student name and course title are required' });
         }
 
-        // Send certificate via email
-        if (student_email) {
-            await email.sendEmail(student_email, 'certificateIssued', [
-                student_name,
-                course_title,
-                certificate_number,
-                verification_code
-            ]);
-        }
+        // Generate systematic certificate number
+        const certData = await certificateGenerator.generateCertificateNumber(course_title, student_id);
 
-        logger.info(`Certificate generated: ${certificate_number} for ${student_name}`);
-        res.json({
-            message: 'success',
-            certificate_id: this.lastID,
-            certificate_number,
-            verification_code
+        const sql = `INSERT INTO certificates (certificate_number, student_id, course_id, student_name, course_title, 
+                     issue_date, certificate_type, verification_code) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        db.run(sql, [
+            certData.certificate_number,
+            student_id,
+            course_id,
+            student_name,
+            course_title,
+            certData.issue_date,
+            certificate_type || 'Completion',
+            certData.verification_code
+        ], async function (err) {
+            if (err) {
+                logger.error("Certificate generation error:", err.message);
+                return res.status(500).json({ error: err.message });
+            }
+
+            // Send certificate via email
+            if (student_email) {
+                try {
+                    await email.sendEmail(student_email, 'certificateIssued', [
+                        student_name,
+                        course_title,
+                        certData.certificate_number,
+                        certData.verification_code
+                    ]);
+                } catch (emailErr) {
+                    logger.error(`Failed to send certificate email: ${emailErr.message}`);
+                }
+            }
+
+            logger.info(`Certificate generated: ${certData.certificate_number} for ${student_name}`);
+            res.json({
+                message: 'success',
+                certificate_id: this.lastID,
+                certificate_number: certData.certificate_number,
+                verification_code: certData.verification_code,
+                course_code: certData.course_code,
+                year: certData.year,
+                sequence: certData.sequence
+            });
         });
-    });
+    } catch (error) {
+        logger.error('Error generating certificate with email:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // ===== SUPER ADMIN MIDDLEWARE =====
