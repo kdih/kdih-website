@@ -134,14 +134,14 @@ router.get('/stats', async (req, res) => {
         `;
 
         const participation = await new Promise((resolve, reject) => {
-            db.get(womenParticipationQuery, [], (err, row) => {
+            db.get(genderQuery, [], (err, row) => {
                 if (err) reject(err);
                 else resolve(row);
             });
         });
 
         const womenPercentage = participation.total > 0
-            ? Math.round((participation.women_count / participation.total) * 100)
+            ? Math.round((participation.female_count / participation.total) * 100)
             : 40; // Default to 40% if no data
 
         stats.push({
