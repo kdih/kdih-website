@@ -105,7 +105,12 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    window.location.href = '/admin/dashboard.html';
+                    // Redirect based on role
+                    if (data.user && data.user.role === 'finance') {
+                        window.location.href = '/admin/finance-dashboard.html';
+                    } else {
+                        window.location.href = '/admin/dashboard.html';
+                    }
                 } else {
                     errorMsg.innerText = data.error || 'Login failed';
                     errorMsg.style.display = 'block';

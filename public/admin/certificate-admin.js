@@ -98,8 +98,8 @@ function getActionButtons(cert) {
         buttons.push(`<button class="btn btn-sm" onclick="copyCertificateLink('${cert.verification_code}')" title="Copy Link"><i class="ph ph-copy"></i></button>`);
     }
 
-    // Finance confirm button (for admin and super_admin when status is pending)
-    if (cert.status === 'pending' && (currentUserRole === 'admin' || currentUserRole === 'super_admin')) {
+    // Finance confirm button (for finance and super_admin when status is pending)
+    if (cert.status === 'pending' && (currentUserRole === 'finance' || currentUserRole === 'super_admin')) {
         buttons.push(`<button class="btn btn-sm btn-success" onclick="confirmFinance(${cert.id})" title="Confirm Payment" style="background: #10b981; color: white;"><i class="ph ph-check"></i> Finance</button>`);
     }
 

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard - KDIH</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css" />
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-light: rgba(59, 130, 246, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+        }
+
+        .header h1 i {
+            color: var(--success);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info span {
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card.highlight {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Table Container */
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-header h2 i {
+            color: var(--warning);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:hover {
+            background: var(--accent-light);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-light);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .status-confirmed {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Loading */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>
+            <i class="ph-fill ph-wallet"></i>
+            Finance Dashboard
+        </h1>
+        <div class="user-info">
+            <span id="user-name">Loading...</span>
+            <button class="logout-btn" onclick="logout()">
+                <i class="ph-fill ph-sign-out"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card highlight">
+                <div class="stat-header">
+                    <span class="stat-title">Pending Confirmation</span>
+                    <i class="ph-fill ph-hourglass stat-icon" style="color: var(--warning);"></i>
+                </div>
+                <div class="stat-value" id="pending-count">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Confirmed Today</span>
+                    <i class="ph-fill ph-check-circle stat-icon" style="color: var(--success);"></i>
+                </div>
+                <div class="stat-value" id="confirmed-today">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Confirmed This Month</span>
+                    <i class="ph-fill ph-calendar stat-icon"></i>
+                </div>
+                <div class="stat-value" id="confirmed-month">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Total Processed</span>
+                    <i class="ph-fill ph-trend-up stat-icon"></i>
+                </div>
+                <div class="stat-value" id="total-processed">0</div>
+            </div>
+        </div>
+
+        <!-- Pending Certificates Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2><i class="ph-fill ph-hourglass"></i> Certificate Requests Pending Payment Confirmation</h2>
+                <div class="filters">
+                    <input type="text" id="search" placeholder="Search by name..." onkeyup="filterTable()">
+                    <select id="course-filter" onchange="filterTable()">
+                        <option value="">All Courses</option>
+                    </select>
+                    <button class="btn btn-outline" onclick="loadPendingCertificates()">
+                        <i class="ph ph-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Certificate Type</th>
+                        <th>Requested By</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-tbody">
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="ph ph-spinner loading"></i>
+                            <p>Loading pending requests...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recently Confirmed -->
+        <div class="table-container" style="margin-top: 2rem;">
+            <div class="table-header">
+                <h2><i class="ph-fill ph-check-circle" style="color: var(--success);"></i> Recently Confirmed</h2>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Confirmed At</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="confirmed-tbody">
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="ph ph-check-circle"></i>
+                            <p>No recent confirmations</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let allCertificates = [];
+        let pendingCertificates = [];
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/check-session');
+                const data = await response.json();
+
+                if (!data.authenticated) {
+                    window.location.href = '/admin/login.html';
+                    return;
+                }
+
+                // Only allow finance and super_admin roles
+                if (!['finance', 'super_admin'].includes(data.user.role)) {
+                    alert('Access denied. Finance Officer or Super Admin role required.');
+                    window.location.href = '/admin/login.html';
+                    return;
+                }
+
+                document.getElementById('user-name').textContent = `${data.user.username} (${data.user.role})`;
+                loadPendingCertificates();
+            } catch (error) {
+                console.error('Auth error:', error);
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        // Load pending certificates
+        async function loadPendingCertificates() {
+            try {
+                const response = await fetch('/api/admin/certificates');
+                const data = await response.json();
+
+                if (data.message !== 'success') {
+                    throw new Error(data.error || 'Failed to load');
+                }
+
+                allCertificates = data.data || [];
+                pendingCertificates = allCertificates.filter(c => c.status === 'pending');
+
+                updateStats();
+                renderPendingTable();
+                renderConfirmedTable();
+                populateCourseFilter();
+
+            } catch (error) {
+                console.error('Error loading certificates:', error);
+                document.getElementById('pending-tbody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="ph ph-warning"></i>
+                            <p>Error loading data</p>
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const pending = allCertificates.filter(c => c.status === 'pending').length;
+            const confirmed = allCertificates.filter(c =>
+                c.status === 'finance_confirmed' || c.status === 'approved'
+            );
+
+            const today = new Date().toISOString().split('T')[0];
+            const confirmedToday = confirmed.filter(c =>
+                c.finance_confirmed_at && c.finance_confirmed_at.startsWith(today)
+            ).length;
+
+            const now = new Date();
+            const thisMonth = confirmed.filter(c => {
+                if (!c.finance_confirmed_at) return false;
+                const date = new Date(c.finance_confirmed_at);
+                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            }).length;
+
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('confirmed-today').textContent = confirmedToday;
+            document.getElementById('confirmed-month').textContent = thisMonth;
+            document.getElementById('total-processed').textContent = confirmed.length;
+        }
+
+        // Render pending table
+        function renderPendingTable() {
+            const tbody = document.getElementById('pending-tbody');
+
+            if (pendingCertificates.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="ph ph-check-circle"></i>
+                            <p>No pending requests! All caught up.</p>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = pendingCertificates.map(cert => {
+                const date = new Date(cert.created_at).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric'
+                });
+
+                return `
+                    <tr>
+                        <td>#${cert.id}</td>
+                        <td><strong>${cert.student_name}</strong></td>
+                        <td>${cert.course_title}</td>
+                        <td><span class="status-badge status-pending">${cert.certificate_type || 'Completion'}</span></td>
+                        <td>${cert.initiated_by_name || 'Admin'}</td>
+                        <td>${date}</td>
+                        <td>
+                            <div class="quick-actions">
+                                <button class="btn btn-success" onclick="confirmPayment(${cert.id}, '${cert.student_name}')">
+                                    <i class="ph-fill ph-check"></i> Confirm Payment
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        // Render confirmed table
+        function renderConfirmedTable() {
+            const tbody = document.getElementById('confirmed-tbody');
+            const confirmed = allCertificates
+                .filter(c => c.status === 'finance_confirmed' || c.status === 'approved')
+                .sort((a, b) => new Date(b.finance_confirmed_at) - new Date(a.finance_confirmed_at))
+                .slice(0, 10);
+
+            if (confirmed.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="ph ph-certificate"></i>
+                            <p>No confirmed certificates yet</p>
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = confirmed.map(cert => {
+                const date = cert.finance_confirmed_at
+                    ? new Date(cert.finance_confirmed_at).toLocaleString()
+                    : 'N/A';
+
+                const statusClass = cert.status === 'approved' ? 'status-confirmed' : 'status-pending';
+                const statusLabel = cert.status === 'approved' ? 'Approved' : 'Awaiting Final Approval';
+
+                return `
+                    <tr>
+                        <td>${cert.student_name}</td>
+                        <td>${cert.course_title}</td>
+                        <td>${date}</td>
+                        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                    </tr>`;
+            }).join('');
+        }
+
+        // Populate course filter
+        function populateCourseFilter() {
+            const courses = [...new Set(pendingCertificates.map(c => c.course_title))];
+            const select = document.getElementById('course-filter');
+            select.innerHTML = '<option value="">All Courses</option>';
+            courses.forEach(course => {
+                select.innerHTML += `<option value="${course}">${course}</option>`;
+            });
+        }
+
+        // Filter table
+        function filterTable() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const course = document.getElementById('course-filter').value;
+
+            const filtered = pendingCertificates.filter(cert => {
+                const matchesSearch = cert.student_name.toLowerCase().includes(search);
+                const matchesCourse = !course || cert.course_title === course;
+                return matchesSearch && matchesCourse;
+            });
+
+            const original = pendingCertificates;
+            pendingCertificates = filtered;
+            renderPendingTable();
+            pendingCertificates = original;
+        }
+
+        // Confirm payment
+        async function confirmPayment(id, studentName) {
+            if (!confirm(`Confirm payment received for "${studentName}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/certificates/${id}/confirm-finance`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.message === 'success') {
+                    alert(`✅ Payment confirmed for ${studentName}!\n\nThe certificate is now awaiting Super Admin approval.`);
+                    loadPendingCertificates();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to confirm'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error confirming payment. Please try again.');
+            }
+        }
+
+        // Logout
+        function logout() {
+            fetch('/api/logout', { method: 'POST' })
+                .then(() => window.location.href = '/admin/login.html')
+                .catch(() => window.location.href = '/admin/login.html');
+        }
+
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+
+</html>

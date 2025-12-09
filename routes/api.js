@@ -1048,8 +1048,14 @@ router.post('/admin/certificates/initiate', requireAuth, async (req, res) => {
     }
 });
 
-// Finance confirm payment (Step 2: Finance/Admin confirms payment)
+// Finance confirm payment (Step 2: Finance Officer or Super Admin confirms payment)
 router.post('/admin/certificates/:id/confirm-finance', requireAuth, (req, res) => {
+    // Only finance or super_admin can confirm payments
+    const allowedRoles = ['finance', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Only Finance Officer or Super Admin can confirm payments' });
+    }
+
     const certId = req.params.id;
 
     const sql = `UPDATE certificates 
