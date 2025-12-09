@@ -522,6 +522,10 @@
                 <i class="ph-fill ph-images"></i>
                 <span>Gallery</span>
             </div>
+            <div class="nav-item" onclick="switchTab('certificates')">
+                <i class="ph-fill ph-certificate"></i>
+                <span>Certificates</span>
+            </div>
             <div class="nav-item" onclick="switchTab('backups')">
                 <i class="ph-fill ph-database"></i>
                 <span>Backups</span>
@@ -1154,6 +1158,185 @@
                 </div>
             </div>
 
+            <!-- Certificates Tab -->
+            <div id="certificates-tab" class="tab-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Certificates</span>
+                            <i class="ph-fill ph-certificate stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="cert-total">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">This Month</span>
+                            <i class="ph-fill ph-calendar stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="cert-this-month">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">This Year</span>
+                            <i class="ph-fill ph-trend-up stat-icon"></i>
+                        </div>
+                        <div class="stat-value" id="cert-this-year">0</div>
+                    </div>
+                </div>
+
+                <!-- Issue Certificate Section -->
+                <div class="table-container" style="margin-bottom: 2rem;">
+                    <div class="table-header">
+                        <h2><i class="ph-fill ph-plus-circle"></i> Issue New Certificate</h2>
+                    </div>
+                    <form id="issue-certificate-form" style="padding: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Student Name *</label>
+                                <input type="text" id="cert-student-name" required placeholder="e.g., Aisha Muhammad">
+                            </div>
+                            <div class="form-group">
+                                <label>Student Email</label>
+                                <input type="email" id="cert-student-email" placeholder="For certificate notification">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Course *</label>
+                                <select id="cert-course" required>
+                                    <option value="">Select Course...</option>
+                                    <option value="Full Stack Web Development">Full Stack Web Development</option>
+                                    <option value="Data Science & Analytics">Data Science & Analytics</option>
+                                    <option value="UI/UX Design Masterclass">UI/UX Design Masterclass</option>
+                                    <option value="Cybersecurity Fundamentals">Cybersecurity Fundamentals</option>
+                                    <option value="Digital Marketing & Social Media">Digital Marketing & Social Media
+                                    </option>
+                                    <option value="Mobile App Development (Flutter)">Mobile App Development (Flutter)
+                                    </option>
+                                    <option value="Graphic Design & Branding">Graphic Design & Branding</option>
+                                    <option value="Business Analytics & Intelligence">Business Analytics & Intelligence
+                                    </option>
+                                    <option value="Cloud Computing (AWS)">Cloud Computing (AWS)</option>
+                                    <option value="Entrepreneurship & Startup Management">Entrepreneurship & Startup
+                                        Management</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Certificate Type</label>
+                                <select id="cert-type">
+                                    <option value="Completion">Completion</option>
+                                    <option value="Excellence">Excellence</option>
+                                    <option value="Participation">Participation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ph-fill ph-certificate"></i> Issue Certificate
+                            </button>
+                            <label
+                                style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: normal;">
+                                <input type="checkbox" id="cert-send-email" checked style="width: auto;">
+                                Send certificate via email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Certificate Result (shown after issuing) -->
+                <div id="certificate-result" class="table-container" style="margin-bottom: 2rem; display: none;">
+                    <div class="table-header" style="background: rgba(16, 185, 129, 0.1);">
+                        <h2 style="color: var(--success);"><i class="ph-fill ph-check-circle"></i> Certificate Issued
+                            Successfully!</h2>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.85rem;">Certificate Number</label>
+                                <p id="result-cert-number"
+                                    style="font-weight: 600; font-family: monospace; font-size: 1.1rem; margin-top: 0.25rem;">
+                                </p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.85rem;">Verification Code</label>
+                                <p id="result-verify-code"
+                                    style="font-weight: 600; font-family: monospace; font-size: 1.1rem; margin-top: 0.25rem;">
+                                </p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.85rem;">Student Name</label>
+                                <p id="result-student-name" style="font-weight: 500; margin-top: 0.25rem;"></p>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.85rem;">Course</label>
+                                <p id="result-course" style="font-weight: 500; margin-top: 0.25rem;"></p>
+                            </div>
+                        </div>
+                        <div
+                            style="margin-top: 1rem; padding: 1rem; background: rgba(37, 99, 235, 0.05); border-radius: 8px;">
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                                <i class="ph-fill ph-link"></i> Verification URL:
+                                <a id="result-verify-url" href="#" target="_blank" style="color: var(--accent);"></a>
+                            </p>
+                        </div>
+                        <button onclick="document.getElementById('certificate-result').style.display='none'" class="btn"
+                            style="margin-top: 1rem;">
+                            <i class="ph ph-x"></i> Close
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Certificates List -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="ph-fill ph-list"></i> Certificate Requests</h2>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <input type="text" id="cert-search" placeholder="Search by name or number..."
+                                onkeyup="filterCertificates()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd; min-width: 200px;">
+                            <select id="cert-status-filter" onchange="filterCertificates()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">All Statuses</option>
+                                <option value="pending">Pending Finance</option>
+                                <option value="finance_confirmed">Awaiting Approval</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <select id="cert-course-filter" onchange="filterCertificates()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">All Courses</option>
+                            </select>
+                            <button class="btn" onclick="loadCertificates()">
+                                <i class="ph ph-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Certificate #</th>
+                                <th>Student Name</th>
+                                <th>Course</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Issue Date</th>
+                                <th>Verification Code</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="certificates-list">
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <i class="ph ph-certificate"></i>
+                                    <p>Loading certificates...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
 
             <!-- Careers Tab -->
             <div id="careers-tab" class="tab-content">
@@ -1650,6 +1833,8 @@
                 analytics: 'Analytics',
                 coworking: 'Coworking Management',
                 services: 'Services',
+                gallery: 'Gallery',
+                certificates: 'Certificate Management',
                 admins: 'Manage Admins',
                 settings: 'Settings'
             };
@@ -1692,6 +1877,9 @@
                     break;
                 case 'services':
                     loadServices();
+                    break;
+                case 'certificates':
+                    loadCertificates();
                     break;
                 case 'admins':
                     loadAdmins();
@@ -4153,6 +4341,7 @@
 
 
     <script src="gallery-admin.js"></script>
+    <script src="certificate-admin.js"></script>
     <script src="admin-edit.js"></script>
 </body>
 

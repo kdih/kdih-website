@@ -954,15 +954,219 @@ router.post('/certificates/generate', requireAuth, async (req, res) => {
     }
 });
 
-// Verify certificate
+// Verify certificate (only approved certificates can be verified publicly)
 router.get('/certificates/verify/:code', (req, res) => {
     const code = req.params.code;
-    const sql = "SELECT * FROM certificates WHERE verification_code = ? OR certificate_number = ?";
+    const sql = "SELECT * FROM certificates WHERE (verification_code = ? OR certificate_number = ?) AND status = 'approved'";
 
     db.get(sql, [code, code], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
         if (!row) return res.status(404).json({ error: 'Certificate not found' });
         res.json({ message: 'success', data: row, valid: true });
+    });
+});
+
+// ===== ADMIN CERTIFICATE MANAGEMENT ENDPOINTS =====
+
+// Get all certificates (admin view with all statuses)
+router.get('/admin/certificates', requireAuth, (req, res) => {
+    const sql = `SELECT c.*, 
+                        u1.username as initiated_by_name,
+                        u2.username as finance_confirmed_by_name,
+                        u3.username as approved_by_name
+                 FROM certificates c
+                 LEFT JOIN users u1 ON c.initiated_by = u1.id
+                 LEFT JOIN users u2 ON c.finance_confirmed_by = u2.id
+                 LEFT JOIN users u3 ON c.approved_by = u3.id
+                 ORDER BY c.created_at DESC`;
+
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Calculate stats
+        const now = new Date();
+        const thisMonth = rows.filter(r => {
+            const created = new Date(r.created_at);
+            return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+        }).length;
+
+        const thisYear = rows.filter(r => {
+            const created = new Date(r.created_at);
+            return created.getFullYear() === now.getFullYear();
+        }).length;
+
+        res.json({
+            message: 'success',
+            data: rows,
+            stats: {
+                total: rows.length,
+                thisMonth,
+                thisYear,
+                pending: rows.filter(r => r.status === 'pending').length,
+                approved: rows.filter(r => r.status === 'approved').length
+            }
+        });
+    });
+});
+
+// Initiate certificate request (Step 1: Admin creates request)
+router.post('/admin/certificates/initiate', requireAuth, async (req, res) => {
+    try {
+        const { student_name, student_email, course_title, certificate_type } = req.body;
+
+        if (!student_name || !course_title) {
+            return res.status(400).json({ error: 'Student name and course title are required' });
+        }
+
+        // Generate a temporary verification code for tracking
+        const crypto = require('crypto');
+        const tempVerifyCode = crypto.randomBytes(6).toString('hex').toUpperCase();
+
+        const sql = `INSERT INTO certificates (student_name, course_title, certificate_type, 
+                     status, initiated_by, created_at, verification_code) 
+                     VALUES (?, ?, ?, 'pending', ?, datetime('now'), ?)`;
+
+        db.run(sql, [
+            student_name,
+            course_title,
+            certificate_type || 'Completion',
+            req.session.user.id,
+            tempVerifyCode
+        ], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            logger.info(`Certificate initiated for ${student_name} by ${req.session.user.username}`);
+            res.json({
+                message: 'success',
+                certificate_id: this.lastID,
+                status: 'pending'
+            });
+        });
+    } catch (error) {
+        console.error('Error initiating certificate:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Finance confirm payment (Step 2: Finance/Admin confirms payment)
+router.post('/admin/certificates/:id/confirm-finance', requireAuth, (req, res) => {
+    const certId = req.params.id;
+
+    const sql = `UPDATE certificates 
+                 SET status = 'finance_confirmed', 
+                     finance_confirmed_by = ?, 
+                     finance_confirmed_at = datetime('now')
+                 WHERE id = ? AND status = 'pending'`;
+
+    db.run(sql, [req.session.user.id, certId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) {
+            return res.status(400).json({ error: 'Certificate not found or already processed' });
+        }
+
+        logger.info(`Certificate ${certId} finance confirmed by ${req.session.user.username}`);
+        res.json({ message: 'success' });
+    });
+});
+
+// Super Admin approve certificate (Step 3: Final approval, generates certificate number)
+router.post('/admin/certificates/:id/approve', requireAuth, async (req, res) => {
+    // Only super_admin can approve
+    if (req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Only super admin can approve certificates' });
+    }
+
+    const certId = req.params.id;
+
+    try {
+        // First, get the certificate details
+        const cert = await new Promise((resolve, reject) => {
+            db.get("SELECT * FROM certificates WHERE id = ? AND status = 'finance_confirmed'", [certId], (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+
+        if (!cert) {
+            return res.status(400).json({ error: 'Certificate not found or not ready for approval' });
+        }
+
+        // Generate the official certificate number
+        const certData = await certificateGenerator.generateCertificateNumber(cert.course_title, cert.student_id);
+
+        // Update with official certificate number
+        const sql = `UPDATE certificates 
+                     SET status = 'approved',
+                         certificate_number = ?,
+                         verification_code = ?,
+                         issue_date = ?,
+                         approved_by = ?,
+                         approved_at = datetime('now')
+                     WHERE id = ?`;
+
+        db.run(sql, [
+            certData.certificate_number,
+            certData.verification_code,
+            certData.issue_date,
+            req.session.user.id,
+            certId
+        ], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            logger.info(`Certificate approved: ${certData.certificate_number} by ${req.session.user.username}`);
+            res.json({
+                message: 'success',
+                certificate_number: certData.certificate_number,
+                verification_code: certData.verification_code,
+                student_name: cert.student_name,
+                course_title: cert.course_title
+            });
+        });
+    } catch (error) {
+        console.error('Error approving certificate:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Reject certificate
+router.post('/admin/certificates/:id/reject', requireAuth, (req, res) => {
+    const certId = req.params.id;
+    const { reason } = req.body;
+
+    const sql = `UPDATE certificates 
+                 SET status = 'rejected',
+                     rejection_reason = ?,
+                     approved_by = ?,
+                     approved_at = datetime('now')
+                 WHERE id = ? AND status IN ('pending', 'finance_confirmed')`;
+
+    db.run(sql, [reason || 'No reason provided', req.session.user.id, certId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) {
+            return res.status(400).json({ error: 'Certificate not found or already approved' });
+        }
+
+        logger.info(`Certificate ${certId} rejected by ${req.session.user.username}`);
+        res.json({ message: 'success' });
+    });
+});
+
+// Delete certificate (Super Admin only)
+router.delete('/admin/certificates/:id', requireAuth, (req, res) => {
+    if (req.session.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Only super admin can delete certificates' });
+    }
+
+    const certId = req.params.id;
+
+    db.run("DELETE FROM certificates WHERE id = ?", [certId], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) {
+            return res.status(404).json({ error: 'Certificate not found' });
+        }
+
+        logger.info(`Certificate ${certId} deleted by ${req.session.user.username}`);
+        res.json({ message: 'success' });
     });
 });
 
