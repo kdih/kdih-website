@@ -8,6 +8,7 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/fill/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-primary: #0f172a;
@@ -37,7 +38,6 @@
             min-height: 100vh;
         }
 
-        /* Header */
         .header {
             background: var(--bg-secondary);
             padding: 1rem 2rem;
@@ -45,6 +45,9 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header h1 {
@@ -62,10 +65,6 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-
-        .user-info span {
-            color: var(--text-muted);
         }
 
         .logout-btn {
@@ -86,25 +85,66 @@
             color: white;
         }
 
-        /* Main Container */
+        /* Tabs Navigation */
+        .tabs-nav {
+            background: var(--bg-secondary);
+            padding: 0 2rem;
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1.5rem 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .stat-card {
             background: var(--bg-card);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             border: 1px solid var(--border);
         }
 
@@ -113,70 +153,66 @@
             background: rgba(245, 158, 11, 0.05);
         }
 
+        .stat-card.success-highlight {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
         .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .stat-title {
             color: var(--text-muted);
-            font-size: 0.875rem;
+            font-size: 0.8rem;
         }
 
         .stat-icon {
-            font-size: 1.5rem;
-            color: var(--accent);
+            font-size: 1.25rem;
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
         }
 
-        /* Table Container */
-        .table-container {
+        .stat-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Cards/Tables */
+        .card {
             background: var(--bg-card);
             border-radius: 12px;
             border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
             overflow: hidden;
         }
 
-        .table-header {
-            padding: 1.25rem 1.5rem;
+        .card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
             gap: 1rem;
         }
 
-        .table-header h2 {
-            font-size: 1.25rem;
+        .card-header h3 {
+            font-size: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .table-header h2 i {
-            color: var(--warning);
-        }
-
-        .filters {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .filters input,
-        .filters select {
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
+        .card-body {
+            padding: 1.25rem;
         }
 
         table {
@@ -186,7 +222,7 @@
 
         th,
         td {
-            padding: 1rem 1.25rem;
+            padding: 0.875rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
@@ -195,9 +231,8 @@
             background: var(--bg-primary);
             color: var(--text-muted);
             font-weight: 500;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         tr:hover {
@@ -213,7 +248,7 @@
             border-radius: 6px;
             border: none;
             cursor: pointer;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             transition: all 0.2s;
         }
 
@@ -222,17 +257,14 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            filter: brightness(1.1);
-        }
-
         .btn-success {
             background: var(--success);
             color: white;
         }
 
-        .btn-success:hover {
-            filter: brightness(1.1);
+        .btn-warning {
+            background: var(--warning);
+            color: white;
         }
 
         .btn-outline {
@@ -241,26 +273,83 @@
             color: var(--text-primary);
         }
 
-        .btn-outline:hover {
-            background: var(--accent-light);
+        .btn:hover {
+            filter: brightness(1.1);
         }
 
-        /* Status Badge */
-        .status-badge {
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Status Badges */
+        .badge {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
         }
 
-        .status-pending {
+        .badge-warning {
             background: rgba(245, 158, 11, 0.1);
             color: #f59e0b;
         }
 
-        .status-confirmed {
+        .badge-success {
             background: rgba(16, 185, 129, 0.1);
             color: #10b981;
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
         }
 
         /* Empty State */
@@ -271,17 +360,68 @@
         }
 
         .empty-state i {
-            font-size: 4rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
+            display: block;
         }
 
-        /* Quick Actions */
-        .quick-actions {
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
             display: flex;
-            gap: 0.5rem;
         }
 
-        /* Loading */
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
         @keyframes spin {
             from {
                 transform: rotate(0deg);
@@ -295,16 +435,20 @@
         .loading i {
             animation: spin 1s linear infinite;
         }
+
+        /* Revenue highlight */
+        .revenue-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success);
+        }
     </style>
 </head>
 
 <body>
     <!-- Header -->
     <header class="header">
-        <h1>
-            <i class="ph-fill ph-wallet"></i>
-            Finance Dashboard
-        </h1>
+        <h1><i class="ph-fill ph-wallet"></i> Finance Dashboard</h1>
         <div class="user-info">
             <span id="user-name">Loading...</span>
             <button class="logout-btn" onclick="logout()">
@@ -313,106 +457,541 @@
         </div>
     </header>
 
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('overview')">
+            <i class="ph-fill ph-chart-pie"></i> Overview
+        </button>
+        <button class="tab-btn" onclick="switchTab('certificates')">
+            <i class="ph-fill ph-certificate"></i> Certificate Payments
+        </button>
+        <button class="tab-btn" onclick="switchTab('students')">
+            <i class="ph-fill ph-users"></i> Student Payments
+        </button>
+        <button class="tab-btn" onclick="switchTab('outstanding')">
+            <i class="ph-fill ph-warning"></i> Outstanding
+        </button>
+        <button class="tab-btn" onclick="switchTab('records')">
+            <i class="ph-fill ph-receipt"></i> Payment Records
+        </button>
+        <button class="tab-btn" onclick="switchTab('analytics')">
+            <i class="ph-fill ph-chart-line"></i> Analytics
+        </button>
+        <button class="tab-btn" onclick="switchTab('audit')">
+            <i class="ph-fill ph-list-checks"></i> Audit Log
+        </button>
+    </nav>
+
     <!-- Main Container -->
     <div class="container">
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card highlight">
-                <div class="stat-header">
-                    <span class="stat-title">Pending Confirmation</span>
-                    <i class="ph-fill ph-hourglass stat-icon" style="color: var(--warning);"></i>
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card highlight">
+                    <div class="stat-header">
+                        <span class="stat-title">Pending Confirmations</span>
+                        <i class="ph-fill ph-hourglass stat-icon" style="color: var(--warning);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-pending">0</div>
                 </div>
-                <div class="stat-value" id="pending-count">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Confirmed Today</span>
-                    <i class="ph-fill ph-check-circle stat-icon" style="color: var(--success);"></i>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Confirmed Today</span>
+                        <i class="ph-fill ph-check-circle stat-icon" style="color: var(--success);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-today">0</div>
                 </div>
-                <div class="stat-value" id="confirmed-today">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Confirmed This Month</span>
-                    <i class="ph-fill ph-calendar stat-icon"></i>
+                <div class="stat-card success-highlight">
+                    <div class="stat-header">
+                        <span class="stat-title">Revenue Today</span>
+                        <i class="ph-fill ph-currency-ngn stat-icon" style="color: var(--success);"></i>
+                    </div>
+                    <div class="stat-value revenue-amount" id="stat-revenue-today">₦0</div>
                 </div>
-                <div class="stat-value" id="confirmed-month">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Total Processed</span>
-                    <i class="ph-fill ph-trend-up stat-icon"></i>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Revenue This Month</span>
+                        <i class="ph-fill ph-calendar stat-icon" style="color: var(--accent);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-revenue-month">₦0</div>
                 </div>
-                <div class="stat-value" id="total-processed">0</div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Outstanding Students</span>
+                        <i class="ph-fill ph-user-circle-minus stat-icon" style="color: var(--danger);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-outstanding">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Revenue</span>
+                        <i class="ph-fill ph-trend-up stat-icon" style="color: var(--accent);"></i>
+                    </div>
+                    <div class="stat-value" id="stat-total-revenue">₦0</div>
+                </div>
             </div>
-        </div>
 
-        <!-- Pending Certificates Table -->
-        <div class="table-container">
-            <div class="table-header">
-                <h2><i class="ph-fill ph-hourglass"></i> Certificate Requests Pending Payment Confirmation</h2>
-                <div class="filters">
-                    <input type="text" id="search" placeholder="Search by name..." onkeyup="filterTable()">
-                    <select id="course-filter" onchange="filterTable()">
-                        <option value="">All Courses</option>
-                    </select>
-                    <button class="btn btn-outline" onclick="loadPendingCertificates()">
-                        <i class="ph ph-arrow-clockwise"></i> Refresh
+            <div class="grid-2">
+                <!-- Pending Certificates -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="ph-fill ph-hourglass"></i> Pending Payments</h3>
+                        <button class="btn btn-outline btn-sm" onclick="loadCertificates()">
+                            <i class="ph ph-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-table">
+                            <tr>
+                                <td colspan="3" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Payments -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="ph-fill ph-clock-clockwise"></i> Recent Payments</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-table">
+                            <tr>
+                                <td colspan="3" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-lightning"></i> Quick Actions</h3>
+                </div>
+                <div class="card-body" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="openRecordPaymentModal()">
+                        <i class="ph-fill ph-plus"></i> Record Payment
+                    </button>
+                    <button class="btn btn-outline" onclick="exportData('certificates')">
+                        <i class="ph-fill ph-download"></i> Export Certificates
+                    </button>
+                    <button class="btn btn-outline" onclick="exportData('outstanding')">
+                        <i class="ph-fill ph-download"></i> Export Outstanding
+                    </button>
+                    <button class="btn btn-outline" onclick="exportData('audit')">
+                        <i class="ph-fill ph-download"></i> Export Audit Log
                     </button>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Request ID</th>
-                        <th>Student Name</th>
-                        <th>Course</th>
-                        <th>Certificate Type</th>
-                        <th>Requested By</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pending-tbody">
-                    <tr>
-                        <td colspan="7" class="empty-state">
-                            <i class="ph ph-spinner loading"></i>
-                            <p>Loading pending requests...</p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
 
-        <!-- Recently Confirmed -->
-        <div class="table-container" style="margin-top: 2rem;">
-            <div class="table-header">
-                <h2><i class="ph-fill ph-check-circle" style="color: var(--success);"></i> Recently Confirmed</h2>
+        <!-- Certificates Tab -->
+        <div id="certificates-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-certificate"></i> Certificate Payment Confirmations</h3>
+                    <div class="filter-bar">
+                        <input type="text" id="cert-search" placeholder="Search..." onkeyup="filterCertificates()">
+                        <select id="cert-status-filter" onchange="filterCertificates()">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="finance_confirmed">Confirmed</option>
+                            <option value="approved">Approved</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm" onclick="loadCertificates()">
+                            <i class="ph ph-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="certificates-table">
+                        <tr>
+                            <td colspan="8" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Course</th>
-                        <th>Confirmed At</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="confirmed-tbody">
-                    <tr>
-                        <td colspan="4" class="empty-state">
-                            <i class="ph ph-check-circle"></i>
-                            <p>No recent confirmations</p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-users"></i> All Student Payment Status</h3>
+                    <div class="filter-bar">
+                        <input type="text" id="student-search" placeholder="Search name or email..."
+                            onkeyup="filterStudents()">
+                        <select id="student-status-filter" onchange="filterStudents()">
+                            <option value="">All</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm" onclick="loadStudentPayments()">
+                            <i class="ph ph-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Course</th>
+                            <th>Course Fee</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table">
+                        <tr>
+                            <td colspan="7" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Outstanding Tab -->
+        <div id="outstanding-tab" class="tab-content">
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="stat-card highlight">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Outstanding</span>
+                    </div>
+                    <div class="stat-value" id="outstanding-total">₦0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Students with Pending Payment</span>
+                    </div>
+                    <div class="stat-value" id="outstanding-count">0</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-warning"></i> Outstanding Payments</h3>
+                    <button class="btn btn-outline btn-sm" onclick="exportData('outstanding')">
+                        <i class="ph-fill ph-download"></i> Export
+                    </button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Course</th>
+                            <th>Amount Due</th>
+                            <th>Days Overdue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outstanding-table">
+                        <tr>
+                            <td colspan="7" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment Records Tab -->
+        <div id="records-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-receipt"></i> Payment Records</h3>
+                    <div class="filter-bar">
+                        <input type="date" id="records-start" onchange="loadPaymentRecords()">
+                        <input type="date" id="records-end" onchange="loadPaymentRecords()">
+                        <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal()">
+                            <i class="ph-fill ph-plus"></i> Add Payment
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="exportData('payments')">
+                            <i class="ph-fill ph-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Reference</th>
+                            <th>Recorded By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records-table">
+                        <tr>
+                            <td colspan="7" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="ph-fill ph-chart-bar"></i> Revenue by Course</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="courseRevenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="ph-fill ph-chart-line"></i> Monthly Revenue Trend</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="monthlyRevenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-credit-card"></i> Payment Methods Breakdown</h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 250px; max-width: 400px; margin: 0 auto;">
+                        <canvas id="paymentMethodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Log Tab -->
+        <div id="audit-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="ph-fill ph-list-checks"></i> Finance Audit Log</h3>
+                    <button class="btn btn-outline btn-sm" onclick="exportData('audit')">
+                        <i class="ph-fill ph-download"></i> Export
+                    </button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Action</th>
+                            <th>User</th>
+                            <th>Entity</th>
+                            <th>Details</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-table">
+                        <tr>
+                            <td colspan="6" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Payment</h3>
+                <button class="modal-close" onclick="closeModal('confirm-modal')">&times;</button>
+            </div>
+            <form id="confirm-form" onsubmit="submitPaymentConfirmation(event)">
+                <input type="hidden" id="confirm-cert-id">
+                <div class="form-group">
+                    <label>Student: <strong id="confirm-student-name"></strong></label>
+                </div>
+                <div class="form-group">
+                    <label>Course: <strong id="confirm-course"></strong></label>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Payment Amount (₦)</label>
+                        <input type="number" id="confirm-amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="confirm-method">
+                            <option value="">Select...</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Paystack">Paystack</option>
+                            <option value="POS">POS</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Payment Reference</label>
+                    <input type="text" id="confirm-reference" placeholder="Transaction ID or Reference">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="confirm-notes" rows="2" placeholder="Optional notes"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    <i class="ph-fill ph-check"></i> Confirm Payment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div id="record-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Record Manual Payment</h3>
+                <button class="modal-close" onclick="closeModal('record-modal')">&times;</button>
+            </div>
+            <form id="record-form" onsubmit="submitRecordPayment(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Student Name *</label>
+                        <input type="text" id="record-student" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="record-email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <input type="text" id="record-course">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount (₦) *</label>
+                        <input type="number" id="record-amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Date</label>
+                        <input type="date" id="record-date">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="record-method">
+                            <option value="">Select...</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Paystack">Paystack</option>
+                            <option value="POS">POS</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Reference</label>
+                        <input type="text" id="record-reference">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="record-notes" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="ph-fill ph-plus"></i> Record Payment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div id="reminder-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Payment Reminder</h3>
+                <button class="modal-close" onclick="closeModal('reminder-modal')">&times;</button>
+            </div>
+            <form id="reminder-form" onsubmit="submitReminder(event)">
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input type="text" id="reminder-student" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="reminder-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <input type="text" id="reminder-course" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Amount Due (₦)</label>
+                    <input type="number" id="reminder-amount" readonly>
+                </div>
+                <button type="submit" class="btn btn-warning" style="width: 100%;">
+                    <i class="ph-fill ph-envelope"></i> Send Reminder
+                </button>
+            </form>
         </div>
     </div>
 
     <script>
-        let allCertificates = [];
-        let pendingCertificates = [];
+        // Data storage
+        let certificatesData = [];
+        let studentsData = [];
+        let outstandingData = [];
+        let recordsData = [];
+        let auditData = [];
+        let charts = {};
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.closest('.tab-btn').classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+
+            // Load data for the tab
+            switch (tab) {
+                case 'overview': loadDashboard(); break;
+                case 'certificates': loadCertificates(); break;
+                case 'students': loadStudentPayments(); break;
+                case 'outstanding': loadOutstanding(); break;
+                case 'records': loadPaymentRecords(); break;
+                case 'analytics': loadAnalytics(); break;
+                case 'audit': loadAuditLog(); break;
+            }
+        }
 
         // Check authentication
         async function checkAuth() {
@@ -420,214 +999,524 @@
                 const response = await fetch('/api/check-session');
                 const data = await response.json();
 
-                if (!data.authenticated) {
-                    window.location.href = '/admin/login.html';
-                    return;
-                }
-
-                // Only allow finance and super_admin roles
-                if (!['finance', 'super_admin'].includes(data.user.role)) {
-                    alert('Access denied. Finance Officer or Super Admin role required.');
+                if (!data.authenticated || !['finance', 'super_admin'].includes(data.user.role)) {
                     window.location.href = '/admin/login.html';
                     return;
                 }
 
                 document.getElementById('user-name').textContent = `${data.user.username} (${data.user.role})`;
-                loadPendingCertificates();
+                loadDashboard();
             } catch (error) {
-                console.error('Auth error:', error);
                 window.location.href = '/admin/login.html';
             }
         }
 
-        // Load pending certificates
-        async function loadPendingCertificates() {
+        // Load dashboard summary
+        async function loadDashboard() {
             try {
-                const response = await fetch('/api/admin/certificates');
-                const data = await response.json();
-
-                if (data.message !== 'success') {
-                    throw new Error(data.error || 'Failed to load');
-                }
-
-                allCertificates = data.data || [];
-                pendingCertificates = allCertificates.filter(c => c.status === 'pending');
-
-                updateStats();
-                renderPendingTable();
-                renderConfirmedTable();
-                populateCourseFilter();
-
-            } catch (error) {
-                console.error('Error loading certificates:', error);
-                document.getElementById('pending-tbody').innerHTML = `
-                    <tr>
-                        <td colspan="7" class="empty-state">
-                            <i class="ph ph-warning"></i>
-                            <p>Error loading data</p>
-                        </td>
-                    </tr>`;
-            }
-        }
-
-        // Update stats
-        function updateStats() {
-            const pending = allCertificates.filter(c => c.status === 'pending').length;
-            const confirmed = allCertificates.filter(c =>
-                c.status === 'finance_confirmed' || c.status === 'approved'
-            );
-
-            const today = new Date().toISOString().split('T')[0];
-            const confirmedToday = confirmed.filter(c =>
-                c.finance_confirmed_at && c.finance_confirmed_at.startsWith(today)
-            ).length;
-
-            const now = new Date();
-            const thisMonth = confirmed.filter(c => {
-                if (!c.finance_confirmed_at) return false;
-                const date = new Date(c.finance_confirmed_at);
-                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-            }).length;
-
-            document.getElementById('pending-count').textContent = pending;
-            document.getElementById('confirmed-today').textContent = confirmedToday;
-            document.getElementById('confirmed-month').textContent = thisMonth;
-            document.getElementById('total-processed').textContent = confirmed.length;
-        }
-
-        // Render pending table
-        function renderPendingTable() {
-            const tbody = document.getElementById('pending-tbody');
-
-            if (pendingCertificates.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="empty-state">
-                            <i class="ph ph-check-circle"></i>
-                            <p>No pending requests! All caught up.</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            tbody.innerHTML = pendingCertificates.map(cert => {
-                const date = new Date(cert.created_at).toLocaleDateString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric'
-                });
-
-                return `
-                    <tr>
-                        <td>#${cert.id}</td>
-                        <td><strong>${cert.student_name}</strong></td>
-                        <td>${cert.course_title}</td>
-                        <td><span class="status-badge status-pending">${cert.certificate_type || 'Completion'}</span></td>
-                        <td>${cert.initiated_by_name || 'Admin'}</td>
-                        <td>${date}</td>
-                        <td>
-                            <div class="quick-actions">
-                                <button class="btn btn-success" onclick="confirmPayment(${cert.id}, '${cert.student_name}')">
-                                    <i class="ph-fill ph-check"></i> Confirm Payment
-                                </button>
-                            </div>
-                        </td>
-                    </tr>`;
-            }).join('');
-        }
-
-        // Render confirmed table
-        function renderConfirmedTable() {
-            const tbody = document.getElementById('confirmed-tbody');
-            const confirmed = allCertificates
-                .filter(c => c.status === 'finance_confirmed' || c.status === 'approved')
-                .sort((a, b) => new Date(b.finance_confirmed_at) - new Date(a.finance_confirmed_at))
-                .slice(0, 10);
-
-            if (confirmed.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="empty-state">
-                            <i class="ph ph-certificate"></i>
-                            <p>No confirmed certificates yet</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            tbody.innerHTML = confirmed.map(cert => {
-                const date = cert.finance_confirmed_at
-                    ? new Date(cert.finance_confirmed_at).toLocaleString()
-                    : 'N/A';
-
-                const statusClass = cert.status === 'approved' ? 'status-confirmed' : 'status-pending';
-                const statusLabel = cert.status === 'approved' ? 'Approved' : 'Awaiting Final Approval';
-
-                return `
-                    <tr>
-                        <td>${cert.student_name}</td>
-                        <td>${cert.course_title}</td>
-                        <td>${date}</td>
-                        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-                    </tr>`;
-            }).join('');
-        }
-
-        // Populate course filter
-        function populateCourseFilter() {
-            const courses = [...new Set(pendingCertificates.map(c => c.course_title))];
-            const select = document.getElementById('course-filter');
-            select.innerHTML = '<option value="">All Courses</option>';
-            courses.forEach(course => {
-                select.innerHTML += `<option value="${course}">${course}</option>`;
-            });
-        }
-
-        // Filter table
-        function filterTable() {
-            const search = document.getElementById('search').value.toLowerCase();
-            const course = document.getElementById('course-filter').value;
-
-            const filtered = pendingCertificates.filter(cert => {
-                const matchesSearch = cert.student_name.toLowerCase().includes(search);
-                const matchesCourse = !course || cert.course_title === course;
-                return matchesSearch && matchesCourse;
-            });
-
-            const original = pendingCertificates;
-            pendingCertificates = filtered;
-            renderPendingTable();
-            pendingCertificates = original;
-        }
-
-        // Confirm payment
-        async function confirmPayment(id, studentName) {
-            if (!confirm(`Confirm payment received for "${studentName}"?`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/admin/certificates/${id}/confirm-finance`, {
-                    method: 'POST'
-                });
-
+                const response = await fetch('/api/admin/finance/dashboard-summary');
                 const data = await response.json();
 
                 if (data.message === 'success') {
-                    alert(`✅ Payment confirmed for ${studentName}!\n\nThe certificate is now awaiting Super Admin approval.`);
-                    loadPendingCertificates();
-                } else {
-                    alert('Error: ' + (data.error || 'Failed to confirm'));
+                    const d = data.data;
+                    document.getElementById('stat-pending').textContent = d.pendingCerts;
+                    document.getElementById('stat-today').textContent = d.confirmedToday;
+                    document.getElementById('stat-revenue-today').textContent = formatCurrency(d.revenueToday);
+                    document.getElementById('stat-revenue-month').textContent = formatCurrency(d.revenueThisMonth);
+                    document.getElementById('stat-outstanding').textContent = d.outstandingCount;
+                    document.getElementById('stat-total-revenue').textContent = formatCurrency(d.totalRevenue);
+
+                    renderRecentPayments(d.recentPayments);
+                }
+                loadCertificates(); // Also load pending
+            } catch (error) {
+                console.error('Dashboard error:', error);
+            }
+        }
+
+        function formatCurrency(amount) {
+            return '₦' + (parseFloat(amount) || 0).toLocaleString();
+        }
+
+        function renderRecentPayments(payments) {
+            const tbody = document.getElementById('recent-table');
+            if (!payments || payments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No recent payments</td></tr>';
+                return;
+            }
+            tbody.innerHTML = payments.map(p => `
+                <tr>
+                    <td>${p.student_name}</td>
+                    <td>${formatCurrency(p.payment_amount)}</td>
+                    <td>${p.payment_method || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Load certificates
+        async function loadCertificates() {
+            try {
+                const response = await fetch('/api/admin/certificates');
+                const data = await response.json();
+                if (data.message === 'success') {
+                    certificatesData = data.data;
+                    renderCertificatesTable();
+                    renderPendingTable();
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error confirming payment. Please try again.');
             }
+        }
+
+        function renderPendingTable() {
+            const pending = certificatesData.filter(c => c.status === 'pending');
+            const tbody = document.getElementById('pending-table');
+
+            if (pending.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><i class="ph ph-check-circle"></i> All caught up!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pending.slice(0, 5).map(c => `
+                <tr>
+                    <td>${c.student_name}</td>
+                    <td>${c.course_title}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="openConfirmModal(${c.id}, '${c.student_name}', '${c.course_title}')">
+                            <i class="ph-fill ph-check"></i> Confirm
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderCertificatesTable() {
+            const tbody = document.getElementById('certificates-table');
+            if (certificatesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No certificates</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = certificatesData.map(c => {
+                const statusBadge = {
+                    'pending': '<span class="badge badge-warning">Pending</span>',
+                    'finance_confirmed': '<span class="badge badge-info">Confirmed</span>',
+                    'approved': '<span class="badge badge-success">Approved</span>',
+                    'rejected': '<span class="badge badge-danger">Rejected</span>'
+                }[c.status] || '<span class="badge">Unknown</span>';
+
+                return `
+                    <tr>
+                        <td>#${c.id}</td>
+                        <td>${c.student_name}</td>
+                        <td>${c.course_title}</td>
+                        <td>${statusBadge}</td>
+                        <td>${c.payment_amount ? formatCurrency(c.payment_amount) : '-'}</td>
+                        <td>${c.payment_method || '-'}</td>
+                        <td>${c.finance_confirmed_at ? new Date(c.finance_confirmed_at).toLocaleDateString() : '-'}</td>
+                        <td>
+                            ${c.status === 'pending' ? `
+                                <button class="btn btn-success btn-sm" onclick="openConfirmModal(${c.id}, '${c.student_name}', '${c.course_title}')">
+                                    <i class="ph-fill ph-check"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterCertificates() {
+            const search = document.getElementById('cert-search').value.toLowerCase();
+            const status = document.getElementById('cert-status-filter').value;
+
+            const filtered = certificatesData.filter(c => {
+                const matchSearch = c.student_name.toLowerCase().includes(search);
+                const matchStatus = !status || c.status === status;
+                return matchSearch && matchStatus;
+            });
+
+            const orig = certificatesData;
+            certificatesData = filtered;
+            renderCertificatesTable();
+            certificatesData = orig;
+        }
+
+        // Load student payments
+        async function loadStudentPayments() {
+            try {
+                const response = await fetch('/api/admin/finance/student-payments');
+                const data = await response.json();
+                if (data.message === 'success') {
+                    studentsData = data.data;
+                    renderStudentsTable();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('students-table');
+            if (studentsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No students</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = studentsData.map(s => {
+                const isPaid = s.payment_status === 'paid' || s.paid_amount;
+                return `
+                    <tr>
+                        <td>${s.student_name}</td>
+                        <td>${s.email || '-'}</td>
+                        <td>${s.course_title}</td>
+                        <td>${s.course_fee ? formatCurrency(s.course_fee) : '-'}</td>
+                        <td>${s.paid_amount ? formatCurrency(s.paid_amount) : '-'}</td>
+                        <td>${isPaid ? '<span class="badge badge-success">Paid</span>' : '<span class="badge badge-warning">Pending</span>'}</td>
+                        <td>
+                            ${!isPaid && s.email ? `
+                                <button class="btn btn-warning btn-sm" onclick="openReminderModal('${s.student_name}', '${s.email}', '${s.course_title}', ${s.course_fee || 0})">
+                                    <i class="ph-fill ph-envelope"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterStudents() {
+            const search = document.getElementById('student-search').value.toLowerCase();
+            const status = document.getElementById('student-status-filter').value;
+
+            const filtered = studentsData.filter(s => {
+                const matchSearch = s.student_name.toLowerCase().includes(search) || (s.email || '').toLowerCase().includes(search);
+                const isPaid = s.payment_status === 'paid' || s.paid_amount;
+                const matchStatus = !status || (status === 'paid' ? isPaid : !isPaid);
+                return matchSearch && matchStatus;
+            });
+
+            const orig = studentsData;
+            studentsData = filtered;
+            renderStudentsTable();
+            studentsData = orig;
+        }
+
+        // Load outstanding
+        async function loadOutstanding() {
+            try {
+                const response = await fetch('/api/admin/finance/outstanding-payments');
+                const data = await response.json();
+                if (data.message === 'success') {
+                    outstandingData = data.data;
+                    document.getElementById('outstanding-total').textContent = formatCurrency(data.stats.totalOutstanding);
+                    document.getElementById('outstanding-count').textContent = data.stats.count;
+                    renderOutstandingTable();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderOutstandingTable() {
+            const tbody = document.getElementById('outstanding-table');
+            if (outstandingData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="ph ph-check-circle"></i> No outstanding payments!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = outstandingData.map(o => `
+                <tr>
+                    <td>${o.student_name}</td>
+                    <td>${o.email || '-'}</td>
+                    <td>${o.phone || '-'}</td>
+                    <td>${o.course_title}</td>
+                    <td>${formatCurrency(o.course_fee)}</td>
+                    <td>${Math.floor(o.days_since_registration || 0)} days</td>
+                    <td>
+                        ${o.email ? `
+                            <button class="btn btn-warning btn-sm" onclick="openReminderModal('${o.student_name}', '${o.email}', '${o.course_title}', ${o.course_fee || 0})">
+                                <i class="ph-fill ph-envelope"></i> Remind
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load payment records
+        async function loadPaymentRecords() {
+            const startDate = document.getElementById('records-start').value;
+            const endDate = document.getElementById('records-end').value;
+
+            let url = '/api/admin/finance/payment-records?';
+            if (startDate) url += `start_date=${startDate}&`;
+            if (endDate) url += `end_date=${endDate}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.message === 'success') {
+                    recordsData = data.data;
+                    renderRecordsTable();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderRecordsTable() {
+            const tbody = document.getElementById('records-table');
+            if (recordsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No payment records</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = recordsData.map(r => `
+                <tr>
+                    <td>${r.payment_date || '-'}</td>
+                    <td>${r.student_name}</td>
+                    <td>${r.course_title || '-'}</td>
+                    <td>${formatCurrency(r.amount)}</td>
+                    <td>${r.payment_method || '-'}</td>
+                    <td>${r.payment_reference || '-'}</td>
+                    <td>${r.recorded_by_name || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Load analytics
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/admin/finance/revenue-analytics');
+                const data = await response.json();
+                if (data.message === 'success') {
+                    renderCharts(data.data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderCharts(data) {
+            // Destroy existing charts
+            Object.values(charts).forEach(c => c.destroy());
+
+            // Course Revenue Chart
+            const courseCtx = document.getElementById('courseRevenueChart').getContext('2d');
+            charts.course = new Chart(courseCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.courseRevenue.map(c => c.course_title?.substring(0, 20) || 'Unknown'),
+                    datasets: [{
+                        label: 'Revenue (₦)',
+                        data: data.courseRevenue.map(c => c.total_revenue),
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Monthly Revenue Chart
+            const monthlyCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+            charts.monthly = new Chart(monthlyCtx, {
+                type: 'line',
+                data: {
+                    labels: data.monthlyRevenue.map(m => m.month),
+                    datasets: [{
+                        label: 'Revenue (₦)',
+                        data: data.monthlyRevenue.map(m => m.revenue),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Payment Method Chart
+            const methodCtx = document.getElementById('paymentMethodChart').getContext('2d');
+            charts.method = new Chart(methodCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.paymentMethods.map(m => m.method),
+                    datasets: [{
+                        data: data.paymentMethods.map(m => m.count),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Load audit log
+        async function loadAuditLog() {
+            try {
+                const response = await fetch('/api/admin/finance/audit-log');
+                const data = await response.json();
+                if (data.message === 'success') {
+                    auditData = data.data;
+                    renderAuditTable();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderAuditTable() {
+            const tbody = document.getElementById('audit-table');
+            if (auditData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No audit records</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = auditData.map(a => `
+                <tr>
+                    <td>${new Date(a.created_at).toLocaleString()}</td>
+                    <td><span class="badge badge-info">${a.action}</span></td>
+                    <td>${a.user_name || '-'}</td>
+                    <td>${a.entity_type} #${a.entity_id || '-'}</td>
+                    <td><small>${a.details || '-'}</small></td>
+                    <td><small>${a.ip_address || '-'}</small></td>
+                </tr>
+            `).join('');
+        }
+
+        // Modals
+        function openConfirmModal(certId, studentName, course) {
+            document.getElementById('confirm-cert-id').value = certId;
+            document.getElementById('confirm-student-name').textContent = studentName;
+            document.getElementById('confirm-course').textContent = course;
+            document.getElementById('confirm-modal').classList.add('active');
+        }
+
+        function openRecordPaymentModal() {
+            document.getElementById('record-form').reset();
+            document.getElementById('record-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('record-modal').classList.add('active');
+        }
+
+        function openReminderModal(student, email, course, amount) {
+            document.getElementById('reminder-student').value = student;
+            document.getElementById('reminder-email').value = email;
+            document.getElementById('reminder-course').value = course;
+            document.getElementById('reminder-amount').value = amount;
+            document.getElementById('reminder-modal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Form submissions
+        async function submitPaymentConfirmation(e) {
+            e.preventDefault();
+            const certId = document.getElementById('confirm-cert-id').value;
+
+            try {
+                const response = await fetch(`/api/admin/certificates/${certId}/confirm-finance-with-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        payment_amount: document.getElementById('confirm-amount').value,
+                        payment_method: document.getElementById('confirm-method').value,
+                        payment_reference: document.getElementById('confirm-reference').value,
+                        payment_notes: document.getElementById('confirm-notes').value
+                    })
+                });
+
+                const data = await response.json();
+                if (data.message === 'success') {
+                    alert('Payment confirmed successfully!');
+                    closeModal('confirm-modal');
+                    loadDashboard();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error confirming payment');
+            }
+        }
+
+        async function submitRecordPayment(e) {
+            e.preventDefault();
+
+            try {
+                const response = await fetch('/api/admin/finance/record-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: document.getElementById('record-student').value,
+                        student_email: document.getElementById('record-email').value,
+                        course_title: document.getElementById('record-course').value,
+                        amount: document.getElementById('record-amount').value,
+                        payment_date: document.getElementById('record-date').value,
+                        payment_method: document.getElementById('record-method').value,
+                        payment_reference: document.getElementById('record-reference').value,
+                        notes: document.getElementById('record-notes').value
+                    })
+                });
+
+                const data = await response.json();
+                if (data.message === 'success') {
+                    alert('Payment recorded successfully!');
+                    closeModal('record-modal');
+                    loadPaymentRecords();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error recording payment');
+            }
+        }
+
+        async function submitReminder(e) {
+            e.preventDefault();
+
+            try {
+                const response = await fetch('/api/admin/finance/send-reminder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: document.getElementById('reminder-student').value,
+                        email: document.getElementById('reminder-email').value,
+                        course_title: document.getElementById('reminder-course').value,
+                        amount_due: document.getElementById('reminder-amount').value
+                    })
+                });
+
+                const data = await response.json();
+                if (data.message === 'success') {
+                    alert('Reminder sent successfully!');
+                    closeModal('reminder-modal');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error sending reminder');
+            }
+        }
+
+        // Export data
+        function exportData(type) {
+            window.location.href = `/api/admin/finance/export/${type}`;
         }
 
         // Logout
         function logout() {
             fetch('/api/logout', { method: 'POST' })
-                .then(() => window.location.href = '/admin/login.html')
-                .catch(() => window.location.href = '/admin/login.html');
+                .then(() => window.location.href = '/admin/login.html');
         }
 
         // Initialize

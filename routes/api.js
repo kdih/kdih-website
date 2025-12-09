@@ -1176,6 +1176,601 @@ router.delete('/admin/certificates/:id', requireAuth, (req, res) => {
     });
 });
 
+// ===== FINANCE MANAGEMENT ENDPOINTS =====
+
+// Helper function to log finance actions
+function logFinanceAction(action, entityType, entityId, userId, userName, details, ipAddress) {
+    db.run(`INSERT INTO finance_audit_log (action, entity_type, entity_id, user_id, user_name, details, ip_address)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [action, entityType, entityId, userId, userName, JSON.stringify(details), ipAddress]);
+}
+
+// Finance confirm with payment details (Enhanced version)
+router.post('/admin/certificates/:id/confirm-finance-with-payment', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Only Finance Officer or Super Admin can confirm payments' });
+    }
+
+    const certId = req.params.id;
+    const { payment_amount, payment_method, payment_reference, payment_notes } = req.body;
+
+    const sql = `UPDATE certificates 
+                 SET status = 'finance_confirmed', 
+                     finance_confirmed_by = ?, 
+                     finance_confirmed_at = datetime('now'),
+                     payment_amount = ?,
+                     payment_method = ?,
+                     payment_reference = ?,
+                     payment_notes = ?
+                 WHERE id = ? AND status = 'pending'`;
+
+    db.run(sql, [
+        req.session.user.id,
+        payment_amount || null,
+        payment_method || null,
+        payment_reference || null,
+        payment_notes || null,
+        certId
+    ], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) {
+            return res.status(400).json({ error: 'Certificate not found or already processed' });
+        }
+
+        // Log the action
+        logFinanceAction('PAYMENT_CONFIRMED', 'certificate', certId,
+            req.session.user.id, req.session.user.username,
+            { payment_amount, payment_method, payment_reference },
+            req.ip);
+
+        logger.info(`Certificate ${certId} finance confirmed with payment by ${req.session.user.username}`);
+        res.json({ message: 'success' });
+    });
+});
+
+// Get student payment status (all registrations with payment info)
+router.get('/admin/finance/student-payments', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'admin', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const sql = `
+        SELECT 
+            cr.id,
+            cr.full_name as student_name,
+            cr.email,
+            cr.phone,
+            cr.course_title,
+            cr.payment_status,
+            cr.payment_reference,
+            cr.course_fee,
+            cr.created_at as registration_date,
+            c.id as certificate_id,
+            c.status as certificate_status,
+            c.payment_amount as paid_amount,
+            c.payment_method,
+            c.payment_reference as cert_payment_ref
+        FROM course_registrations cr
+        LEFT JOIN certificates c ON c.student_name = cr.full_name AND c.course_title = cr.course_title
+        ORDER BY cr.created_at DESC
+    `;
+
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Calculate stats
+        const total = rows.length;
+        const paid = rows.filter(r => r.payment_status === 'paid' || r.paid_amount).length;
+        const pending = rows.filter(r => r.payment_status === 'pending' || (!r.payment_status && !r.paid_amount)).length;
+        const totalRevenue = rows.reduce((sum, r) => sum + (parseFloat(r.paid_amount) || 0), 0);
+        const expectedRevenue = rows.reduce((sum, r) => sum + (parseFloat(r.course_fee) || 0), 0);
+
+        res.json({
+            message: 'success',
+            data: rows,
+            stats: {
+                total,
+                paid,
+                pending,
+                totalRevenue,
+                expectedRevenue,
+                outstanding: expectedRevenue - totalRevenue
+            }
+        });
+    });
+});
+
+// Get outstanding payments (students who haven't paid)
+router.get('/admin/finance/outstanding-payments', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'admin', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const sql = `
+        SELECT 
+            cr.id,
+            cr.full_name as student_name,
+            cr.email,
+            cr.phone,
+            cr.course_title,
+            cr.course_fee,
+            cr.payment_status,
+            cr.created_at as registration_date,
+            JULIANDAY('now') - JULIANDAY(cr.created_at) as days_since_registration
+        FROM course_registrations cr
+        WHERE (cr.payment_status IS NULL OR cr.payment_status != 'paid')
+        ORDER BY cr.created_at ASC
+    `;
+
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        const totalOutstanding = rows.reduce((sum, r) => sum + (parseFloat(r.course_fee) || 0), 0);
+
+        res.json({
+            message: 'success',
+            data: rows,
+            stats: {
+                count: rows.length,
+                totalOutstanding
+            }
+        });
+    });
+});
+
+// Get revenue analytics
+router.get('/admin/finance/revenue-analytics', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'admin', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { period } = req.query; // 'day', 'week', 'month', 'year'
+
+    // Revenue by course
+    const courseRevenueSQL = `
+        SELECT 
+            course_title,
+            COUNT(*) as count,
+            SUM(COALESCE(payment_amount, 0)) as total_revenue
+        FROM certificates
+        WHERE status = 'approved' AND payment_amount IS NOT NULL
+        GROUP BY course_title
+        ORDER BY total_revenue DESC
+    `;
+
+    // Monthly revenue trend
+    const monthlyRevenueSQL = `
+        SELECT 
+            strftime('%Y-%m', finance_confirmed_at) as month,
+            COUNT(*) as count,
+            SUM(COALESCE(payment_amount, 0)) as revenue
+        FROM certificates
+        WHERE status IN ('finance_confirmed', 'approved') AND finance_confirmed_at IS NOT NULL
+        GROUP BY strftime('%Y-%m', finance_confirmed_at)
+        ORDER BY month DESC
+        LIMIT 12
+    `;
+
+    // Payment method breakdown
+    const paymentMethodSQL = `
+        SELECT 
+            COALESCE(payment_method, 'Not Specified') as method,
+            COUNT(*) as count,
+            SUM(COALESCE(payment_amount, 0)) as total
+        FROM certificates
+        WHERE status IN ('finance_confirmed', 'approved')
+        GROUP BY payment_method
+    `;
+
+    // Today's stats
+    const todaySQL = `
+        SELECT 
+            COUNT(*) as confirmations,
+            SUM(COALESCE(payment_amount, 0)) as revenue
+        FROM certificates
+        WHERE date(finance_confirmed_at) = date('now')
+    `;
+
+    db.all(courseRevenueSQL, [], (err1, courseRevenue) => {
+        if (err1) return res.status(500).json({ error: err1.message });
+
+        db.all(monthlyRevenueSQL, [], (err2, monthlyRevenue) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+
+            db.all(paymentMethodSQL, [], (err3, paymentMethods) => {
+                if (err3) return res.status(500).json({ error: err3.message });
+
+                db.get(todaySQL, [], (err4, todayStats) => {
+                    if (err4) return res.status(500).json({ error: err4.message });
+
+                    res.json({
+                        message: 'success',
+                        data: {
+                            courseRevenue,
+                            monthlyRevenue: monthlyRevenue.reverse(),
+                            paymentMethods,
+                            todayStats: todayStats || { confirmations: 0, revenue: 0 }
+                        }
+                    });
+                });
+            });
+        });
+    });
+});
+
+// Get coworking revenue
+router.get('/admin/finance/coworking-revenue', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'admin', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const membershipSQL = `
+        SELECT 
+            membership_type,
+            COUNT(*) as count,
+            status
+        FROM coworking_members
+        GROUP BY membership_type, status
+    `;
+
+    const expiredSQL = `
+        SELECT COUNT(*) as count
+        FROM coworking_members
+        WHERE date(end_date) < date('now') AND status = 'active'
+    `;
+
+    const roomBookingsSQL = `
+        SELECT 
+            r.name as room_name,
+            COUNT(rb.id) as bookings,
+            SUM(r.price_per_hour * 
+                ((JULIANDAY(rb.end_time) - JULIANDAY(rb.start_time)) * 24)
+            ) as estimated_revenue
+        FROM room_bookings rb
+        JOIN rooms r ON rb.room_id = r.id
+        WHERE rb.status = 'confirmed'
+        GROUP BY r.id
+    `;
+
+    db.all(membershipSQL, [], (err1, memberships) => {
+        if (err1) return res.status(500).json({ error: err1.message });
+
+        db.get(expiredSQL, [], (err2, expired) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+
+            db.all(roomBookingsSQL, [], (err3, roomBookings) => {
+                if (err3) return res.status(500).json({ error: err3.message });
+
+                res.json({
+                    message: 'success',
+                    data: {
+                        memberships,
+                        expiredCount: expired?.count || 0,
+                        roomBookings
+                    }
+                });
+            });
+        });
+    });
+});
+
+// Get finance audit log
+router.get('/admin/finance/audit-log', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { limit = 100, offset = 0 } = req.query;
+
+    const sql = `
+        SELECT * FROM finance_audit_log
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+    `;
+
+    db.all(sql, [parseInt(limit), parseInt(offset)], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        db.get("SELECT COUNT(*) as total FROM finance_audit_log", [], (err2, count) => {
+            res.json({
+                message: 'success',
+                data: rows,
+                total: count?.total || 0
+            });
+        });
+    });
+});
+
+// Record manual payment
+router.post('/admin/finance/record-payment', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { student_name, student_email, course_title, amount, payment_method, payment_reference, payment_date, notes } = req.body;
+
+    if (!student_name || !amount) {
+        return res.status(400).json({ error: 'Student name and amount are required' });
+    }
+
+    const sql = `INSERT INTO payment_records 
+                 (student_name, student_email, course_title, amount, payment_method, payment_reference, payment_date, recorded_by, notes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [
+        student_name,
+        student_email || null,
+        course_title || null,
+        amount,
+        payment_method || null,
+        payment_reference || null,
+        payment_date || new Date().toISOString().split('T')[0],
+        req.session.user.id,
+        notes || null
+    ], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+
+        // Log the action
+        logFinanceAction('PAYMENT_RECORDED', 'payment_record', this.lastID,
+            req.session.user.id, req.session.user.username,
+            { student_name, amount, payment_method },
+            req.ip);
+
+        res.json({ message: 'success', payment_id: this.lastID });
+    });
+});
+
+// Get payment records
+router.get('/admin/finance/payment-records', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'admin', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { start_date, end_date, course } = req.query;
+
+    let sql = `SELECT pr.*, u.username as recorded_by_name
+               FROM payment_records pr
+               LEFT JOIN users u ON pr.recorded_by = u.id
+               WHERE 1=1`;
+    const params = [];
+
+    if (start_date) {
+        sql += ` AND date(pr.payment_date) >= date(?)`;
+        params.push(start_date);
+    }
+    if (end_date) {
+        sql += ` AND date(pr.payment_date) <= date(?)`;
+        params.push(end_date);
+    }
+    if (course) {
+        sql += ` AND pr.course_title = ?`;
+        params.push(course);
+    }
+
+    sql += ` ORDER BY pr.created_at DESC`;
+
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        const totalAmount = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+
+        res.json({
+            message: 'success',
+            data: rows,
+            stats: {
+                count: rows.length,
+                totalAmount
+            }
+        });
+    });
+});
+
+// Export finance data as CSV
+router.get('/admin/finance/export/:type', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { type } = req.params;
+    const { start_date, end_date } = req.query;
+
+    let sql, filename;
+
+    switch (type) {
+        case 'certificates':
+            sql = `SELECT 
+                    certificate_number, student_name, course_title, certificate_type,
+                    status, issue_date, payment_amount, payment_method, payment_reference,
+                    finance_confirmed_at, created_at
+                   FROM certificates
+                   ORDER BY created_at DESC`;
+            filename = 'certificates_export.csv';
+            break;
+
+        case 'payments':
+            sql = `SELECT 
+                    student_name, student_email, course_title, amount, 
+                    payment_method, payment_reference, payment_date, status, created_at
+                   FROM payment_records
+                   ORDER BY created_at DESC`;
+            filename = 'payments_export.csv';
+            break;
+
+        case 'registrations':
+            sql = `SELECT 
+                    full_name, email, phone, course_title, course_fee,
+                    payment_status, payment_reference, created_at
+                   FROM course_registrations
+                   ORDER BY created_at DESC`;
+            filename = 'registrations_export.csv';
+            break;
+
+        case 'outstanding':
+            sql = `SELECT 
+                    full_name, email, phone, course_title, course_fee, created_at
+                   FROM course_registrations
+                   WHERE payment_status IS NULL OR payment_status != 'paid'
+                   ORDER BY created_at ASC`;
+            filename = 'outstanding_payments.csv';
+            break;
+
+        case 'audit':
+            sql = `SELECT 
+                    action, entity_type, entity_id, user_name, details, ip_address, created_at
+                   FROM finance_audit_log
+                   ORDER BY created_at DESC`;
+            filename = 'audit_log.csv';
+            break;
+
+        default:
+            return res.status(400).json({ error: 'Invalid export type' });
+    }
+
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'No data to export' });
+        }
+
+        // Convert to CSV
+        const headers = Object.keys(rows[0]).join(',');
+        const csvRows = rows.map(row =>
+            Object.values(row).map(val =>
+                typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : (val ?? '')
+            ).join(',')
+        );
+        const csv = [headers, ...csvRows].join('\n');
+
+        // Log export action
+        logFinanceAction('DATA_EXPORTED', type, null,
+            req.session.user.id, req.session.user.username,
+            { type, rows_count: rows.length },
+            req.ip);
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(csv);
+    });
+});
+
+// Send payment reminder email
+router.post('/admin/finance/send-reminder', requireAuth, async (req, res) => {
+    const allowedRoles = ['finance', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const { email, student_name, course_title, amount_due } = req.body;
+
+    if (!email || !student_name) {
+        return res.status(400).json({ error: 'Email and student name are required' });
+    }
+
+    try {
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: process.env.SMTP_PORT || 587,
+            secure: false,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: process.env.SMTP_FROM || 'finance@kdih.org',
+            to: email,
+            subject: 'Payment Reminder - KDIH',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #1e293b;">Payment Reminder</h2>
+                    <p>Dear ${student_name},</p>
+                    <p>This is a friendly reminder that your payment for <strong>${course_title || 'your course'}</strong> is still pending.</p>
+                    ${amount_due ? `<p>Amount Due: <strong>₦${parseFloat(amount_due).toLocaleString()}</strong></p>` : ''}
+                    <p>Please complete your payment at your earliest convenience to continue with your enrollment.</p>
+                    <p>If you have already made the payment, please disregard this reminder and share your payment reference with us.</p>
+                    <br>
+                    <p>Best regards,<br>KDIH Finance Team</p>
+                </div>
+            `
+        });
+
+        // Log the action
+        logFinanceAction('REMINDER_SENT', 'email', null,
+            req.session.user.id, req.session.user.username,
+            { email, student_name, course_title },
+            req.ip);
+
+        res.json({ message: 'success' });
+    } catch (error) {
+        console.error('Email error:', error);
+        res.status(500).json({ error: 'Failed to send reminder email' });
+    }
+});
+
+// Get finance dashboard summary
+router.get('/admin/finance/dashboard-summary', requireAuth, (req, res) => {
+    const allowedRoles = ['finance', 'admin', 'super_admin'];
+    if (!allowedRoles.includes(req.session.user.role)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const queries = {
+        pendingCerts: `SELECT COUNT(*) as count FROM certificates WHERE status = 'pending'`,
+        confirmedToday: `SELECT COUNT(*) as count FROM certificates WHERE date(finance_confirmed_at) = date('now')`,
+        revenueToday: `SELECT COALESCE(SUM(payment_amount), 0) as total FROM certificates WHERE date(finance_confirmed_at) = date('now')`,
+        revenueThisMonth: `SELECT COALESCE(SUM(payment_amount), 0) as total FROM certificates WHERE strftime('%Y-%m', finance_confirmed_at) = strftime('%Y-%m', 'now')`,
+        totalRevenue: `SELECT COALESCE(SUM(payment_amount), 0) as total FROM certificates WHERE status IN ('finance_confirmed', 'approved')`,
+        outstandingCount: `SELECT COUNT(*) as count FROM course_registrations WHERE payment_status IS NULL OR payment_status != 'paid'`,
+        recentPayments: `SELECT student_name, course_title, payment_amount, payment_method, finance_confirmed_at 
+                         FROM certificates WHERE finance_confirmed_at IS NOT NULL 
+                         ORDER BY finance_confirmed_at DESC LIMIT 5`
+    };
+
+    const results = {};
+
+    db.get(queries.pendingCerts, [], (err, pending) => {
+        results.pendingCerts = pending?.count || 0;
+
+        db.get(queries.confirmedToday, [], (err, confirmed) => {
+            results.confirmedToday = confirmed?.count || 0;
+
+            db.get(queries.revenueToday, [], (err, revToday) => {
+                results.revenueToday = revToday?.total || 0;
+
+                db.get(queries.revenueThisMonth, [], (err, revMonth) => {
+                    results.revenueThisMonth = revMonth?.total || 0;
+
+                    db.get(queries.totalRevenue, [], (err, revTotal) => {
+                        results.totalRevenue = revTotal?.total || 0;
+
+                        db.get(queries.outstandingCount, [], (err, outstanding) => {
+                            results.outstandingCount = outstanding?.count || 0;
+
+                            db.all(queries.recentPayments, [], (err, recent) => {
+                                results.recentPayments = recent || [];
+
+                                res.json({ message: 'success', data: results });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
 // ===== STARTUP INCUBATION ENDPOINTS =====
 
 // Submit startup application
