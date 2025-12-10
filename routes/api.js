@@ -3320,7 +3320,7 @@ router.post('/admin/users', requireSuperAdmin, async (req, res) => {
         const bcrypt = require('bcrypt');
 
         // Validate role
-        if (!['admin', 'super_admin'].includes(role)) {
+        if (!['admin', 'super_admin', 'finance'].includes(role)) {
             return res.status(400).json({ error: 'Invalid role' });
         }
 
@@ -3367,7 +3367,7 @@ router.patch('/admin/users/:id', requireSuperAdmin, async (req, res) => {
             params.push(email);
         }
         if (role !== undefined) {
-            if (!['admin', 'super_admin'].includes(role)) {
+            if (!['admin', 'super_admin', 'finance'].includes(role)) {
                 return res.status(400).json({ error: 'Invalid role' });
             }
             updates.push('role = ?');
