@@ -225,6 +225,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
+            -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
             z-index: 1000;
             overflow-y: auto;
@@ -445,288 +446,281 @@
                     <p style="margin-top: 1rem; color: #64748b;">Loading available positions...</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Job listings hidden until openings available -->
+        <div class="jobs-grid" style="display: none;">
+            <!-- Job 1: Hub Manager -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>Hub Manager / Operations Lead</h3>
+                    </div>
+                </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                </div>
+
+                <div class="job-section">
+                    <h4>What You'll Do:</h4>
+                    <ul>
+                        <li>Lead and coordinate all hub operations</li>
+                        <li>Supervise teams and ensure smooth service delivery</li>
+                        <li>Oversee training, coworking, and startup programs</li>
+                        <li>Manage partnerships and stakeholder engagement</li>
+                        <li>Implement processes, policies, and growth strategies</li>
+                    </ul>
+                </div>
+
+                <div class="job-section">
+                    <h4>Requirements:</h4>
+                    <ul>
+                        <li>3+ years in operations/tech/education/programs</li>
+                        <li>Leadership ability and strong communication</li>
+                        <li>Problem-solving mindset and team motivation skills</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
             </div>
 
-            <!-- Job listings hidden until openings available -->
-            <div class="jobs-grid" style="display: none;">
-                <!-- Job 1: Hub Manager -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>Hub Manager / Operations Lead</h3>
-                        </div>
+            <!-- Job 2: Admin & Finance Officer -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>Admin & Finance Officer</h3>
                     </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>What You'll Do:</h4>
-                        <ul>
-                            <li>Lead and coordinate all hub operations</li>
-                            <li>Supervise teams and ensure smooth service delivery</li>
-                            <li>Oversee training, coworking, and startup programs</li>
-                            <li>Manage partnerships and stakeholder engagement</li>
-                            <li>Implement processes, policies, and growth strategies</li>
-                        </ul>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>Requirements:</h4>
-                        <ul>
-                            <li>3+ years in operations/tech/education/programs</li>
-                            <li>Leadership ability and strong communication</li>
-                            <li>Problem-solving mindset and team motivation skills</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
+                </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
                 </div>
 
-                <!-- Job 2: Admin & Finance Officer -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>Admin & Finance Officer</h3>
-                        </div>
-                    </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>What You'll Do:</h4>
-                        <ul>
-                            <li>Maintain financial records & receipts</li>
-                            <li>Manage registrations and enrollment data</li>
-                            <li>Prepare weekly admin and finance reports</li>
-                            <li>Support procurement and documentation</li>
-                            <li>Maintain digital and physical filing systems</li>
-                        </ul>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>Requirements:</h4>
-                        <ul>
-                            <li>HND/BSc in Accounting, Business Admin, Economics</li>
-                            <li>Strong Excel and documentation skills</li>
-                            <li>Accuracy and honesty are a must</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
+                <div class="job-section">
+                    <h4>What You'll Do:</h4>
+                    <ul>
+                        <li>Maintain financial records & receipts</li>
+                        <li>Manage registrations and enrollment data</li>
+                        <li>Prepare weekly admin and finance reports</li>
+                        <li>Support procurement and documentation</li>
+                        <li>Maintain digital and physical filing systems</li>
+                    </ul>
                 </div>
 
-                <!-- Job 3: ICT Support Officer -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>ICT / Technical Support Officer</h3>
-                        </div>
-                    </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>Responsibilities:</h4>
-                        <ul>
-                            <li>Manage computers, Wi-Fi, printers, and network</li>
-                            <li>Support technical needs during training sessions</li>
-                            <li>Handle device setup for events</li>
-                            <li>Maintain system backups and basic cybersecurity</li>
-                            <li>Provide on-site troubleshooting</li>
-                        </ul>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>Requirements:</h4>
-                        <ul>
-                            <li>OND/HND/BSc in ICT, Computer Science, Engineering</li>
-                            <li>Experience in IT support or lab setup</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
+                <div class="job-section">
+                    <h4>Requirements:</h4>
+                    <ul>
+                        <li>HND/BSc in Accounting, Business Admin, Economics</li>
+                        <li>Strong Excel and documentation skills</li>
+                        <li>Accuracy and honesty are a must</li>
+                    </ul>
                 </div>
 
-                <!-- Job 4: Programs & Training Coordinator -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>Programs & Training Coordinator</h3>
-                        </div>
-                    </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
-                    </div>
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
+            </div>
 
-                    <div class="job-section">
-                        <h4>Your Tasks:</h4>
-                        <ul>
-                            <li>Plan and coordinate all training & workshops</li>
-                            <li>Communicate with trainers, mentors & participants</li>
-                            <li>Manage attendance, schedules, and logistics</li>
-                            <li>Oversee incubation-related activities</li>
-                            <li>Support certificates, reporting & curriculum planning</li>
-                        </ul>
+            <!-- Job 3: ICT Support Officer -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>ICT / Technical Support Officer</h3>
                     </div>
-
-                    <div class="job-section">
-                        <h4>You Should Have:</h4>
-                        <ul>
-                            <li>Experience coordinating programs or trainings</li>
-                            <li>Excellent communication & organization skills</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
+                </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
                 </div>
 
-                <!-- Job 5: Front Desk Officer -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>Front Desk / Customer & Member Services Officer</h3>
-                        </div>
-                    </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>You'll Handle:</h4>
-                        <ul>
-                            <li>Visitor reception & inquiries</li>
-                            <li>Coworking bookings and class registrations</li>
-                            <li>Phone calls, emails, and customer support</li>
-                            <li>Front desk organization and admin tasks</li>
-                        </ul>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>Requirements:</h4>
-                        <ul>
-                            <li>Good communication skills</li>
-                            <li>Customer-friendly attitude</li>
-                            <li>Basic computer skills</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
+                <div class="job-section">
+                    <h4>Responsibilities:</h4>
+                    <ul>
+                        <li>Manage computers, Wi-Fi, printers, and network</li>
+                        <li>Support technical needs during training sessions</li>
+                        <li>Handle device setup for events</li>
+                        <li>Maintain system backups and basic cybersecurity</li>
+                        <li>Provide on-site troubleshooting</li>
+                    </ul>
                 </div>
 
-                <!-- Job 6: Trainers & Consultants -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>Part-Time Trainers & Consultants</h3>
-                        </div>
-                    </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Part-time / Contract</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Rolling Application</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Per Session</span>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>Areas We're Recruiting For:</h4>
-                        <ul>
-                            <li>Data Analytics</li>
-                            <li>Cybersecurity</li>
-                            <li>Web Development</li>
-                            <li>UI/UX Design</li>
-                            <li>Digital Marketing</li>
-                            <li>Python Programming</li>
-                            <li>ICT Consulting</li>
-                            <li>Business/Entrepreneurship</li>
-                        </ul>
-                    </div>
-
-                    <div class="job-section">
-                        <h4>You Should Have:</h4>
-                        <ul>
-                            <li>Proven skills and training experience</li>
-                            <li>Ability to deliver hands-on practical sessions</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
+                <div class="job-section">
+                    <h4>Requirements:</h4>
+                    <ul>
+                        <li>OND/HND/BSc in ICT, Computer Science, Engineering</li>
+                        <li>Experience in IT support or lab setup</li>
+                    </ul>
                 </div>
 
-                <!-- Job 7: Facility Assistant -->
-                <div class="job-card">
-                    <div class="job-header">
-                        <div class="job-title">
-                            <h3>Facility & Operations Assistant</h3>
-                        </div>
-                    </div>
-                    <div class="job-meta">
-                        <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
-                        <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
-                        <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
-                        <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
-                    </div>
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
+            </div>
 
-                    <div class="job-section">
-                        <h4>Key Tasks:</h4>
-                        <ul>
-                            <li>Maintain cleanliness and order</li>
-                            <li>Support event setup and logistics</li>
-                            <li>Assist with power (generator/inverter)</li>
-                            <li>Manage utilities and supplies</li>
-                        </ul>
+            <!-- Job 4: Programs & Training Coordinator -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>Programs & Training Coordinator</h3>
                     </div>
-
-                    <div class="job-section">
-                        <h4>Requirements:</h4>
-                        <ul>
-                            <li>Good work ethic</li>
-                            <li>Basic technical understanding is a plus</li>
-                        </ul>
-                    </div>
-
-                    <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;"
-                        onclick="return false;">
-                        Applications Opening Soon <i class="ph ph-clock"></i>
-                    </a>
                 </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                </div>
+
+                <div class="job-section">
+                    <h4>Your Tasks:</h4>
+                    <ul>
+                        <li>Plan and coordinate all training & workshops</li>
+                        <li>Communicate with trainers, mentors & participants</li>
+                        <li>Manage attendance, schedules, and logistics</li>
+                        <li>Oversee incubation-related activities</li>
+                        <li>Support certificates, reporting & curriculum planning</li>
+                    </ul>
+                </div>
+
+                <div class="job-section">
+                    <h4>You Should Have:</h4>
+                    <ul>
+                        <li>Experience coordinating programs or trainings</li>
+                        <li>Excellent communication & organization skills</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
+            </div>
+
+            <!-- Job 5: Front Desk Officer -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>Front Desk / Customer & Member Services Officer</h3>
+                    </div>
+                </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                </div>
+
+                <div class="job-section">
+                    <h4>You'll Handle:</h4>
+                    <ul>
+                        <li>Visitor reception & inquiries</li>
+                        <li>Coworking bookings and class registrations</li>
+                        <li>Phone calls, emails, and customer support</li>
+                        <li>Front desk organization and admin tasks</li>
+                    </ul>
+                </div>
+
+                <div class="job-section">
+                    <h4>Requirements:</h4>
+                    <ul>
+                        <li>Good communication skills</li>
+                        <li>Customer-friendly attitude</li>
+                        <li>Basic computer skills</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
+            </div>
+
+            <!-- Job 6: Trainers & Consultants -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>Part-Time Trainers & Consultants</h3>
+                    </div>
+                </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Part-time / Contract</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Rolling Application</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Per Session</span>
+                </div>
+
+                <div class="job-section">
+                    <h4>Areas We're Recruiting For:</h4>
+                    <ul>
+                        <li>Data Analytics</li>
+                        <li>Cybersecurity</li>
+                        <li>Web Development</li>
+                        <li>UI/UX Design</li>
+                        <li>Digital Marketing</li>
+                        <li>Python Programming</li>
+                        <li>ICT Consulting</li>
+                        <li>Business/Entrepreneurship</li>
+                    </ul>
+                </div>
+
+                <div class="job-section">
+                    <h4>You Should Have:</h4>
+                    <ul>
+                        <li>Proven skills and training experience</li>
+                        <li>Ability to deliver hands-on practical sessions</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
+            </div>
+
+            <!-- Job 7: Facility Assistant -->
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="job-title">
+                        <h3>Facility & Operations Assistant</h3>
+                    </div>
+                </div>
+                <div class="job-meta">
+                    <span class="meta-badge"><i class="ph ph-briefcase"></i> Full-time</span>
+                    <span class="meta-badge"><i class="ph ph-map-pin"></i> Katsina, Nigeria</span>
+                    <span class="meta-badge"><i class="ph ph-calendar"></i> Apply by: Jan 31, 2026</span>
+                    <span class="meta-badge"><i class="ph ph-currency-ngn"></i> Competitive</span>
+                </div>
+
+                <div class="job-section">
+                    <h4>Key Tasks:</h4>
+                    <ul>
+                        <li>Maintain cleanliness and order</li>
+                        <li>Support event setup and logistics</li>
+                        <li>Assist with power (generator/inverter)</li>
+                        <li>Manage utilities and supplies</li>
+                    </ul>
+                </div>
+
+                <div class="job-section">
+                    <h4>Requirements:</h4>
+                    <ul>
+                        <li>Good work ethic</li>
+                        <li>Basic technical understanding is a plus</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="apply-btn" style="background: #64748b; cursor: not-allowed;" onclick="return false;">
+                    Applications Opening Soon <i class="ph ph-clock"></i>
+                </a>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- CTA Section -->
@@ -888,17 +882,17 @@
                 closeApplyModal();
             }
         });
-    
+
         // ===== DYNAMIC JOB LOADING =====
-        
+
         // Load jobs from API when page loads
         document.addEventListener('DOMContentLoaded', loadJobs);
-        
+
         async function loadJobs() {
             try {
                 const response = await fetch('/api/jobs/active');
                 if (!response.ok) throw new Error('Failed to load jobs');
-                
+
                 const jobs = await response.json();
                 renderJobs(jobs);
             } catch (error) {
@@ -906,29 +900,29 @@
                 showNoJobs();
             }
         }
-        
+
         function renderJobs(jobs) {
             const container = document.getElementById('jobsContainer');
-            
+
             if (!jobs || jobs.length === 0) {
                 showNoJobs();
                 return;
             }
-            
+
             container.innerHTML = `
                 <div class="jobs-grid">
                     ${jobs.map(job => createJobCard(job)).join('')}
                 </div>
             `;
         }
-        
+
         function createJobCard(job) {
             const responsibilities = job.responsibilities || [];
             const requirements = job.requirements || [];
-            const deadline = job.application_deadline 
+            const deadline = job.application_deadline
                 ? new Date(job.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 : null;
-            
+
             return `
                 <div class="job-card">
                     <div class="job-header">
@@ -980,14 +974,14 @@
                     ` : ''}
                     
                     <div class="job-actions">
-                        <button onclick="openApplicationModal('${job.title}')" class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
+                        <button onclick="openApplyModal('${job.title}')" class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
                             <i class="ph-fill ph-paper-plane"></i> Apply Now
                         </button>
                     </div>
                 </div>
             `;
         }
-        
+
         function formatEmploymentType(type) {
             const types = {
                 'full-time': 'Full-time',
@@ -996,7 +990,7 @@
             };
             return types[type] || type;
         }
-        
+
         function showNoJobs() {
             const container = document.getElementById('jobsContainer');
             container.innerHTML = `
@@ -1027,7 +1021,7 @@
                 </div>
             `;
         }
-        
+
     </script>
 </body>
 
