@@ -973,10 +973,14 @@
                         </div>
                     ` : ''}
                     
-                    <div class="job-actions">
-                        <button onclick="openApplyModal('${job.title}')" class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
-                            <i class="ph-fill ph-paper-plane"></i> Apply Now
-                        </button>
+                    <div class="job-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                        <a href="mailto:info@kdih.org,katsinadigitalhub@gmail.com?subject=Application for ${encodeURIComponent(job.title)}&body=Dear KDIH Team,%0D%0A%0D%0AI am writing to apply for the ${encodeURIComponent(job.title)} position.%0D%0A%0D%0APlease find my CV attached.%0D%0A%0D%0ABest regards" 
+                           class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <i class="ph-fill ph-envelope"></i> Apply via Email
+                        </a>
+                        <span style="color: #64748b; font-size: 0.875rem;">
+                            <i class="ph ph-info"></i> Send CV to info@kdih.org
+                        </span>
                     </div>
                 </div>
             `;
