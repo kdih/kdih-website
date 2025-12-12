@@ -3,18 +3,31 @@ const path = require('path');
 const fs = require('fs');
 const logger = require('./logger');
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+// Create uploads directory - use persistent storage on production
+const dataDir = process.env.DATA_PATH || path.join(__dirname, '..');
+const uploadsDir = path.join(dataDir, 'uploads');
+
+// Ensure uploads directory exists
+try {
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+        console.log('Created uploads directory:', uploadsDir);
+    }
+} catch (err) {
+    console.error('Error creating uploads directory:', err.message);
 }
 
-// Create subdirectories
-const subdirs = ['pitch-decks', 'certificates', 'profiles', 'documents'];
+// Create subdirectories with error handling
+const subdirs = ['pitch-decks', 'certificates', 'profiles', 'documents', 'cv', 'portfolio'];
 subdirs.forEach(dir => {
-    const dirPath = path.join(uploadsDir, dir);
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
+    try {
+        const dirPath = path.join(uploadsDir, dir);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+            console.log('Created upload subdirectory:', dirPath);
+        }
+    } catch (err) {
+        console.error(`Error creating subdirectory ${dir}:`, err.message);
     }
 });
 
