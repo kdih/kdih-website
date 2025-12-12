@@ -978,10 +978,32 @@
                            class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
                             <i class="ph-fill ph-envelope"></i> Apply via Email
                         </a>
-                        <span style="color: #64748b; font-size: 0.875rem;">
-                            <i class="ph ph-info"></i> Send CV to info@kdih.org & Copy katsinadigitalhub@gmail.com
-                        </span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="color: #64748b; font-size: 0.75rem;">Share:</span>
+                            <a href="https://wa.me/?text=${encodeURIComponent('Check out this job at KDIH: ' + job.title + ' - https://kdih.org/careers.html')}" 
+                               target="_blank" rel="noopener" 
+                               style="color: #25D366; font-size: 1.25rem;" title="Share on WhatsApp">
+                                <i class="ph-fill ph-whatsapp-logo"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent('KDIH is hiring! ' + job.title + ' - Apply now:')}&url=${encodeURIComponent('https://kdih.org/careers.html')}" 
+                               target="_blank" rel="noopener" 
+                               style="color: #1DA1F2; font-size: 1.25rem;" title="Share on X/Twitter">
+                                <i class="ph-fill ph-x-logo"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://kdih.org/careers.html')}" 
+                               target="_blank" rel="noopener" 
+                               style="color: #0077B5; font-size: 1.25rem;" title="Share on LinkedIn">
+                                <i class="ph-fill ph-linkedin-logo"></i>
+                            </a>
+                            <button onclick="copyJobLink('${job.title}')" 
+                                    style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer;" title="Copy link">
+                                <i class="ph ph-copy"></i>
+                            </button>
+                        </div>
                     </div>
+                    <p style="color: #64748b; font-size: 0.8rem; margin-top: 0.75rem;">
+                        <i class="ph ph-info"></i> Send CV to info@kdih.org & Copy katsinadigitalhub@gmail.com
+                    </p>
                 </div>
             `;
         }
@@ -1024,6 +1046,21 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Copy job link to clipboard
+        function copyJobLink(jobTitle) {
+            const url = 'https://kdih.org/careers.html';
+            navigator.clipboard.writeText(url).then(() => {
+                // Show a brief toast notification
+                const toast = document.createElement('div');
+                toast.textContent = '✓ Link copied!';
+                toast.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; z-index: 9999; font-size: 0.9rem;';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            }).catch(err => {
+                alert('Copy this link: ' + url);
+            });
         }
 
     </script>
