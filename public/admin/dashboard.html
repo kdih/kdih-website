@@ -1437,9 +1437,26 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
 
-            <!-- Careers Tab -->
+                <!-- Trainer Details Modal -->
+                <div id="trainerModal" class="modal"
+                    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+                    <div
+                        style="background: #1e293b; border-radius: 12px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative;">
+                        <button onclick="closeTrainerModal()"
+                            style="position: absolute; top: 1rem; right: 1rem; background: #334155; border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">×</button>
+
+                        <div style="padding: 1.5rem 2rem; border-bottom: 1px solid #334155;">
+                            <h2 style="margin: 0; color: #f1f5f9;"><i class="ph-fill ph-user-circle"></i> Trainer
+                                Details</h2>
+                        </div>
+
+                        <div id="trainerModalContent" style="padding: 2rem;">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="careers-tab" class="tab-content">
                 <!-- Job Postings Section -->
                 <div class="table-container" style="margin-bottom: 3rem;">
@@ -3215,34 +3232,126 @@
             }
         }
 
+        let currentTrainerId = null;
+
         function viewTrainerDetails(id) {
             const trainer = allTrainers.find(t => t.id === id);
             if (!trainer) return;
 
+            currentTrainerId = id;
             const expertise = JSON.parse(trainer.expertise_areas || '[]');
+            const statusBadges = {
+                pending: '<span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">⏳ Pending</span>',
+                contacted: '<span style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">📞 Contacted</span>',
+                approved: '<span style="background: #d1fae5; color: #065f46; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">✅ Approved</span>',
+                rejected: '<span style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">❌ Rejected</span>'
+            };
 
-            alert(`
-📋 TRAINER DETAILS
+            document.getElementById('trainerModalContent').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Full Name</p>
+                        <p style="color: #f1f5f9; font-size: 1rem; margin: 0.25rem 0 0; font-weight: 600;">${trainer.full_name}</p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Status</p>
+                        <p style="margin: 0.25rem 0 0;">${statusBadges[trainer.status] || trainer.status}</p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Email</p>
+                        <p style="margin: 0.25rem 0 0;"><a href="mailto:${trainer.email}" style="color: #60a5fa;">${trainer.email}</a></p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Phone</p>
+                        <p style="color: #f1f5f9; margin: 0.25rem 0 0;">${trainer.phone}</p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Location</p>
+                        <p style="color: #f1f5f9; margin: 0.25rem 0 0;">${trainer.location || 'Not provided'}</p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Applied</p>
+                        <p style="color: #f1f5f9; margin: 0.25rem 0 0;">${new Date(trainer.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Experience</p>
+                        <p style="color: #f1f5f9; margin: 0.25rem 0 0;">${trainer.years_experience ? trainer.years_experience + ' years' : 'Not specified'}</p>
+                    </div>
+                    <div>
+                        <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Availability</p>
+                        <p style="color: #f1f5f9; margin: 0.25rem 0 0;">${trainer.availability || 'Not specified'}</p>
+                    </div>
+                </div>
 
-Name: ${trainer.full_name}
-Email: ${trainer.email}
-Phone: ${trainer.phone}
-Location: ${trainer.location || 'Not provided'}
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Expertise Areas</p>
+                    <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        ${expertise.map(e => `<span style="background: #334155; color: #60a5fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${e}</span>`).join('')}
+                    </div>
+                </div>
 
-Expertise: ${expertise.join(', ')}
-Experience: ${trainer.years_experience || 'Not specified'} years
-Availability: ${trainer.availability || 'Not specified'}
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Bio</p>
+                    <p style="color: #f1f5f9; margin: 0.25rem 0 0; line-height: 1.5;">${trainer.bio || 'Not provided'}</p>
+                </div>
 
-Bio: ${trainer.bio || 'Not provided'}
+                <div style="margin-bottom: 1.5rem; background: #0f172a; padding: 1rem; border-radius: 8px;">
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin: 0 0 0.5rem;"><i class="ph ph-certificate"></i> Previous Trainings Conducted</p>
+                    <pre style="color: #f1f5f9; margin: 0; white-space: pre-wrap; font-family: inherit; font-size: 0.9rem;">${trainer.training_history || 'Not provided'}</pre>
+                </div>
 
-📌 PREVIOUS TRAININGS:
-${trainer.training_history || 'Not provided'}
+                ${trainer.portfolio_link ? `
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="color: #94a3b8; font-size: 0.8rem; margin: 0;">Portfolio</p>
+                    <p style="margin: 0.25rem 0 0;"><a href="${trainer.portfolio_link}" target="_blank" style="color: #60a5fa;">${trainer.portfolio_link}</a></p>
+                </div>
+                ` : ''}
 
-Portfolio: ${trainer.portfolio_link || 'Not provided'}
+                <div style="margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid #334155;">
+                    <label style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 0.5rem;"><i class="ph ph-note-pencil"></i> Admin Notes (Internal)</label>
+                    <textarea id="trainerNotes" rows="4" style="width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem; color: #f1f5f9; font-family: inherit; resize: vertical;" placeholder="Add notes about this trainer (interview feedback, availability, etc.)...">${trainer.notes || ''}</textarea>
+                </div>
 
-Status: ${trainer.status}
-Applied: ${new Date(trainer.created_at).toLocaleString()}
-            `.trim());
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button onclick="closeTrainerModal()" style="padding: 0.5rem 1rem; background: #334155; border: none; border-radius: 6px; color: #f1f5f9; cursor: pointer;">Cancel</button>
+                    <button onclick="saveTrainerNotes()" style="padding: 0.5rem 1rem; background: #2563eb; border: none; border-radius: 6px; color: white; cursor: pointer;"><i class="ph ph-floppy-disk"></i> Save Notes</button>
+                </div>
+            `;
+
+            document.getElementById('trainerModal').style.display = 'flex';
+        }
+
+        function closeTrainerModal() {
+            document.getElementById('trainerModal').style.display = 'none';
+            currentTrainerId = null;
+        }
+
+        async function saveTrainerNotes() {
+            if (!currentTrainerId) return;
+
+            const notes = document.getElementById('trainerNotes').value;
+
+            try {
+                const response = await fetch(`/api/admin/trainers/${currentTrainerId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes })
+                });
+
+                if (response.ok) {
+                    // Update local data
+                    const trainer = allTrainers.find(t => t.id === currentTrainerId);
+                    if (trainer) trainer.notes = notes;
+
+                    alert('Notes saved successfully!');
+                    closeTrainerModal();
+                } else {
+                    alert('Failed to save notes');
+                }
+            } catch (error) {
+                console.error('Error saving notes:', error);
+                alert('Error saving notes');
+            }
         }
 
         // Load admins (Super Admin only)

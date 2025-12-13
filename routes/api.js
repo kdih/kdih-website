@@ -4566,6 +4566,77 @@ router.patch('/admin/trainers/:id', requireAuth, (req, res) => {
             logger.error('Error updating trainer application:', err);
             return res.status(500).json({ error: 'Failed to update application' });
         }
+
+        // If status was updated, send email notification
+        if (status) {
+            db.get('SELECT full_name, email FROM trainer_applications WHERE id = ?', [id], (err, trainer) => {
+                if (err || !trainer) return;
+
+                const emailTemplates = {
+                    contacted: {
+                        subject: 'KDIH Trainer Application - We\'d Like to Connect!',
+                        body: `
+                            <h2>Hello ${trainer.full_name},</h2>
+                            <p>Thank you for your interest in joining the KDIH Trainer Pool!</p>
+                            <p>We've reviewed your application and would like to learn more about your experience and availability.</p>
+                            <p><strong>What's Next?</strong></p>
+                            <ul>
+                                <li>A team member will reach out to you within the next few days</li>
+                                <li>Please ensure your phone is accessible</li>
+                                <li>You may be invited for a brief orientation session</li>
+                            </ul>
+                            <p>If you have any questions, feel free to reply to this email.</p>
+                            <p>Best regards,<br>The KDIH Team</p>
+                        `
+                    },
+                    approved: {
+                        subject: '🎉 Congratulations! You\'ve Been Approved - KDIH Trainer Pool',
+                        body: `
+                            <h2>Congratulations ${trainer.full_name}!</h2>
+                            <p>We're thrilled to inform you that your application to join the KDIH Trainer Pool has been <strong style="color: #10b981;">APPROVED</strong>!</p>
+                            <p><strong>What This Means:</strong></p>
+                            <ul>
+                                <li>You are now part of our pool of professional trainers</li>
+                                <li>We will contact you when training opportunities match your expertise</li>
+                                <li>You may be assigned to upcoming courses, workshops, or bootcamps</li>
+                            </ul>
+                            <p><strong>Next Steps:</strong></p>
+                            <ol>
+                                <li>Keep your availability updated</li>
+                                <li>Respond promptly when we reach out about opportunities</li>
+                                <li>Prepare your training materials for your specialty areas</li>
+                            </ol>
+                            <p>Welcome to the team! We look forward to working with you.</p>
+                            <p>Best regards,<br>The KDIH Team<br>Katsina Digital Innovation Hub</p>
+                        `
+                    },
+                    rejected: {
+                        subject: 'KDIH Trainer Application Update',
+                        body: `
+                            <h2>Dear ${trainer.full_name},</h2>
+                            <p>Thank you for your interest in joining the KDIH Trainer Pool and for taking the time to submit your application.</p>
+                            <p>After careful review, we regret to inform you that we are unable to proceed with your application at this time.</p>
+                            <p>This decision may be due to:</p>
+                            <ul>
+                                <li>Current saturation in your expertise area</li>
+                                <li>Specific requirements for ongoing projects</li>
+                                <li>Other considerations based on our current needs</li>
+                            </ul>
+                            <p>We encourage you to continue developing your skills and to reapply in the future when new opportunities arise.</p>
+                            <p>Thank you for your understanding.</p>
+                            <p>Best regards,<br>The KDIH Team</p>
+                        `
+                    }
+                };
+
+                const template = emailTemplates[status];
+                if (template) {
+                    sendEmail(trainer.email, template.subject, template.body)
+                        .catch(err => console.error('Failed to send trainer status email:', err));
+                }
+            });
+        }
+
         res.json({ message: 'Application updated successfully' });
     });
 });
