@@ -4437,6 +4437,137 @@ router.post('/careers/apply', upload.fields([
     });
 });
 
+// ===== TRAINER/CONSULTANT APPLICATIONS =====
+
+// Submit trainer application (public)
+router.post('/trainers/apply', (req, res) => {
+    const { full_name, email, phone, location, expertise_areas, years_experience, bio, portfolio_link, availability } = req.body;
+
+    // Validation
+    if (!full_name || !email || !phone || !expertise_areas) {
+        return res.status(400).json({ error: 'Please fill in all required fields (Name, Email, Phone, Expertise Areas)' });
+    }
+
+    // Convert expertise_areas array to JSON string if it's an array
+    const expertiseJson = Array.isArray(expertise_areas) ? JSON.stringify(expertise_areas) : expertise_areas;
+
+    const sql = `INSERT INTO trainer_applications 
+        (full_name, email, phone, location, expertise_areas, years_experience, bio, portfolio_link, availability) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [full_name, email, phone, location, expertiseJson, years_experience, bio, portfolio_link, availability], function (err) {
+        if (err) {
+            logger.error('Error saving trainer application:', err);
+            return res.status(500).json({ error: 'Failed to submit application' });
+        }
+
+        // Send email notification to admin
+        sendEmail(
+            'info@kdih.org',
+            'New Trainer/Consultant Application',
+            `
+                <h2>New Trainer Application</h2>
+                <p><strong>Name:</strong> ${full_name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phone}</p>
+                <p><strong>Location:</strong> ${location || 'Not provided'}</p>
+                <p><strong>Expertise Areas:</strong> ${expertiseJson}</p>
+                <p><strong>Experience:</strong> ${years_experience || 'Not specified'} years</p>
+                <p><strong>Availability:</strong> ${availability || 'Not specified'}</p>
+                <p><strong>Bio:</strong></p>
+                <p>${bio || 'Not provided'}</p>
+                <p><strong>Portfolio:</strong> ${portfolio_link || 'Not provided'}</p>
+                <p><strong>Application ID:</strong> ${this.lastID}</p>
+                <p>Review in the admin dashboard.</p>
+            `
+        ).catch(err => console.error('Failed to send notification email:', err));
+
+        // Send confirmation to applicant
+        sendEmail(
+            email,
+            'Thank You for Your Interest - KDIH',
+            `
+                <h2>Thank You for Registering!</h2>
+                <p>Dear ${full_name},</p>
+                <p>We've received your application to join our pool of Part-Time Trainers & Consultants at Katsina Digital Innovation Hub.</p>
+                <p><strong>What Happens Next?</strong></p>
+                <ul>
+                    <li>Your profile has been added to our trainer database</li>
+                    <li>We'll contact you when training opportunities match your expertise</li>
+                    <li>You may be invited for an orientation/interview session</li>
+                </ul>
+                <p>Thank you for your interest in empowering the next generation of tech talent in Northern Nigeria!</p>
+                <p>Best regards,<br>The KDIH Team</p>
+            `
+        ).catch(err => console.error('Failed to send confirmation email:', err));
+
+        res.json({
+            message: 'Application submitted successfully! We will contact you when opportunities arise.',
+            applicationId: this.lastID
+        });
+    });
+});
+
+// Get all trainer applications (Admin)
+router.get('/admin/trainers', requireAuth, (req, res) => {
+    const { status, expertise } = req.query;
+    let sql = 'SELECT * FROM trainer_applications WHERE 1=1';
+    const params = [];
+
+    if (status) {
+        sql += ' AND status = ?';
+        params.push(status);
+    }
+    if (expertise) {
+        sql += ' AND expertise_areas LIKE ?';
+        params.push(`%${expertise}%`);
+    }
+
+    sql += ' ORDER BY created_at DESC';
+
+    db.all(sql, params, (err, applications) => {
+        if (err) {
+            logger.error('Error fetching trainer applications:', err);
+            return res.status(500).json({ error: 'Failed to fetch applications' });
+        }
+        res.json(applications);
+    });
+});
+
+// Update trainer application status (Admin)
+router.patch('/admin/trainers/:id', requireAuth, (req, res) => {
+    const { status, notes } = req.body;
+    const { id } = req.params;
+
+    let sql = 'UPDATE trainer_applications SET';
+    const params = [];
+    const updates = [];
+
+    if (status) {
+        updates.push(' status = ?');
+        params.push(status);
+    }
+    if (notes !== undefined) {
+        updates.push(' notes = ?');
+        params.push(notes);
+    }
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'No updates provided' });
+    }
+
+    sql += updates.join(',') + ' WHERE id = ?';
+    params.push(id);
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            logger.error('Error updating trainer application:', err);
+            return res.status(500).json({ error: 'Failed to update application' });
+        }
+        res.json({ message: 'Application updated successfully' });
+    });
+});
+
 // Get all job applications (Admin)
 router.get('/admin/careers/applications', requireAuth, (req, res) => {
     const { status, position } = req.query;

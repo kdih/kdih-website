@@ -745,6 +745,125 @@
         </div>
     </div>
 
+    <!-- Trainer Registration Modal -->
+    <div class="modal" id="trainerModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeTrainerModal()">
+                <i class="ph ph-x"></i>
+            </button>
+            <h2 style="margin-bottom: 0.5rem;">Join Our Trainer Pool</h2>
+            <p style="color: var(--text-light); margin-bottom: 1.5rem;">Register your interest to become a part-time
+                trainer or consultant at KDIH. We'll contact you when opportunities arise.</p>
+
+            <form id="trainerForm">
+                <div class="form-group">
+                    <label for="trainerName">Full Name *</label>
+                    <input type="text" id="trainerName" name="full_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerEmail">Email Address *</label>
+                    <input type="email" id="trainerEmail" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerPhone">Phone Number *</label>
+                    <input type="tel" id="trainerPhone" name="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerLocation">Location</label>
+                    <input type="text" id="trainerLocation" name="location" placeholder="e.g., Katsina, Nigeria">
+                </div>
+
+                <div class="form-group">
+                    <label>Areas of Expertise * (Select all that apply)</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Web Development"> Web Development
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Mobile App Development"> Mobile Apps
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Data Science/AI"> Data Science/AI
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Cybersecurity"> Cybersecurity
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="UI/UX Design"> UI/UX Design
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Graphics Design"> Graphics Design
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Digital Marketing"> Digital Marketing
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Cloud Computing"> Cloud Computing
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Business Development"> Business Dev
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Startup Mentorship"> Startup Mentorship
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="Project Management"> Project Management
+                        </label>
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" name="expertise" value="ICT Consulting"> ICT Consulting
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerExperience">Years of Experience</label>
+                    <input type="number" id="trainerExperience" name="years_experience" min="0" placeholder="e.g., 3">
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerAvailability">Availability</label>
+                    <select id="trainerAvailability" name="availability">
+                        <option value="">Select availability</option>
+                        <option value="Weekends only">Weekends only</option>
+                        <option value="Evenings only">Evenings only</option>
+                        <option value="Weekends and Evenings">Weekends and Evenings</option>
+                        <option value="Flexible">Flexible (Anytime)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerBio">Brief Bio / About Yourself</label>
+                    <textarea id="trainerBio" name="bio" rows="3"
+                        placeholder="Tell us about your experience and what you can offer..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerPortfolio">Portfolio / LinkedIn URL (Optional)</label>
+                    <input type="url" id="trainerPortfolio" name="portfolio_link" placeholder="https://...">
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="ph-fill ph-user-plus"></i> Register Interest
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Application Modal -->
     <div class="modal" id="applyModal">
         <div class="modal-content">
@@ -835,6 +954,80 @@
             document.getElementById('portfolioFileName').textContent = 'Click to upload (optional)';
             document.body.style.overflow = 'auto';
         }
+
+        // ===== TRAINER MODAL FUNCTIONS =====
+        function openTrainerModal() {
+            document.getElementById('trainerModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTrainerModal() {
+            document.getElementById('trainerModal').classList.remove('active');
+            document.getElementById('trainerForm').reset();
+            document.body.style.overflow = 'auto';
+        }
+
+        // Handle trainer form submission
+        document.getElementById('trainerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Submitting...';
+
+            // Get selected expertise areas
+            const expertiseCheckboxes = document.querySelectorAll('input[name="expertise"]:checked');
+            const expertiseAreas = Array.from(expertiseCheckboxes).map(cb => cb.value);
+
+            if (expertiseAreas.length === 0) {
+                alert('Please select at least one area of expertise.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="ph-fill ph-user-plus"></i> Register Interest';
+                return;
+            }
+
+            const formData = {
+                full_name: document.getElementById('trainerName').value,
+                email: document.getElementById('trainerEmail').value,
+                phone: document.getElementById('trainerPhone').value,
+                location: document.getElementById('trainerLocation').value,
+                expertise_areas: expertiseAreas,
+                years_experience: document.getElementById('trainerExperience').value,
+                availability: document.getElementById('trainerAvailability').value,
+                bio: document.getElementById('trainerBio').value,
+                portfolio_link: document.getElementById('trainerPortfolio').value
+            };
+
+            try {
+                const response = await fetch('/api/trainers/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Thank you for registering! We will contact you when opportunities arise.');
+                    closeTrainerModal();
+                } else {
+                    alert('❌ ' + (result.error || 'Failed to submit. Please try again.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ An error occurred. Please try again or contact info@kdih.org');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="ph-fill ph-user-plus"></i> Register Interest';
+            }
+        });
+
+        // Close trainer modal when clicking outside
+        document.getElementById('trainerModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeTrainerModal();
+            }
+        });
 
         function updateFileName(input, spanId) {
             const span = document.getElementById(spanId);
@@ -974,10 +1167,17 @@
                     ` : ''}
                     
                     <div class="job-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <a href="mailto:info@kdih.org,katsinadigitalhub@gmail.com?subject=Application for ${encodeURIComponent(job.title)}&body=Dear KDIH Team,%0D%0A%0D%0AI am writing to apply for the ${encodeURIComponent(job.title)} position.%0D%0A%0D%0APlease find my CV attached.%0D%0A%0D%0ABest regards" 
-                           class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-                            <i class="ph-fill ph-envelope"></i> Apply via Email
-                        </a>
+                        ${job.employment_type === 'part-time' ? `
+                            <button onclick="openTrainerModal()" 
+                               class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                <i class="ph-fill ph-user-plus"></i> Register Your Interest
+                            </button>
+                        ` : `
+                            <a href="mailto:info@kdih.org,katsinadigitalhub@gmail.com?subject=Application for ${encodeURIComponent(job.title)}&body=Dear KDIH Team,%0D%0A%0D%0AI am writing to apply for the ${encodeURIComponent(job.title)} position.%0D%0A%0D%0APlease find my CV attached.%0D%0A%0D%0ABest regards" 
+                               class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                <i class="ph-fill ph-envelope"></i> Apply via Email
+                            </a>
+                        `}
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <span style="color: #64748b; font-size: 0.75rem;">Share:</span>
                             <a href="https://wa.me/?text=${encodeURIComponent('Check out this job at KDIH: ' + job.title + ' - https://kdih.org/careers.html')}" 
@@ -1006,9 +1206,11 @@
                             </button>
                         </div>
                     </div>
+                    ${job.employment_type !== 'part-time' ? `
                     <p style="color: #64748b; font-size: 0.8rem; margin-top: 0.75rem;">
                         <i class="ph ph-info"></i> Send CV to info@kdih.org & Copy katsinadigitalhub@gmail.com
                     </p>
+                    ` : ''}
                 </div>
             `;
         }
