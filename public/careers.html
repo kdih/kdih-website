@@ -849,55 +849,11 @@
                         <label style="margin-bottom: 0.75rem; display: block;"><i class="ph ph-lightning"></i> Areas of
                             Expertise * <span style="font-weight: normal; color: #64748b;">(Select all that
                                 apply)</span></label>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Web Development">
-                                <span><i class="ph ph-code"></i> Web Dev</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Mobile Apps">
-                                <span><i class="ph ph-device-mobile"></i> Mobile Apps</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Data Science/AI">
-                                <span><i class="ph ph-brain"></i> Data/AI</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Cybersecurity">
-                                <span><i class="ph ph-shield-check"></i> Security</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="UI/UX Design">
-                                <span><i class="ph ph-figma-logo"></i> UI/UX</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Graphics Design">
-                                <span><i class="ph ph-paint-brush"></i> Graphics</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Digital Marketing">
-                                <span><i class="ph ph-megaphone"></i> Marketing</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Cloud Computing">
-                                <span><i class="ph ph-cloud"></i> Cloud</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Business Development">
-                                <span><i class="ph ph-briefcase"></i> Business</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Startup Mentorship">
-                                <span><i class="ph ph-rocket"></i> Startups</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="Project Management">
-                                <span><i class="ph ph-kanban"></i> PM</span>
-                            </label>
-                            <label class="expertise-checkbox">
-                                <input type="checkbox" name="expertise" value="ICT Consulting">
-                                <span><i class="ph ph-desktop-tower"></i> ICT</span>
-                            </label>
+                        <div id="expertiseContainer"
+                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                            <!-- Will be populated dynamically from courses -->
+                            <p style="grid-column: span 3; color: #64748b; font-size: 0.85rem;"><i
+                                    class="ph ph-spinner ph-spin"></i> Loading expertise areas...</p>
                         </div>
                     </div>
 
@@ -1046,9 +1002,35 @@
         }
 
         // ===== TRAINER MODAL FUNCTIONS =====
+
+        // Load expertise areas from courses API
+        async function loadExpertiseAreas() {
+            const container = document.getElementById('expertiseContainer');
+            try {
+                const response = await fetch('/api/courses');
+                const courses = await response.json();
+
+                if (courses.length === 0) {
+                    container.innerHTML = '<p style="grid-column: span 3; color: #64748b;">No courses available yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = courses.map(course => `
+                    <label class="expertise-checkbox">
+                        <input type="checkbox" name="expertise" value="${course.title}">
+                        <span><i class="ph ph-book-open"></i> ${course.title.length > 20 ? course.title.substring(0, 20) + '...' : course.title}</span>
+                    </label>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading expertise areas:', error);
+                container.innerHTML = '<p style="grid-column: span 3; color: #ef4444;">Failed to load expertise areas</p>';
+            }
+        }
+
         function openTrainerModal() {
             document.getElementById('trainerModal').classList.add('active');
             document.body.style.overflow = 'hidden';
+            loadExpertiseAreas(); // Load courses as expertise options
         }
 
         function closeTrainerModal() {

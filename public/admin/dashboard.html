@@ -1351,18 +1351,7 @@
                             <select id="trainerExpertiseFilter" onchange="loadTrainers()"
                                 style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
                                 <option value="">All Expertise</option>
-                                <option value="Web Development">Web Development</option>
-                                <option value="Mobile Apps">Mobile Apps</option>
-                                <option value="Data Science/AI">Data Science/AI</option>
-                                <option value="Cybersecurity">Cybersecurity</option>
-                                <option value="UI/UX Design">UI/UX Design</option>
-                                <option value="Graphics Design">Graphics Design</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
-                                <option value="Cloud Computing">Cloud Computing</option>
-                                <option value="Business Development">Business Development</option>
-                                <option value="Startup Mentorship">Startup Mentorship</option>
-                                <option value="Project Management">Project Management</option>
-                                <option value="ICT Consulting">ICT Consulting</option>
+                                <!-- Will be populated dynamically -->
                             </select>
                             <select id="trainerStatusFilter" onchange="loadTrainers()"
                                 style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
@@ -1979,6 +1968,7 @@
                     loadAdmins();
                     break;
                 case 'trainers':
+                    loadExpertiseFilter();
                     loadTrainers();
                     break;
                 case 'settings':
@@ -3098,6 +3088,23 @@
 
         // ===== TRAINER POOL FUNCTIONS =====
         let allTrainers = [];
+
+        // Load expertise filter options from courses
+        async function loadExpertiseFilter() {
+            const select = document.getElementById('trainerExpertiseFilter');
+            if (!select) return;
+
+            try {
+                const response = await fetch('/api/courses');
+                const courses = await response.json();
+
+                // Keep the "All Expertise" option and add course options
+                select.innerHTML = '<option value="">All Expertise</option>' +
+                    courses.map(course => `<option value="${course.title}">${course.title}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading expertise filter:', error);
+            }
+        }
 
         async function loadTrainers() {
             const expertise = document.getElementById('trainerExpertiseFilter')?.value || '';
