@@ -379,6 +379,53 @@
             gap: 0.5rem;
         }
 
+        /* Expertise Checkbox Styles */
+        .expertise-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        .expertise-checkbox:hover {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .expertise-checkbox input {
+            display: none;
+        }
+
+        .expertise-checkbox input:checked+span {
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .expertise-checkbox input:checked~span {
+            color: #10b981;
+        }
+
+        .expertise-checkbox:has(input:checked) {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .expertise-checkbox span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .expertise-checkbox span i {
+            font-size: 1rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .job-header {
@@ -387,6 +434,10 @@
 
             .modal-content {
                 padding: 1.5rem;
+            }
+
+            .expertise-checkbox span {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -747,120 +798,150 @@
 
     <!-- Trainer Registration Modal -->
     <div class="modal" id="trainerModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <button class="modal-close" onclick="closeTrainerModal()">
+        <div class="modal-content" style="max-width: 650px; padding: 0; overflow: hidden;">
+            <button class="modal-close" onclick="closeTrainerModal()"
+                style="position: absolute; top: 1rem; right: 1rem; z-index: 10; background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.25rem;">
                 <i class="ph ph-x"></i>
             </button>
-            <h2 style="margin-bottom: 0.5rem;">Join Our Trainer Pool</h2>
-            <p style="color: var(--text-light); margin-bottom: 1.5rem;">Register your interest to become a part-time
-                trainer or consultant at KDIH. We'll contact you when opportunities arise.</p>
 
-            <form id="trainerForm">
-                <div class="form-group">
-                    <label for="trainerName">Full Name *</label>
-                    <input type="text" id="trainerName" name="full_name" required>
+            <!-- Modal Header -->
+            <div
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 2rem; color: white; text-align: center;">
+                <div
+                    style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                    <i class="ph-fill ph-chalkboard-teacher" style="font-size: 1.75rem;"></i>
                 </div>
+                <h2 style="margin: 0 0 0.5rem; color: white;">Join Our Trainer Pool</h2>
+                <p style="margin: 0; opacity: 0.9; font-size: 0.95rem;">Register your interest to become a part-time
+                    trainer or consultant</p>
+            </div>
 
-                <div class="form-group">
-                    <label for="trainerEmail">Email Address *</label>
-                    <input type="email" id="trainerEmail" name="email" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="trainerPhone">Phone Number *</label>
-                    <input type="tel" id="trainerPhone" name="phone" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="trainerLocation">Location</label>
-                    <input type="text" id="trainerLocation" name="location" placeholder="e.g., Katsina, Nigeria">
-                </div>
-
-                <div class="form-group">
-                    <label>Areas of Expertise * (Select all that apply)</label>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Web Development"> Web Development
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Mobile App Development"> Mobile Apps
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Data Science/AI"> Data Science/AI
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Cybersecurity"> Cybersecurity
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="UI/UX Design"> UI/UX Design
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Graphics Design"> Graphics Design
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Digital Marketing"> Digital Marketing
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Cloud Computing"> Cloud Computing
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Business Development"> Business Dev
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Startup Mentorship"> Startup Mentorship
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="Project Management"> Project Management
-                        </label>
-                        <label
-                            style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" name="expertise" value="ICT Consulting"> ICT Consulting
-                        </label>
+            <!-- Form Body -->
+            <div style="padding: 1.5rem 2rem 2rem;">
+                <form id="trainerForm">
+                    <!-- Row 1: Name & Email -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="trainerName"><i class="ph ph-user"></i> Full Name *</label>
+                            <input type="text" id="trainerName" name="full_name" required placeholder="Your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="trainerEmail"><i class="ph ph-envelope"></i> Email *</label>
+                            <input type="email" id="trainerEmail" name="email" required placeholder="your@email.com">
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="trainerExperience">Years of Experience</label>
-                    <input type="number" id="trainerExperience" name="years_experience" min="0" placeholder="e.g., 3">
-                </div>
+                    <!-- Row 2: Phone & Location -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="trainerPhone"><i class="ph ph-phone"></i> Phone *</label>
+                            <input type="tel" id="trainerPhone" name="phone" required placeholder="08012345678">
+                        </div>
+                        <div class="form-group">
+                            <label for="trainerLocation"><i class="ph ph-map-pin"></i> Location</label>
+                            <input type="text" id="trainerLocation" name="location" placeholder="City, State">
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="trainerAvailability">Availability</label>
-                    <select id="trainerAvailability" name="availability">
-                        <option value="">Select availability</option>
-                        <option value="Weekends only">Weekends only</option>
-                        <option value="Evenings only">Evenings only</option>
-                        <option value="Weekends and Evenings">Weekends and Evenings</option>
-                        <option value="Flexible">Flexible (Anytime)</option>
-                    </select>
-                </div>
+                    <!-- Expertise Areas -->
+                    <div class="form-group">
+                        <label style="margin-bottom: 0.75rem; display: block;"><i class="ph ph-lightning"></i> Areas of
+                            Expertise * <span style="font-weight: normal; color: #64748b;">(Select all that
+                                apply)</span></label>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Web Development">
+                                <span><i class="ph ph-code"></i> Web Dev</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Mobile Apps">
+                                <span><i class="ph ph-device-mobile"></i> Mobile Apps</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Data Science/AI">
+                                <span><i class="ph ph-brain"></i> Data/AI</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Cybersecurity">
+                                <span><i class="ph ph-shield-check"></i> Security</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="UI/UX Design">
+                                <span><i class="ph ph-figma-logo"></i> UI/UX</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Graphics Design">
+                                <span><i class="ph ph-paint-brush"></i> Graphics</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Digital Marketing">
+                                <span><i class="ph ph-megaphone"></i> Marketing</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Cloud Computing">
+                                <span><i class="ph ph-cloud"></i> Cloud</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Business Development">
+                                <span><i class="ph ph-briefcase"></i> Business</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Startup Mentorship">
+                                <span><i class="ph ph-rocket"></i> Startups</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="Project Management">
+                                <span><i class="ph ph-kanban"></i> PM</span>
+                            </label>
+                            <label class="expertise-checkbox">
+                                <input type="checkbox" name="expertise" value="ICT Consulting">
+                                <span><i class="ph ph-desktop-tower"></i> ICT</span>
+                            </label>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="trainerBio">Brief Bio / About Yourself</label>
-                    <textarea id="trainerBio" name="bio" rows="3"
-                        placeholder="Tell us about your experience and what you can offer..."></textarea>
-                </div>
+                    <!-- Row 3: Experience & Availability -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="trainerExperience"><i class="ph ph-clock"></i> Years of Experience</label>
+                            <input type="number" id="trainerExperience" name="years_experience" min="0"
+                                placeholder="e.g., 3">
+                        </div>
+                        <div class="form-group">
+                            <label for="trainerAvailability"><i class="ph ph-calendar"></i> Availability</label>
+                            <select id="trainerAvailability" name="availability">
+                                <option value="">Select...</option>
+                                <option value="Weekends only">Weekends only</option>
+                                <option value="Evenings only">Evenings only</option>
+                                <option value="Weekends and Evenings">Weekends & Evenings</option>
+                                <option value="Flexible">Flexible (Anytime)</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="trainerPortfolio">Portfolio / LinkedIn URL (Optional)</label>
-                    <input type="url" id="trainerPortfolio" name="portfolio_link" placeholder="https://...">
-                </div>
+                    <div class="form-group">
+                        <label for="trainerBio"><i class="ph ph-text-columns"></i> Brief Bio</label>
+                        <textarea id="trainerBio" name="bio" rows="3"
+                            placeholder="Tell us about your experience, certifications, and what makes you a great trainer..."></textarea>
+                    </div>
 
-                <button type="submit" class="submit-btn">
-                    <i class="ph-fill ph-user-plus"></i> Register Interest
-                </button>
-            </form>
+                    <div class="form-group">
+                        <label for="trainerPortfolio"><i class="ph ph-link"></i> Portfolio / LinkedIn (Optional)</label>
+                        <input type="url" id="trainerPortfolio" name="portfolio_link"
+                            placeholder="https://linkedin.com/in/yourname">
+                    </div>
+
+                    <button type="submit" class="submit-btn"
+                        style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 1rem;">
+                        <i class="ph-fill ph-paper-plane-tilt"></i> Submit Application
+                    </button>
+
+                    <p style="text-align: center; margin-top: 1rem; color: #64748b; font-size: 0.85rem;">
+                        <i class="ph ph-shield-check"></i> Your information is secure and will only be used for
+                        recruitment purposes.
+                    </p>
+                </form>
+            </div>
         </div>
     </div>
 
