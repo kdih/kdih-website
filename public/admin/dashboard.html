@@ -3096,7 +3096,8 @@
 
             try {
                 const response = await fetch('/api/courses');
-                const courses = await response.json();
+                const result = await response.json();
+                const courses = result.data || result;
 
                 // Keep the "All Expertise" option and add course options
                 select.innerHTML = '<option value="">All Expertise</option>' +

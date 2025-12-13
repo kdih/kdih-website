@@ -1008,9 +1008,10 @@
             const container = document.getElementById('expertiseContainer');
             try {
                 const response = await fetch('/api/courses');
-                const courses = await response.json();
+                const result = await response.json();
+                const courses = result.data || result; // Handle both {data: []} and [] formats
 
-                if (courses.length === 0) {
+                if (!courses || courses.length === 0) {
                     container.innerHTML = '<p style="grid-column: span 3; color: #64748b;">No courses available yet.</p>';
                     return;
                 }
