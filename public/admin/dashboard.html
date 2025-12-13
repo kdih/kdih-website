@@ -3308,8 +3308,11 @@
                 ` : ''}
 
                 <div style="margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid #334155;">
-                    <label style="color: #94a3b8; font-size: 0.8rem; display: block; margin-bottom: 0.5rem;"><i class="ph ph-note-pencil"></i> Admin Notes (Internal)</label>
-                    <textarea id="trainerNotes" rows="4" style="width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem; color: #f1f5f9; font-family: inherit; resize: vertical;" placeholder="Add notes about this trainer (interview feedback, availability, etc.)...">${trainer.notes || ''}</textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label style="color: #94a3b8; font-size: 0.8rem;"><i class="ph ph-note-pencil"></i> Admin Notes (Internal)</label>
+                        <button onclick="insertNotesTemplate()" style="background: #334155; border: none; color: #60a5fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer;"><i class="ph ph-plus"></i> Insert Template</button>
+                    </div>
+                    <textarea id="trainerNotes" rows="10" style="width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem; color: #f1f5f9; font-family: inherit; resize: vertical; line-height: 1.5;">${trainer.notes || ''}</textarea>
                 </div>
 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end;">
@@ -3352,6 +3355,44 @@
                 console.error('Error saving notes:', error);
                 alert('Error saving notes');
             }
+        }
+
+        function insertNotesTemplate() {
+            const textarea = document.getElementById('trainerNotes');
+            const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            const template = `📅 DATE: ${today}
+
+📞 CONTACT ATTEMPTS:
+- 
+
+📋 INTERVIEW NOTES:
+- Communication: 
+- Technical Skills: 
+- Teaching ability: 
+
+💰 RATE & TERMS:
+- Agreed Rate: ₦
+- Payment Terms: 
+
+📆 AVAILABILITY:
+- Days: 
+- Hours: 
+- Start Date: 
+
+⭐ PERFORMANCE LOG:
+- 
+
+📝 ADDITIONAL NOTES:
+- `;
+
+            // Only insert if empty or append to existing
+            if (textarea.value.trim() === '') {
+                textarea.value = template;
+            } else {
+                textarea.value += '\n\n---\n\n' + template;
+            }
+            textarea.focus();
         }
 
         // Load admins (Super Admin only)
