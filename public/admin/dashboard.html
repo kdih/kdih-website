@@ -530,9 +530,13 @@
                 <i class="ph-fill ph-database"></i>
                 <span>Backups</span>
             </div>
-            <div class="nav-item" id="careers-nav" onclick="switchTab('careers')" style="display: none;">
+            <div class="nav-item" onclick="switchTab('careers')" style="display: none;" id="careers-nav">
                 <i class="ph-fill ph-briefcase"></i>
                 <span>Careers</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('trainers')">
+                <i class="ph-fill ph-chalkboard-teacher"></i>
+                <span>Trainer Pool</span>
             </div>
             <div class="nav-item" id="admins-nav" onclick="switchTab('admins')" style="display: none;">
                 <i class="ph-fill ph-shield-check"></i>
@@ -1338,6 +1342,94 @@
             </div>
 
 
+            <!-- Trainer Pool Tab -->
+            <div id="trainers-tab" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="ph-fill ph-chalkboard-teacher"></i> Trainer Pool</h2>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <select id="trainerExpertiseFilter" onchange="loadTrainers()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">All Expertise</option>
+                                <option value="Web Development">Web Development</option>
+                                <option value="Mobile Apps">Mobile Apps</option>
+                                <option value="Data Science/AI">Data Science/AI</option>
+                                <option value="Cybersecurity">Cybersecurity</option>
+                                <option value="UI/UX Design">UI/UX Design</option>
+                                <option value="Graphics Design">Graphics Design</option>
+                                <option value="Digital Marketing">Digital Marketing</option>
+                                <option value="Cloud Computing">Cloud Computing</option>
+                                <option value="Business Development">Business Development</option>
+                                <option value="Startup Mentorship">Startup Mentorship</option>
+                                <option value="Project Management">Project Management</option>
+                                <option value="ICT Consulting">ICT Consulting</option>
+                            </select>
+                            <select id="trainerStatusFilter" onchange="loadTrainers()"
+                                style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="loadTrainers()">
+                                <i class="ph ph-arrows-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="trainerStats"
+                        style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="stat-card"
+                            style="background: rgba(37, 99, 235, 0.1); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;" id="totalTrainers">0</div>
+                            <div style="color: #64748b; font-size: 0.85rem;">Total Applications</div>
+                        </div>
+                        <div class="stat-card"
+                            style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;" id="pendingTrainers">0
+                            </div>
+                            <div style="color: #64748b; font-size: 0.85rem;">Pending Review</div>
+                        </div>
+                        <div class="stat-card"
+                            style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;" id="approvedTrainers">0
+                            </div>
+                            <div style="color: #64748b; font-size: 0.85rem;">Approved</div>
+                        </div>
+                        <div class="stat-card"
+                            style="background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #6366f1;" id="contactedTrainers">0
+                            </div>
+                            <div style="color: #64748b; font-size: 0.85rem;">Contacted</div>
+                        </div>
+                    </div>
+
+                    <table id="trainersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Expertise Areas</th>
+                                <th>Experience</th>
+                                <th>Availability</th>
+                                <th>Status</th>
+                                <th>Applied</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trainersTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem;">
+                                    <i class="ph ph-spinner ph-spin" style="font-size: 2rem;"></i>
+                                    <p>Loading trainer applications...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Careers Tab -->
             <div id="careers-tab" class="tab-content">
                 <!-- Job Postings Section -->
@@ -1837,6 +1929,7 @@
                 gallery: 'Gallery',
                 certificates: 'Certificate Management',
                 admins: 'Manage Admins',
+                trainers: 'Trainer Pool',
                 settings: 'Settings'
             };
             document.getElementById('page-title').textContent = titles[tab];
@@ -1884,6 +1977,9 @@
                     break;
                 case 'admins':
                     loadAdmins();
+                    break;
+                case 'trainers':
+                    loadTrainers();
                     break;
                 case 'settings':
                     // Settings content is static, no data to load
@@ -2998,6 +3094,142 @@
             } catch (error) {
                 alert('Error updating status');
             }
+        }
+
+        // ===== TRAINER POOL FUNCTIONS =====
+        let allTrainers = [];
+
+        async function loadTrainers() {
+            const expertise = document.getElementById('trainerExpertiseFilter')?.value || '';
+            const status = document.getElementById('trainerStatusFilter')?.value || '';
+
+            try {
+                let url = '/api/admin/trainers?';
+                if (expertise) url += `expertise=${encodeURIComponent(expertise)}&`;
+                if (status) url += `status=${encodeURIComponent(status)}`;
+
+                const response = await fetch(url);
+                const trainers = await response.json();
+                allTrainers = trainers;
+
+                // Update stats
+                document.getElementById('totalTrainers').textContent = trainers.length;
+                document.getElementById('pendingTrainers').textContent = trainers.filter(t => t.status === 'pending').length;
+                document.getElementById('approvedTrainers').textContent = trainers.filter(t => t.status === 'approved').length;
+                document.getElementById('contactedTrainers').textContent = trainers.filter(t => t.status === 'contacted').length;
+
+                const tbody = document.getElementById('trainersTableBody');
+                if (trainers.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem;">
+                                <i class="ph ph-users-three" style="font-size: 3rem; color: #64748b;"></i>
+                                <p style="color: #64748b; margin-top: 0.5rem;">No trainer applications found</p>
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = trainers.map(trainer => {
+                    const expertise = JSON.parse(trainer.expertise_areas || '[]');
+                    const expertiseBadges = expertise.slice(0, 3).map(e =>
+                        `<span style="background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-right: 0.25rem;">${e}</span>`
+                    ).join('') + (expertise.length > 3 ? `<span style="color: #64748b; font-size: 0.75rem;">+${expertise.length - 3} more</span>` : '');
+
+                    const statusColors = {
+                        pending: 'background: #fef3c7; color: #92400e;',
+                        contacted: 'background: #dbeafe; color: #1e40af;',
+                        approved: 'background: #d1fae5; color: #065f46;',
+                        rejected: 'background: #fee2e2; color: #991b1b;'
+                    };
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${trainer.full_name}</strong>
+                                ${trainer.location ? `<br><small style="color: #64748b;"><i class="ph ph-map-pin"></i> ${trainer.location}</small>` : ''}
+                            </td>
+                            <td>
+                                <a href="mailto:${trainer.email}" style="color: #2563eb;">${trainer.email}</a>
+                                <br><small>${trainer.phone}</small>
+                            </td>
+                            <td>${expertiseBadges}</td>
+                            <td>${trainer.years_experience ? trainer.years_experience + ' years' : '-'}</td>
+                            <td>${trainer.availability || '-'}</td>
+                            <td>
+                                <select onchange="updateTrainerStatus(${trainer.id}, this.value)" style="padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid #ddd; ${statusColors[trainer.status] || ''}">
+                                    <option value="pending" ${trainer.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="contacted" ${trainer.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                                    <option value="approved" ${trainer.status === 'approved' ? 'selected' : ''}>Approved</option>
+                                    <option value="rejected" ${trainer.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            </td>
+                            <td>${new Date(trainer.created_at).toLocaleDateString()}</td>
+                            <td>
+                                <button onclick="viewTrainerDetails(${trainer.id})" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                    <i class="ph ph-eye"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading trainers:', error);
+                document.getElementById('trainersTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #ef4444;">
+                            <i class="ph ph-warning" style="font-size: 2rem;"></i>
+                            <p>Failed to load trainer applications</p>
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        async function updateTrainerStatus(id, status) {
+            try {
+                const response = await fetch(`/api/admin/trainers/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+
+                if (response.ok) {
+                    loadTrainers();
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating trainer:', error);
+                alert('Error updating status');
+            }
+        }
+
+        function viewTrainerDetails(id) {
+            const trainer = allTrainers.find(t => t.id === id);
+            if (!trainer) return;
+
+            const expertise = JSON.parse(trainer.expertise_areas || '[]');
+
+            alert(`
+📋 TRAINER DETAILS
+
+Name: ${trainer.full_name}
+Email: ${trainer.email}
+Phone: ${trainer.phone}
+Location: ${trainer.location || 'Not provided'}
+
+Expertise: ${expertise.join(', ')}
+Experience: ${trainer.years_experience || 'Not specified'} years
+Availability: ${trainer.availability || 'Not specified'}
+
+Bio: ${trainer.bio || 'Not provided'}
+
+Portfolio: ${trainer.portfolio_link || 'Not provided'}
+
+Status: ${trainer.status}
+Applied: ${new Date(trainer.created_at).toLocaleString()}
+            `.trim());
         }
 
         // Load admins (Super Admin only)
