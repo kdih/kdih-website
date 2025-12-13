@@ -1372,7 +1372,7 @@
                                 <option value="approved">Approved</option>
                                 <option value="rejected">Rejected</option>
                             </select>
-                            <button class="btn btn-secondary" onclick="loadTrainers()">
+                            <button class="btn" onclick="loadTrainers()" style="background: #2563eb; color: white;">
                                 <i class="ph ph-arrows-clockwise"></i> Refresh
                             </button>
                         </div>
@@ -3132,41 +3132,42 @@
 
                 tbody.innerHTML = trainers.map(trainer => {
                     const expertise = JSON.parse(trainer.expertise_areas || '[]');
-                    const expertiseBadges = expertise.slice(0, 3).map(e =>
-                        `<span style="background: #e0f2fe; color: #0369a1; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-right: 0.25rem;">${e}</span>`
-                    ).join('') + (expertise.length > 3 ? `<span style="color: #64748b; font-size: 0.75rem;">+${expertise.length - 3} more</span>` : '');
+                    // Show first 2 badges, then count
+                    const expertiseBadges = expertise.slice(0, 2).map(e =>
+                        `<span style="display: inline-block; background: #1e293b; color: #60a5fa; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; margin: 0.1rem; white-space: nowrap;">${e}</span>`
+                    ).join('') + (expertise.length > 2 ? `<span style="display: inline-block; background: #334155; color: #94a3b8; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; margin: 0.1rem;">+${expertise.length - 2}</span>` : '');
 
-                    const statusColors = {
-                        pending: 'background: #fef3c7; color: #92400e;',
-                        contacted: 'background: #dbeafe; color: #1e40af;',
-                        approved: 'background: #d1fae5; color: #065f46;',
-                        rejected: 'background: #fee2e2; color: #991b1b;'
+                    const statusBadges = {
+                        pending: '<span style="background: #fef3c7; color: #92400e; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">⏳ Pending</span>',
+                        contacted: '<span style="background: #dbeafe; color: #1e40af; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">📞 Contacted</span>',
+                        approved: '<span style="background: #d1fae5; color: #065f46; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">✅ Approved</span>',
+                        rejected: '<span style="background: #fee2e2; color: #991b1b; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">❌ Rejected</span>'
                     };
 
                     return `
                         <tr>
-                            <td>
-                                <strong>${trainer.full_name}</strong>
+                            <td style="min-width: 120px;">
+                                <strong style="color: #f1f5f9;">${trainer.full_name}</strong>
                                 ${trainer.location ? `<br><small style="color: #64748b;"><i class="ph ph-map-pin"></i> ${trainer.location}</small>` : ''}
                             </td>
-                            <td>
-                                <a href="mailto:${trainer.email}" style="color: #2563eb;">${trainer.email}</a>
-                                <br><small>${trainer.phone}</small>
+                            <td style="min-width: 150px;">
+                                <a href="mailto:${trainer.email}" style="color: #60a5fa; font-size: 0.85rem;">${trainer.email}</a>
+                                <br><small style="color: #94a3b8;">${trainer.phone}</small>
                             </td>
-                            <td>${expertiseBadges}</td>
-                            <td>${trainer.years_experience ? trainer.years_experience + ' years' : '-'}</td>
-                            <td>${trainer.availability || '-'}</td>
+                            <td style="max-width: 180px;">${expertiseBadges}</td>
+                            <td style="text-align: center;">${trainer.years_experience ? `<strong>${trainer.years_experience}</strong> yrs` : '-'}</td>
+                            <td style="font-size: 0.85rem;">${trainer.availability || '-'}</td>
                             <td>
-                                <select onchange="updateTrainerStatus(${trainer.id}, this.value)" style="padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid #ddd; ${statusColors[trainer.status] || ''}">
-                                    <option value="pending" ${trainer.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                    <option value="contacted" ${trainer.status === 'contacted' ? 'selected' : ''}>Contacted</option>
-                                    <option value="approved" ${trainer.status === 'approved' ? 'selected' : ''}>Approved</option>
-                                    <option value="rejected" ${trainer.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                <select onchange="updateTrainerStatus(${trainer.id}, this.value)" style="padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #f1f5f9; font-size: 0.8rem; cursor: pointer;">
+                                    <option value="pending" ${trainer.status === 'pending' ? 'selected' : ''}>⏳ Pending</option>
+                                    <option value="contacted" ${trainer.status === 'contacted' ? 'selected' : ''}>📞 Contacted</option>
+                                    <option value="approved" ${trainer.status === 'approved' ? 'selected' : ''}>✅ Approved</option>
+                                    <option value="rejected" ${trainer.status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
                                 </select>
                             </td>
-                            <td>${new Date(trainer.created_at).toLocaleDateString()}</td>
+                            <td style="font-size: 0.85rem; color: #94a3b8;">${new Date(trainer.created_at).toLocaleDateString()}</td>
                             <td>
-                                <button onclick="viewTrainerDetails(${trainer.id})" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                <button onclick="viewTrainerDetails(${trainer.id})" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #2563eb;">
                                     <i class="ph ph-eye"></i> View
                                 </button>
                             </td>
