@@ -4441,21 +4441,21 @@ router.post('/careers/apply', upload.fields([
 
 // Submit trainer application (public)
 router.post('/trainers/apply', (req, res) => {
-    const { full_name, email, phone, location, expertise_areas, years_experience, bio, portfolio_link, availability } = req.body;
+    const { full_name, email, phone, location, expertise_areas, years_experience, bio, portfolio_link, availability, training_history } = req.body;
 
     // Validation
-    if (!full_name || !email || !phone || !expertise_areas) {
-        return res.status(400).json({ error: 'Please fill in all required fields (Name, Email, Phone, Expertise Areas)' });
+    if (!full_name || !email || !phone || !expertise_areas || !training_history) {
+        return res.status(400).json({ error: 'Please fill in all required fields (Name, Email, Phone, Expertise Areas, Training History)' });
     }
 
     // Convert expertise_areas array to JSON string if it's an array
     const expertiseJson = Array.isArray(expertise_areas) ? JSON.stringify(expertise_areas) : expertise_areas;
 
     const sql = `INSERT INTO trainer_applications 
-        (full_name, email, phone, location, expertise_areas, years_experience, bio, portfolio_link, availability) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        (full_name, email, phone, location, expertise_areas, years_experience, bio, portfolio_link, availability, training_history) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    db.run(sql, [full_name, email, phone, location, expertiseJson, years_experience, bio, portfolio_link, availability], function (err) {
+    db.run(sql, [full_name, email, phone, location, expertiseJson, years_experience, bio, portfolio_link, availability, training_history], function (err) {
         if (err) {
             logger.error('Error saving trainer application:', err);
             return res.status(500).json({ error: 'Failed to submit application' });
@@ -4476,6 +4476,8 @@ router.post('/trainers/apply', (req, res) => {
                 <p><strong>Availability:</strong> ${availability || 'Not specified'}</p>
                 <p><strong>Bio:</strong></p>
                 <p>${bio || 'Not provided'}</p>
+                <h3>Previous Trainings Conducted:</h3>
+                <pre style="background: #f5f5f5; padding: 10px; white-space: pre-wrap;">${training_history}</pre>
                 <p><strong>Portfolio:</strong> ${portfolio_link || 'Not provided'}</p>
                 <p><strong>Application ID:</strong> ${this.lastID}</p>
                 <p>Review in the admin dashboard.</p>

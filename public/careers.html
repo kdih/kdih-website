@@ -926,6 +926,14 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="trainerHistory"><i class="ph ph-certificate"></i> Previous Trainings *</label>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">List trainings you've
+                            conducted with evidence links (YouTube, photos, certificates). One per line.</p>
+                        <textarea id="trainerHistory" name="training_history" rows="4" required
+                            placeholder="Example:&#10;Web Development Bootcamp - 20 participants - https://youtube.com/...&#10;Excel Training for SMEs - Certificate attached - https://drive.google.com/...&#10;UI/UX Workshop at UniKAT - Photos: https://link.com/..."></textarea>
+                    </div>
+
+                    <div class="form-group">
                         <label for="trainerPortfolio"><i class="ph ph-link"></i> Portfolio / LinkedIn (Optional)</label>
                         <input type="url" id="trainerPortfolio" name="portfolio_link"
                             placeholder="https://linkedin.com/in/yourname">
@@ -1076,6 +1084,7 @@
                 years_experience: document.getElementById('trainerExperience').value,
                 availability: document.getElementById('trainerAvailability').value,
                 bio: document.getElementById('trainerBio').value,
+                training_history: document.getElementById('trainerHistory').value,
                 portfolio_link: document.getElementById('trainerPortfolio').value
             };
 
