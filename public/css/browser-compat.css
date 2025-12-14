@@ -1,0 +1,397 @@
+/**
+ * Browser Compatibility CSS
+ * Supports: Chrome, Safari, Firefox, Edge, iOS Safari, Android Browser
+ * KDIH Website - Cross-browser fixes
+ */
+
+/* ============================================
+   1. CSS PREFIXES FOR OLDER BROWSERS
+   ============================================ */
+
+/* Flexbox prefixes for Safari and older browsers */
+.nav-inner,
+.nav-links,
+.hero-btns,
+.service-icon,
+.check-icon,
+.founder-header,
+.contact-item,
+.modal-overlay,
+.stat-item,
+.check-list li,
+.founder-credentials li,
+.delivery-list li {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+/* Flex properties */
+.track-title::after {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+}
+
+/* Grid prefixes */
+.hero-content,
+.stats-grid,
+.services-grid,
+.impact-grid,
+.impact-stats,
+.about-grid,
+.contact-grid,
+.course-list,
+.delivery-grid {
+    display: -ms-grid;
+    display: grid;
+}
+
+/* ============================================
+   2. BACKDROP FILTER (Safari Fix)
+   ============================================ */
+
+nav.scrolled,
+.hero-badge,
+.impact-card,
+.contact-item,
+.hero-caption {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not ((-webkit-backdrop-filter: blur(12px)) or (backdrop-filter: blur(12px))) {
+    nav.scrolled {
+        background: rgba(255, 255, 255, 0.95) !important;
+    }
+    
+    .hero-badge,
+    .hero-caption {
+        background: rgba(30, 41, 59, 0.9) !important;
+    }
+    
+    .impact-card {
+        background: rgba(30, 41, 59, 0.95) !important;
+    }
+    
+    .contact-item {
+        background: rgba(255, 255, 255, 0.2) !important;
+    }
+}
+
+/* ============================================
+   3. SMOOTH SCROLL (Safari Fix)
+   ============================================ */
+
+html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+}
+
+/* Safari smooth scroll polyfill class */
+.scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+/* ============================================
+   4. TRANSFORM & TRANSITION PREFIXES
+   ============================================ */
+
+.btn:hover,
+.service-card:hover,
+.course-card:hover,
+.contact-item:hover,
+.modal-content {
+    -webkit-transform: translateY(-2px);
+    -moz-transform: translateY(-2px);
+    -ms-transform: translateY(-2px);
+    transform: translateY(-2px);
+}
+
+.reveal {
+    -webkit-transform: translateY(30px);
+    -moz-transform: translateY(30px);
+    -ms-transform: translateY(30px);
+    transform: translateY(30px);
+}
+
+.reveal.active {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+}
+
+/* Transition prefixes */
+a,
+.btn,
+.service-card,
+.course-card,
+.contact-item,
+.modal-overlay,
+.reveal {
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   5. TEXT GRADIENT (Safari Fix)
+   ============================================ */
+
+.text-gradient {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback */
+}
+
+/* ============================================
+   6. BOX-SIZING FIX (Older browsers)
+   ============================================ */
+
+*,
+*::before,
+*::after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* ============================================
+   7. iOS SPECIFIC FIXES
+   ============================================ */
+
+/* Prevent iOS zoom on input focus */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+textarea,
+select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+}
+
+/* iOS tap highlight removal */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix for iOS safe area (notch) */
+body {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Fix iOS input styling */
+input,
+textarea,
+button,
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0; /* Prevent iOS rounded corners */
+}
+
+/* Restore proper button styling after appearance reset */
+button,
+.btn {
+    border-radius: 9999px;
+    cursor: pointer;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    -webkit-appearance: checkbox;
+    -moz-appearance: checkbox;
+    appearance: checkbox;
+}
+
+/* ============================================
+   8. MOBILE TOUCH OPTIMIZATION
+   ============================================ */
+
+/* Ensure minimum touch target size (48px recommended by Google) */
+@media (max-width: 768px) {
+    .btn,
+    button,
+    a,
+    .nav-links a,
+    .service-card,
+    .course-card,
+    input,
+    select,
+    textarea {
+        min-height: 44px;
+    }
+    
+    /* Better touch spacing */
+    .nav-links {
+        gap: 0.5rem;
+    }
+    
+    .nav-links a {
+        padding: 0.875rem 1rem;
+        display: block;
+        width: 100%;
+    }
+    
+    /* Prevent accidental double-tap zoom */
+    * {
+        touch-action: manipulation;
+    }
+    
+    /* Better scrolling */
+    body {
+        -webkit-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+    }
+}
+
+/* ============================================
+   9. ANIMATION PREFIXES
+   ============================================ */
+
+@-webkit-keyframes fadeUp {
+    from { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
+    to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
+@-webkit-keyframes fadeDown {
+    from { opacity: 0; -webkit-transform: translateY(-20px); transform: translateY(-20px); }
+    to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
+@-webkit-keyframes float {
+    0%, 100% { -webkit-transform: translate(0, 0); transform: translate(0, 0); }
+    50% { -webkit-transform: translate(30px, 50px); transform: translate(30px, 50px); }
+}
+
+/* ============================================
+   10. FILTER PREFIXES (Safari)
+   ============================================ */
+
+.orb {
+    -webkit-filter: blur(80px);
+    filter: blur(80px);
+}
+
+/* ============================================
+   11. PRINT STYLES
+   ============================================ */
+
+@media print {
+    nav,
+    .hero-bg,
+    .orb,
+    .sticky-cta,
+    .modal-overlay {
+        display: none !important;
+    }
+    
+    body {
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+    }
+    
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+}
+
+/* ============================================
+   12. HIGH CONTRAST MODE SUPPORT
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    :root {
+        --accent: #0000ff;
+        --text-main: #000000;
+        --bg-light: #ffffff;
+    }
+    
+    .btn-primary {
+        border: 2px solid #000;
+    }
+}
+
+/* ============================================
+   13. REDUCED MOTION (Accessibility)
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    html {
+        scroll-behavior: auto;
+    }
+    
+    .orb {
+        animation: none;
+    }
+    
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ============================================
+   14. FIREFOX SPECIFIC FIXES
+   ============================================ */
+
+@-moz-document url-prefix() {
+    /* Firefox scrollbar styling */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: #64748b #1e293b;
+    }
+}
+
+/* ============================================
+   15. EDGE/IE FALLBACKS
+   ============================================ */
+
+/* CSS Grid fallback for older Edge */
+@supports not (display: grid) {
+    .services-grid,
+    .course-list {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .service-card,
+    .course-card {
+        width: 100%;
+        max-width: 350px;
+        margin: 1rem;
+    }
+}
+
+/* ============================================
+   16. DARK MODE SUPPORT (Optional)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    /* The site already has dark sections, 
+       but you can add dark mode support here */
+}
