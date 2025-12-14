@@ -9,8 +9,8 @@
    ============================================ */
 
 /* Flexbox prefixes for Safari and older browsers */
+/* NOTE: .nav-links excluded to preserve mobile display:none */
 .nav-inner,
-.nav-links,
 .hero-btns,
 .service-icon,
 .check-icon,
@@ -67,16 +67,16 @@ nav.scrolled,
     nav.scrolled {
         background: rgba(255, 255, 255, 0.95) !important;
     }
-    
+
     .hero-badge,
     .hero-caption {
         background: rgba(30, 41, 59, 0.9) !important;
     }
-    
+
     .impact-card {
         background: rgba(30, 41, 59, 0.95) !important;
     }
-    
+
     .contact-item {
         background: rgba(255, 255, 255, 0.2) !important;
     }
@@ -88,7 +88,8 @@ nav.scrolled,
 
 html {
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* iOS momentum scrolling */
 }
 
 /* Safari smooth scroll polyfill class */
@@ -148,7 +149,8 @@ a,
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    color: transparent; /* Fallback */
+    color: transparent;
+    /* Fallback */
 }
 
 /* ============================================
@@ -175,7 +177,8 @@ input[type="number"],
 input[type="password"],
 textarea,
 select {
-    font-size: 16px !important; /* Prevents zoom on iOS */
+    font-size: 16px !important;
+    /* Prevents zoom on iOS */
 }
 
 /* iOS tap highlight removal */
@@ -199,7 +202,8 @@ select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    border-radius: 0; /* Prevent iOS rounded corners */
+    border-radius: 0;
+    /* Prevent iOS rounded corners */
 }
 
 /* Restore proper button styling after appearance reset */
@@ -222,6 +226,7 @@ input[type="radio"] {
 
 /* Ensure minimum touch target size (48px recommended by Google) */
 @media (max-width: 768px) {
+
     .btn,
     button,
     a,
@@ -233,23 +238,23 @@ input[type="radio"] {
     textarea {
         min-height: 44px;
     }
-    
-    /* Better touch spacing */
-    .nav-links {
+
+    /* Better touch spacing - only when nav is active */
+    .nav-links.active {
         gap: 0.5rem;
     }
-    
-    .nav-links a {
+
+    .nav-links.active a {
         padding: 0.875rem 1rem;
         display: block;
         width: 100%;
     }
-    
+
     /* Prevent accidental double-tap zoom */
     * {
         touch-action: manipulation;
     }
-    
+
     /* Better scrolling */
     body {
         -webkit-overflow-scrolling: touch;
@@ -262,18 +267,45 @@ input[type="radio"] {
    ============================================ */
 
 @-webkit-keyframes fadeUp {
-    from { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
-    to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+    from {
+        opacity: 0;
+        -webkit-transform: translateY(20px);
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
 }
 
 @-webkit-keyframes fadeDown {
-    from { opacity: 0; -webkit-transform: translateY(-20px); transform: translateY(-20px); }
-    to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+    from {
+        opacity: 0;
+        -webkit-transform: translateY(-20px);
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
 }
 
 @-webkit-keyframes float {
-    0%, 100% { -webkit-transform: translate(0, 0); transform: translate(0, 0); }
-    50% { -webkit-transform: translate(30px, 50px); transform: translate(30px, 50px); }
+
+    0%,
+    100% {
+        -webkit-transform: translate(0, 0);
+        transform: translate(0, 0);
+    }
+
+    50% {
+        -webkit-transform: translate(30px, 50px);
+        transform: translate(30px, 50px);
+    }
 }
 
 /* ============================================
@@ -290,6 +322,7 @@ input[type="radio"] {
    ============================================ */
 
 @media print {
+
     nav,
     .hero-bg,
     .orb,
@@ -297,13 +330,13 @@ input[type="radio"] {
     .modal-overlay {
         display: none !important;
     }
-    
+
     body {
         font-size: 12pt;
         color: #000;
         background: #fff;
     }
-    
+
     a {
         color: #000;
         text-decoration: underline;
@@ -320,7 +353,7 @@ input[type="radio"] {
         --text-main: #000000;
         --bg-light: #ffffff;
     }
-    
+
     .btn-primary {
         border: 2px solid #000;
     }
@@ -331,6 +364,7 @@ input[type="radio"] {
    ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -338,15 +372,15 @@ input[type="radio"] {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    
+
     html {
         scroll-behavior: auto;
     }
-    
+
     .orb {
         animation: none;
     }
-    
+
     .reveal {
         opacity: 1;
         transform: none;
@@ -358,6 +392,7 @@ input[type="radio"] {
    ============================================ */
 
 @-moz-document url-prefix() {
+
     /* Firefox scrollbar styling */
     * {
         scrollbar-width: thin;
@@ -371,6 +406,7 @@ input[type="radio"] {
 
 /* CSS Grid fallback for older Edge */
 @supports not (display: grid) {
+
     .services-grid,
     .course-list {
         display: -webkit-box;
@@ -378,7 +414,7 @@ input[type="radio"] {
         display: flex;
         flex-wrap: wrap;
     }
-    
+
     .service-card,
     .course-card {
         width: 100%;
