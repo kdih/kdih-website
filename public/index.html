@@ -47,7 +47,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 
     <!-- Browser Compatibility -->
-    <link rel="stylesheet" href="/css/browser-compat.css">
+    <link rel="stylesheet" href="/css/browser-compat.css?v=2">
 
     <!-- Additional Mobile & Safari Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -779,9 +779,12 @@
         }
 
         .contact-item {
+            display: block !important;
+            /* Prevent flex override from Safari */
             background: rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
             border-radius: 16px;
+            -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
             transition: transform 0.3s ease;
         }
