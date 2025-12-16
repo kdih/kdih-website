@@ -31,8 +31,9 @@ try {
     process.exit(0);
 }
 
-const IMAGES_DIR = path.join(__dirname, 'public/images');
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const PROJECT_ROOT = path.join(__dirname, '..');
+const IMAGES_DIR = path.join(PROJECT_ROOT, 'public/images');
+const PUBLIC_DIR = path.join(PROJECT_ROOT, 'public');
 const MAX_WIDTH = 1200;  // Max width for images
 const QUALITY = 80;      // WebP quality (0-100)
 
@@ -90,10 +91,11 @@ async function processDirectory(dir) {
 function listLargeImages() {
     console.log('\n📸 Large Images Found:\n');
 
+    const projectRoot = path.join(__dirname, '..');
     const dirs = [
-        path.join(__dirname, 'public'),
-        path.join(__dirname, 'public/images'),
-        path.join(__dirname, 'public/images/gallery')
+        path.join(projectRoot, 'public'),
+        path.join(projectRoot, 'public/images'),
+        path.join(projectRoot, 'public/images/gallery')
     ];
 
     let totalSize = 0;
