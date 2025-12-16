@@ -109,15 +109,38 @@ app.use((req, res, next) => {
     next();
 });
 
-// Static files with caching
-app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0, // Cache for 1 day in production
+// Static files with optimized caching
+const staticOptions = {
     etag: true,
-    lastModified: true
-}));
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+        // Set cache-control based on file type
+        if (filePath.endsWith('.html')) {
+            // HTML files - short cache, must revalidate
+            res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+        } else if (filePath.match(/\.(css|js)$/)) {
+            // CSS/JS - cache for 1 week
+            res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+        } else if (filePath.match(/\.(jpg|jpeg|png|gif|webp|svg|ico)$/)) {
+            // Images - cache for 1 month
+            res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+        } else if (filePath.match(/\.(woff|woff2|ttf|eot)$/)) {
+            // Fonts - cache for 1 year
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+            // Other files - 1 day cache
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+        }
+    }
+};
+
+app.use(express.static(path.join(__dirname, 'public'), staticOptions));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-    maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0, // Cache uploads for 7 days
-    etag: true
+    ...staticOptions,
+    setHeaders: (res) => {
+        // Uploads - cache for 1 month
+        res.setHeader('Cache-Control', 'public, max-age=2592000');
+    }
 }));
 
 // Health check endpoint

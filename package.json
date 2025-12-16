@@ -19,7 +19,8 @@
     "test:verbose": "jest --verbose --coverage",
     "security:test": "node security-test.js",
     "security:check": "node pre-deploy-security.js",
-    "security:audit": "npm audit && node pre-deploy-security.js"
+    "security:audit": "npm audit && node pre-deploy-security.js",
+    "optimize-images": "node scripts/optimize-images.js"
   },
   "keywords": [
     "kdih",

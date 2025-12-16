@@ -38,7 +38,13 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;700;800&display=swap"
         rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/kdihlogo.jpeg" as="image">
+    <link rel="preload" href="/css/browser-compat.css" as="style">
+
+    <!-- Defer non-critical scripts -->
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 
     <!-- Browser Compatibility -->
     <link rel="stylesheet" href="/css/browser-compat.css">
@@ -2126,6 +2132,30 @@
 
         // Load data on start
         fetchData();
+
+        // Lazy loading for images (native + fallback)
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add loading="lazy" to all images below the fold
+            const images = document.querySelectorAll('img:not([loading])');
+            images.forEach((img, index) => {
+                if (index > 0) { // Skip first image (logo)
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                }
+            });
+
+            // Performance monitoring (optional)
+            if ('PerformanceObserver' in window) {
+                const observer = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (entry.initiatorType === 'img' && entry.duration > 1000) {
+                            console.warn('Slow image load:', entry.name, entry.duration.toFixed(0) + 'ms');
+                        }
+                    }
+                });
+                observer.observe({ entryTypes: ['resource'] });
+            }
+        });
     </script>
 </body>
 
