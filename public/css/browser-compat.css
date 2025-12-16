@@ -9,13 +9,12 @@
    ============================================ */
 
 /* Flexbox prefixes for Safari and older browsers */
-/* NOTE: .nav-links excluded to preserve mobile display:none */
+/* NOTE: .nav-links and .contact-item excluded to preserve original layout */
 .nav-inner,
 .hero-btns,
 .service-icon,
 .check-icon,
 .founder-header,
-.contact-item,
 .modal-overlay,
 .stat-item,
 .check-list li,
