@@ -1872,6 +1872,36 @@
         <i class="ph-fill ph-whatsapp-logo"></i>
     </a>
 
+    <!-- Coming Soon Modal -->
+    <div id="coming-soon-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <button class="modal-close" id="close-coming-soon">
+                <i class="ph-bold ph-x"></i>
+            </button>
+            <div style="font-size: 4rem; color: var(--accent); margin-bottom: 1rem;">
+                <i class="ph-fill ph-clock-countdown"></i>
+            </div>
+            <h2 style="color: var(--primary); margin-bottom: 0.75rem;">Coming Soon!</h2>
+            <p id="coming-soon-course" style="color: var(--text-light); margin-bottom: 1.5rem; font-size: 1rem;">
+                Enrollment for <strong></strong> will open soon.
+            </p>
+            <p style="color: var(--text-light); margin-bottom: 2rem; font-size: 0.95rem;">
+                We're preparing an amazing learning experience for you. Stay tuned for updates!
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="https://wa.me/2348067933935?text=Hello%20KDIH!%20I'm%20interested%20in%20learning%20more%20about%20your%20courses."
+                    target="_blank" class="btn btn-primary"
+                    style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="ph-fill ph-whatsapp-logo"></i> Contact Us on WhatsApp
+                </a>
+                <button class="btn btn-outline" id="close-coming-soon-btn"
+                    style="border-color: var(--primary); color: var(--primary);">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -2048,13 +2078,35 @@
 
 
 
-        // Enrollment Logic - Redirect to Register Page
+        // Enrollment Logic - Show Coming Soon Modal
+        const comingSoonModal = document.getElementById('coming-soon-modal');
+        const closeComingSoonBtn = document.getElementById('close-coming-soon');
+        const closeComingSoonBtn2 = document.getElementById('close-coming-soon-btn');
+        const comingSoonCourse = document.getElementById('coming-soon-course');
+
         document.querySelectorAll('.enroll-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const courseTitle = btn.getAttribute('data-course');
-                // Redirect to register.html with course title as query param
-                window.location.href = `register.html?course=${encodeURIComponent(courseTitle)}`;
+                // Show Coming Soon modal with course name
+                comingSoonCourse.innerHTML = `Enrollment for <strong>${courseTitle}</strong> will open soon.`;
+                comingSoonModal.classList.add('active');
             });
+        });
+
+        // Close modal handlers
+        closeComingSoonBtn.addEventListener('click', () => {
+            comingSoonModal.classList.remove('active');
+        });
+
+        closeComingSoonBtn2.addEventListener('click', () => {
+            comingSoonModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside
+        comingSoonModal.addEventListener('click', (e) => {
+            if (e.target === comingSoonModal) {
+                comingSoonModal.classList.remove('active');
+            }
         });
 
         // Navbar Scroll Effect
