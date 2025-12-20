@@ -121,22 +121,7 @@
 
 ---
 
-### 8. Digital Marketing, Growth & Sales
-
-| Field | Details |
-|-------|---------|
-| **Duration** | 6 Weeks |
-| **Track** | Business Skills |
-| **Description** | Social media marketing, SEO, paid advertising, and content creation for business growth. |
-| **Prerequisites** | Basic computer skills |
-| **Skills Covered** | Social Media Marketing, SEO, Paid Advertising, Content Creation, Sales Funnels, CRM |
-| **Project** | Create a complete marketing strategy for a business |
-| **Certificate** | Yes - upon completion |
-| **Price** | [To be determined] |
-
----
-
-### 9. Business Sustainability, Leadership & Scaling
+### 8. Business Sustainability, Leadership & Scaling
 
 | Field | Details |
 |-------|---------|
@@ -151,7 +136,7 @@
 
 ---
 
-### 10. Digital Skills for MSMEs & Public Sector
+### 9. Digital Skills for MSMEs & Public Sector
 
 | Field | Details |
 |-------|---------|
@@ -166,7 +151,7 @@
 
 ---
 
-### 11. Social Innovation & Impact Entrepreneurship
+### 10. Social Innovation & Impact Entrepreneurship
 
 | Field | Details |
 |-------|---------|
@@ -181,7 +166,7 @@
 
 ---
 
-### 12. Digital Law, IP & Tech Policy
+### 11. Digital Law, IP & Tech Policy
 
 | Field | Details |
 |-------|---------|
@@ -196,7 +181,7 @@
 
 ---
 
-### 13. Monitoring, Evaluation & Impact Reporting
+### 12. Monitoring, Evaluation & Impact Reporting
 
 | Field | Details |
 |-------|---------|
@@ -258,8 +243,8 @@ All courses include:
 | Track | Courses | Duration Range |
 |-------|---------|----------------|
 | Technical & Digital Skills | 6 courses | 6-12 weeks |
-| Entrepreneurship & Business | 7 courses | 4-8 weeks |
-| **Total** | **13 courses** | **4-12 weeks** |
+| Entrepreneurship & Business | 6 courses | 4-8 weeks |
+| **Total** | **12 courses** | **4-12 weeks** |
 
 ---
 
