@@ -1760,60 +1760,58 @@
     <section id="success-stories" class="success-stories-section">
         <div class="container">
             <div class="stories-layout">
-                <!-- Left: Big Quote Spotlight -->
+                <!-- Left: Vision Spotlight -->
                 <div class="story-spotlight reveal">
                     <div class="spotlight-badge">
-                        <i class="ph-fill ph-star"></i> Success Story
+                        <i class="ph-fill ph-rocket-launch"></i> Your Future Awaits
                     </div>
                     <blockquote class="spotlight-quote" id="active-quote">
-                        "KDIH gave me the practical skills I needed to transition from zero coding experience to
-                        building real applications. The mentorship was invaluable."
+                        "At KDIH, we're building the next generation of digital innovators in Northern Nigeria. Your
+                        journey from learner to industry-ready professional starts here."
                     </blockquote>
                     <div class="spotlight-author">
-                        <div class="author-avatar" id="active-avatar">AM</div>
+                        <div class="author-avatar" id="active-avatar"><i class="ph-fill ph-graduation-cap"
+                                style="font-size: 1.5rem;"></i></div>
                         <div class="author-details">
-                            <h4 id="active-name">Ahmad Muhammad</h4>
-                            <p id="active-role">Full Stack Web Development Graduate</p>
+                            <h4 id="active-name">KDIH Vision</h4>
+                            <p id="active-role">Transforming Potential into Excellence</p>
                         </div>
                     </div>
                     <div class="spotlight-result" id="active-result">
-                        <span class="result-label">Outcome:</span>
-                        <span class="result-value">Secured Remote Employment</span>
+                        <span class="result-label">Our Promise:</span>
+                        <span class="result-value">Job-Ready Skills in 12 Weeks</span>
                     </div>
                 </div>
 
-                <!-- Right: Story Navigator -->
+                <!-- Right: Industry Stats & CTA -->
                 <div class="stories-navigator reveal">
-                    <h3>More Success Stories</h3>
+                    <h3>Why Digital Skills Matter</h3>
                     <div class="stories-list">
-                        <button class="story-nav-item active" data-index="0">
-                            <div class="nav-avatar">AM</div>
+                        <div class="story-nav-item stat-card">
+                            <div class="nav-avatar stat-icon"><i class="ph-fill ph-chart-line-up"></i></div>
                             <div class="nav-info">
-                                <span class="nav-name">Ahmad Muhammad</span>
-                                <span class="nav-outcome">Remote Employment</span>
+                                <span class="nav-name stat-number">₦500K+</span>
+                                <span class="nav-outcome">Average monthly earning for freelancers</span>
                             </div>
-                            <i class="ph-fill ph-arrow-right nav-arrow"></i>
-                        </button>
-                        <button class="story-nav-item" data-index="1">
-                            <div class="nav-avatar">FA</div>
+                        </div>
+                        <div class="story-nav-item stat-card">
+                            <div class="nav-avatar stat-icon"><i class="ph-fill ph-briefcase"></i></div>
                             <div class="nav-info">
-                                <span class="nav-name">Fatima Abubakar</span>
-                                <span class="nav-outcome">₦5M Seed Funding</span>
+                                <span class="nav-name stat-number">40%</span>
+                                <span class="nav-outcome">Of Nigerian tech jobs are unfilled</span>
                             </div>
-                            <i class="ph-fill ph-arrow-right nav-arrow"></i>
-                        </button>
-                        <button class="story-nav-item" data-index="2">
-                            <div class="nav-avatar">HI</div>
+                        </div>
+                        <div class="story-nav-item stat-card">
+                            <div class="nav-avatar stat-icon"><i class="ph-fill ph-trend-up"></i></div>
                             <div class="nav-info">
-                                <span class="nav-name">Hauwa Ibrahim</span>
-                                <span class="nav-outcome">300% Client Growth</span>
+                                <span class="nav-name stat-number">3x</span>
+                                <span class="nav-outcome">Higher earning potential with digital skills</span>
                             </div>
-                            <i class="ph-fill ph-arrow-right nav-arrow"></i>
-                        </button>
+                        </div>
                     </div>
                     <div class="stories-cta">
-                        <p>Want to be our next success story?</p>
-                        <a href="/member/register.html" class="btn btn-primary">Start Your Journey →</a>
+                        <p>Be part of our founding cohort!</p>
+                        <a href="/register.html" class="btn btn-primary">Start Your Journey →</a>
                     </div>
                 </div>
             </div>
@@ -2041,6 +2039,30 @@
 
         .stories-cta .btn {
             width: 100%;
+        }
+
+        /* Stat Cards Styling */
+        .stat-card {
+            cursor: default;
+        }
+
+        .stat-card:hover {
+            background: #f1f5f9;
+            border-color: var(--secondary);
+        }
+
+        .stat-icon {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+        }
+
+        .stat-icon i {
+            font-size: 1.1rem;
+        }
+
+        .stat-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
         }
 
         @media (max-width: 992px) {

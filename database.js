@@ -642,10 +642,10 @@ function initDatabase() {
         db.get("SELECT count(*) as count FROM stats", (err, row) => {
             if (row.count === 0) {
                 const stats = [
-                    { value: 500, label: 'Youth Trained', suffix: '+' },
-                    { value: 10, label: 'Startups Incubated', suffix: '+' },
-                    { value: 100, label: 'Jobs Created', suffix: '+' },
-                    { value: 40, label: '% Women Participation', suffix: '%' }
+                    { value: 16, label: 'Professional Courses', suffix: '' },
+                    { value: 2027, label: 'Target Year', suffix: '' },
+                    { value: 2000, label: 'Youth Target', suffix: '+' },
+                    { value: 40, label: 'Women Goal', suffix: '%' }
                 ];
                 const insertStat = db.prepare("INSERT INTO stats (value, label, suffix) VALUES (?, ?, ?)");
                 stats.forEach(s => insertStat.run(s.value, s.label, s.suffix));
