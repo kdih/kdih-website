@@ -66,94 +66,47 @@ router.delete('/services/:id', requireAuth, (req, res) => {
     });
 });
 
-// Get all stats (Dynamic - calculated from database)
+// Get all stats (Pre-launch mode - shows goals and targets)
 router.get('/stats', async (req, res) => {
     try {
         const stats = [];
 
-        // 1. Youth Trained - Count from course_registrations + member_enrollments
-        const youthTrainedQuery = `
-            SELECT 
-                (SELECT COUNT(DISTINCT email_personal) FROM course_registrations) +
-                (SELECT COUNT(DISTINCT member_id) FROM member_enrollments)
-                as total
-        `;
-
-        const youthTrained = await new Promise((resolve, reject) => {
-            db.get(youthTrainedQuery, [], (err, row) => {
-                if (err) reject(err);
-                else resolve(row.total || 0);
-            });
-        });
-
+        // 1. Professional Courses Offered
         stats.push({
             id: 1,
-            value: youthTrained,
-            label: 'Youth Trained',
-            suffix: '+'
+            value: 16,
+            label: 'Professional Courses',
+            suffix: ''
         });
 
-        // 2. Startups Incubated - Count accepted/incubated startup applications
-        const startupsQuery = `
-            SELECT COUNT(*) as total 
-            FROM startup_applications 
-            WHERE application_status IN ('accepted', 'incubated', 'active')
-        `;
-
-        const startupsIncubated = await new Promise((resolve, reject) => {
-            db.get(startupsQuery, [], (err, row) => {
-                if (err) reject(err);
-                else resolve(row.total || 0);
-            });
-        });
-
+        // 2. Target Year
         stats.push({
             id: 2,
-            value: startupsIncubated,
-            label: 'Startups Incubated',
+            value: 2027,
+            label: 'Vision Year',
+            suffix: ''
+        });
+
+        // 3. Youth Target
+        stats.push({
+            id: 3,
+            value: 2000,
+            label: 'Youth Target',
             suffix: '+'
         });
 
-        // 3. Jobs Created - Estimated as 3x startups incubated (average team size)
-        // You can update this calculation based on actual job data if available
-        // 4. Jobs Created (Estimate)
+        // 4. Women Goal
         stats.push({
             id: 4,
-            value: 150, // This is usually an estimate/manual tracking
-            label: 'Jobs Created',
-            suffix: '+'
-        });
-
-        // 5. Calculate Gender Ratio
-        const genderQuery = `
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN gender LIKE 'Female' OR gender LIKE 'female' THEN 1 ELSE 0 END) as female_count
-            FROM course_registrations
-            WHERE gender IS NOT NULL AND gender != ''
-        `;
-
-        const participation = await new Promise((resolve, reject) => {
-            db.get(genderQuery, [], (err, row) => {
-                if (err) reject(err);
-                else resolve(row);
-            });
-        });
-
-        const womenPercentage = participation.total > 0
-            ? Math.round((participation.female_count / participation.total) * 100)
-            : 40; // Default to 40% if no data
-
-        stats.push({
-            id: 4,
-            value: womenPercentage,
-            label: '% Women Participation',
+            value: 40,
+            label: 'Women Goal',
             suffix: '%'
         });
 
         res.json({
             "message": "success",
             "data": stats,
+            "mode": "pre-launch",
             "calculated_at": new Date().toISOString()
         });
 
