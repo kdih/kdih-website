@@ -75,31 +75,31 @@ router.get('/stats', async (req, res) => {
         stats.push({
             id: 1,
             value: 16,
-            label: 'Professional Courses',
+            label: 'Courses Offered',
             suffix: ''
         });
 
-        // 2. Target Year
+        // 2. Learning Tracks
         stats.push({
             id: 2,
-            value: 2027,
-            label: 'Vision Year',
+            value: 2,
+            label: 'Learning Tracks',
             suffix: ''
         });
 
-        // 3. Youth Target
+        // 3. Program Duration
         stats.push({
             id: 3,
-            value: 2000,
-            label: 'Youth Target',
-            suffix: '+'
+            value: 12,
+            label: 'Week Programs',
+            suffix: ''
         });
 
-        // 4. Women Goal
+        // 4. Women Priority
         stats.push({
             id: 4,
             value: 40,
-            label: 'Women Goal',
+            label: 'Women Priority',
             suffix: '%'
         });
 
