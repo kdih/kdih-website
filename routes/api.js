@@ -71,35 +71,35 @@ router.get('/stats', async (req, res) => {
     try {
         const stats = [];
 
-        // 1. Professional Courses Offered
+        // 1. Youth Target
         stats.push({
             id: 1,
-            value: 16,
-            label: 'Courses Offered',
-            suffix: ''
+            value: 2000,
+            label: 'Youth by 2027',
+            suffix: '+'
         });
 
-        // 2. Learning Tracks
+        // 2. Startups Target
         stats.push({
             id: 2,
-            value: 2,
-            label: 'Learning Tracks',
-            suffix: ''
+            value: 50,
+            label: 'Startups by 2027',
+            suffix: '+'
         });
 
-        // 3. Program Duration
+        // 3. Jobs Target
         stats.push({
             id: 3,
-            value: 12,
-            label: 'Week Programs',
-            suffix: ''
+            value: 1000,
+            label: 'Jobs by 2027',
+            suffix: '+'
         });
 
-        // 4. Women Priority
+        // 4. Women Target
         stats.push({
             id: 4,
             value: 40,
-            label: 'Women Priority',
+            label: 'Women Target',
             suffix: '%'
         });
 
