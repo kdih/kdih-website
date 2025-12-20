@@ -1321,6 +1321,182 @@
         </div>
     </div>
 
+    <!-- Our Ecosystem Section - Unique KDIH Design -->
+    <section id="ecosystem" class="ecosystem-section">
+        <div class="container">
+            <div class="ecosystem-header reveal">
+                <span class="ecosystem-badge">🌍 Our Ecosystem</span>
+                <h2>Building Northern Nigeria's Tech Future <span class="highlight-text">Together</span></h2>
+            </div>
+            <div class="ecosystem-ticker-wrapper">
+                <div class="ecosystem-ticker">
+                    <div class="ticker-track">
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🏛️</span>
+                            <span class="ticker-name">Tony Elumelu Foundation</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🇳🇬</span>
+                            <span class="ticker-name">NITDA</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🏠</span>
+                            <span class="ticker-name">Katsina State Government</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🎓</span>
+                            <span class="ticker-name">Academic Institutions</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">💼</span>
+                            <span class="ticker-name">Local Tech Startups</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🤝</span>
+                            <span class="ticker-name">Community Partners</span>
+                        </div>
+                        <!-- Duplicate for seamless loop -->
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🏛️</span>
+                            <span class="ticker-name">Tony Elumelu Foundation</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🇳🇬</span>
+                            <span class="ticker-name">NITDA</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🏠</span>
+                            <span class="ticker-name">Katsina State Government</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🎓</span>
+                            <span class="ticker-name">Academic Institutions</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">💼</span>
+                            <span class="ticker-name">Local Tech Startups</span>
+                        </div>
+                        <div class="ticker-item">
+                            <span class="ticker-icon">🤝</span>
+                            <span class="ticker-name">Community Partners</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Unique Ecosystem Section Styles */
+        .ecosystem-section {
+            padding: 4rem 0;
+            background: linear-gradient(180deg, var(--bg-light) 0%, white 100%);
+            overflow: hidden;
+        }
+
+        .ecosystem-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .ecosystem-badge {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .ecosystem-header h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .ecosystem-header .highlight-text {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ecosystem-ticker-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+
+        .ecosystem-ticker {
+            display: flex;
+            width: fit-content;
+        }
+
+        .ticker-track {
+            display: flex;
+            animation: ticker-scroll 30s linear infinite;
+            gap: 1.5rem;
+        }
+
+        @keyframes ticker-scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.5rem;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .ticker-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+            border-color: var(--accent);
+        }
+
+        .ticker-icon {
+            font-size: 1.25rem;
+        }
+
+        .ticker-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        @media (max-width: 768px) {
+            .ticker-item {
+                padding: 0.625rem 1rem;
+            }
+
+            .ticker-name {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+
     <!-- Services Section -->
     <section id="services" class="section-padding">
         <div class="container">
@@ -1562,7 +1738,373 @@
         </div>
     </section>
 
+    <!-- Success Stories Section - Unique KDIH Design -->
+    <section id="success-stories" class="success-stories-section">
+        <div class="container">
+            <div class="stories-layout">
+                <!-- Left: Big Quote Spotlight -->
+                <div class="story-spotlight reveal">
+                    <div class="spotlight-badge">
+                        <i class="ph-fill ph-star"></i> Success Story
+                    </div>
+                    <blockquote class="spotlight-quote" id="active-quote">
+                        "KDIH gave me the practical skills I needed to transition from zero coding experience to
+                        building real applications. The mentorship was invaluable."
+                    </blockquote>
+                    <div class="spotlight-author">
+                        <div class="author-avatar" id="active-avatar">AM</div>
+                        <div class="author-details">
+                            <h4 id="active-name">Ahmad Muhammad</h4>
+                            <p id="active-role">Full Stack Web Development Graduate</p>
+                        </div>
+                    </div>
+                    <div class="spotlight-result" id="active-result">
+                        <span class="result-label">Outcome:</span>
+                        <span class="result-value">Secured Remote Employment</span>
+                    </div>
+                </div>
 
+                <!-- Right: Story Navigator -->
+                <div class="stories-navigator reveal">
+                    <h3>More Success Stories</h3>
+                    <div class="stories-list">
+                        <button class="story-nav-item active" data-index="0">
+                            <div class="nav-avatar">AM</div>
+                            <div class="nav-info">
+                                <span class="nav-name">Ahmad Muhammad</span>
+                                <span class="nav-outcome">Remote Employment</span>
+                            </div>
+                            <i class="ph-fill ph-arrow-right nav-arrow"></i>
+                        </button>
+                        <button class="story-nav-item" data-index="1">
+                            <div class="nav-avatar">FA</div>
+                            <div class="nav-info">
+                                <span class="nav-name">Fatima Abubakar</span>
+                                <span class="nav-outcome">₦5M Seed Funding</span>
+                            </div>
+                            <i class="ph-fill ph-arrow-right nav-arrow"></i>
+                        </button>
+                        <button class="story-nav-item" data-index="2">
+                            <div class="nav-avatar">HI</div>
+                            <div class="nav-info">
+                                <span class="nav-name">Hauwa Ibrahim</span>
+                                <span class="nav-outcome">300% Client Growth</span>
+                            </div>
+                            <i class="ph-fill ph-arrow-right nav-arrow"></i>
+                        </button>
+                    </div>
+                    <div class="stories-cta">
+                        <p>Want to be our next success story?</p>
+                        <a href="/member/register.html" class="btn btn-primary">Start Your Journey →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        /* Success Stories Section - Unique KDIH Design */
+        .success-stories-section {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--primary) 0%, #1a2744 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-stories-section::before {
+            content: '"';
+            position: absolute;
+            top: -50px;
+            left: 5%;
+            font-size: 400px;
+            font-family: serif;
+            color: rgba(255, 255, 255, 0.03);
+            pointer-events: none;
+        }
+
+        .stories-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .story-spotlight {
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .spotlight-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .spotlight-quote {
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+            color: white;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            font-style: italic;
+            transition: opacity 0.3s ease;
+        }
+
+        .spotlight-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .author-avatar {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .author-details h4 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .author-details p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .spotlight-result {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(6, 182, 212, 0.2);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 12px;
+        }
+
+        .result-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+
+        .result-value {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .stories-navigator {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stories-navigator h3 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stories-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .story-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .story-nav-item:hover {
+            background: #f1f5f9;
+            border-color: var(--accent);
+        }
+
+        .story-nav-item.active {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
+            border-color: var(--accent);
+        }
+
+        .nav-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .story-nav-item.active .nav-avatar {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+        }
+
+        .nav-info {
+            flex: 1;
+        }
+
+        .nav-name {
+            display: block;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .nav-outcome {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .nav-arrow {
+            color: var(--accent);
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: translateX(-5px);
+        }
+
+        .story-nav-item.active .nav-arrow,
+        .story-nav-item:hover .nav-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .stories-cta {
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .stories-cta p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .stories-cta .btn {
+            width: 100%;
+        }
+
+        @media (max-width: 992px) {
+            .stories-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .stories-navigator {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .story-spotlight {
+                padding: 2rem;
+            }
+
+            .spotlight-quote {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Success Stories Navigation
+        (function () {
+            const stories = [
+                {
+                    quote: "KDIH gave me the practical skills I needed to transition from zero coding experience to building real applications. The mentorship was invaluable.",
+                    name: "Ahmad Muhammad",
+                    role: "Full Stack Web Development Graduate",
+                    initials: "AM",
+                    result: "Secured Remote Employment"
+                },
+                {
+                    quote: "The startup incubation program at KDIH provided the guidance and network that helped us secure our first round of funding. They don't just teach—they build ecosystems.",
+                    name: "Fatima Abubakar",
+                    role: "Founder, TechStartup Katsina",
+                    initials: "FA",
+                    result: "₦5M Seed Funding Raised"
+                },
+                {
+                    quote: "As a woman in tech, finding a supportive community was crucial. KDIH's inclusive environment and quality training helped me grow my digital marketing agency.",
+                    name: "Hauwa Ibrahim",
+                    role: "Digital Marketing Graduate",
+                    initials: "HI",
+                    result: "300% Client Growth"
+                }
+            ];
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const navItems = document.querySelectorAll('.story-nav-item');
+                const quoteEl = document.getElementById('active-quote');
+                const nameEl = document.getElementById('active-name');
+                const roleEl = document.getElementById('active-role');
+                const avatarEl = document.getElementById('active-avatar');
+                const resultEl = document.getElementById('active-result');
+
+                if (!navItems.length || !quoteEl) return;
+
+                navItems.forEach(item => {
+                    item.addEventListener('click', function () {
+                        const index = parseInt(this.dataset.index);
+                        const story = stories[index];
+
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+
+                        quoteEl.style.opacity = 0;
+                        setTimeout(() => {
+                            quoteEl.textContent = '"' + story.quote + '"';
+                            nameEl.textContent = story.name;
+                            roleEl.textContent = story.role;
+                            avatarEl.textContent = story.initials;
+                            resultEl.innerHTML = '<span class="result-label">Outcome:</span><span class="result-value">' + story.result + '</span>';
+                            quoteEl.style.opacity = 1;
+                        }, 200);
+                    });
+                });
+            });
+        })();
+    </script>
 
 
     <!-- Community Hub Section (Membership + Gallery) -->
@@ -1902,16 +2444,413 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p class="footer-text">&copy; 2025 Katsina Digital Innovation Hub (KDIH). All rights reserved.</p>
-            <p class="footer-text" style="margin-top: 0.5rem; font-size: 0.85rem;">
-                Supported by <a href="https://www.tonyelumelufoundation.org" target="_blank" rel="noopener noreferrer"
-                    style="color: #d4af37; font-weight: 600; text-decoration: none;">Tony Elumelu Foundation</a>
-            </p>
+    <!-- Unique KDIH Footer -->
+    <footer class="kdih-footer">
+        <!-- Main Footer -->
+        <div class="footer-main">
+            <div class="container">
+                <div class="footer-layout">
+                    <!-- Left Panel: CTA Focus -->
+                    <div class="footer-cta-panel">
+                        <div class="footer-brand-box">
+                            <img src="kdihlogo.jpeg" alt="KDIH Logo" class="footer-logo-img">
+                            <div>
+                                <h3>Katsina Digital Innovation Hub</h3>
+                                <p class="tagline">Technology • Talent • Transformation</p>
+                            </div>
+                        </div>
+                        <p class="footer-mission">Empowering Northern Nigeria's digital future through world-class
+                            technology training, startup incubation, and a thriving innovation ecosystem.</p>
+                        <div class="footer-cta-buttons">
+                            <a href="/member/register.html" class="footer-btn footer-btn-primary">
+                                <i class="ph-fill ph-graduation-cap"></i> Start Learning
+                            </a>
+                            <a href="coworking.html" class="footer-btn footer-btn-secondary">
+                                <i class="ph-fill ph-buildings"></i> Join Co-working
+                            </a>
+                        </div>
+                        <div class="footer-social-row">
+                            <span>Follow us:</span>
+                            <div class="social-icons">
+                                <a href="https://twitter.com/kdih" target="_blank" rel="noopener noreferrer"
+                                    aria-label="Twitter"><i class="ph-fill ph-x-logo"></i></a>
+                                <a href="https://facebook.com/kdih" target="_blank" rel="noopener noreferrer"
+                                    aria-label="Facebook"><i class="ph-fill ph-facebook-logo"></i></a>
+                                <a href="https://linkedin.com/company/kdih" target="_blank" rel="noopener noreferrer"
+                                    aria-label="LinkedIn"><i class="ph-fill ph-linkedin-logo"></i></a>
+                                <a href="https://instagram.com/kdih" target="_blank" rel="noopener noreferrer"
+                                    aria-label="Instagram"><i class="ph-fill ph-instagram-logo"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Quick Info -->
+                    <div class="footer-info-panel">
+                        <div class="info-card">
+                            <h4><i class="ph-fill ph-navigation-arrow"></i> Navigate</h4>
+                            <div class="quick-links-row">
+                                <a href="#home">Home</a>
+                                <a href="#services">Services</a>
+                                <a href="courses.html">Courses</a>
+                                <a href="events.html">Events</a>
+                                <a href="gallery.html">Gallery</a>
+                                <a href="careers.html">Careers</a>
+                            </div>
+                        </div>
+                        <div class="info-card contact-card">
+                            <h4><i class="ph-fill ph-chat-circle-dots"></i> Get In Touch</h4>
+                            <div class="contact-row">
+                                <a href="tel:+2347011114441" class="contact-link">
+                                    <i class="ph-fill ph-phone"></i>
+                                    +234 701 111 4441
+                                </a>
+                                <a href="mailto:info@kdih.org" class="contact-link">
+                                    <i class="ph-fill ph-envelope"></i>
+                                    info@kdih.org
+                                </a>
+                            </div>
+                            <p class="address">
+                                <i class="ph-fill ph-map-pin"></i>
+                                No. 6 Danmarna Petroleum Plaza, Kofar Kaura Road, Katsina
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom-bar">
+            <div class="container">
+                <div class="bottom-content">
+                    <p>&copy; 2025 Katsina Digital Innovation Hub. All rights reserved.</p>
+                    <div class="bottom-center">
+                        <span class="supported-by">Proudly Supported by</span>
+                        <a href="https://www.tonyelumelufoundation.org" target="_blank" rel="noopener noreferrer"
+                            class="tef-link">
+                            Tony Elumelu Foundation
+                        </a>
+                    </div>
+                    <div class="bottom-links">
+                        <a href="privacy.html">Privacy</a>
+                        <a href="terms.html">Terms</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
+
+    <style>
+        /* Unique KDIH Footer Design */
+        .kdih-footer {
+            background: linear-gradient(135deg, #0a0f1a 0%, var(--primary) 100%);
+            color: white;
+        }
+
+        .footer-main {
+            padding: 4rem 0 3rem;
+        }
+
+        .footer-layout {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 4rem;
+        }
+
+        /* CTA Panel */
+        .footer-cta-panel {
+            padding-right: 2rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand-box {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            object-fit: cover;
+        }
+
+        .footer-brand-box h3 {
+            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tagline {
+            color: var(--secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .footer-mission {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .footer-cta-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: white;
+        }
+
+        .footer-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+        }
+
+        .footer-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footer-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .footer-social-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .footer-social-row span {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .social-icons a {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Info Panel */
+        .footer-info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .info-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .info-card h4 i {
+            color: var(--secondary);
+        }
+
+        .quick-links-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .quick-links-row a {
+            padding: 0.4rem 0.9rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .quick-links-row a:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .contact-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .contact-link i {
+            color: var(--secondary);
+        }
+
+        .contact-link:hover {
+            color: white;
+        }
+
+        .address {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .address i {
+            color: var(--secondary);
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Bottom Bar */
+        .footer-bottom-bar {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem 0;
+        }
+
+        .bottom-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .bottom-content p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .bottom-center {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .supported-by {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .tef-link {
+            color: #d4af37;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .tef-link:hover {
+            color: #f0d060;
+        }
+
+        .bottom-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .bottom-links a {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .bottom-links a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .footer-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-cta-panel {
+                padding-right: 0;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .footer-brand-box {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-cta-buttons {
+                flex-direction: column;
+            }
+
+            .footer-btn {
+                justify-content: center;
+            }
+
+            .footer-social-row {
+                flex-direction: column;
+            }
+
+            .bottom-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
 
     <!-- Schema Markup for SEO -->
     <script type="application/ld+json">
