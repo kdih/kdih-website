@@ -14,7 +14,37 @@
 
 ## A. TECHNICAL & DIGITAL SKILLS TRACK
 
-### 1. Full Stack Web Development
+### 1. Basic Digital Literacy
+
+| Field | Details |
+|-------|---------|
+| **Duration** | 4 Weeks |
+| **Track** | Technical Skills |
+| **Description** | Computer basics, internet navigation, email, typing, online safety, and cloud storage. |
+| **Prerequisites** | None - complete beginners welcome |
+| **Skills Covered** | Computer Operation, Internet Browsing, Email, Typing, Online Safety, Cloud Storage |
+| **Project** | Set up professional email and cloud storage accounts |
+| **Certificate** | Yes - upon completion |
+| **Price** | [To be determined] |
+
+---
+
+### 2. AI & Machine Learning Fundamentals
+
+| Field | Details |
+|-------|---------|
+| **Duration** | 8 Weeks |
+| **Track** | Technical Skills |
+| **Description** | Introduction to AI and Machine Learning using Python. Build simple AI models and understand ML concepts. |
+| **Prerequisites** | Basic programming knowledge helpful |
+| **Skills Covered** | Python, Machine Learning Basics, Data Preprocessing, Model Training, AI Tools, ChatGPT |
+| **Project** | Build and deploy a simple ML model |
+| **Certificate** | Yes - upon completion |
+| **Price** | [To be determined] |
+
+---
+
+### 3. Full Stack Web Development
 
 | Field | Details |
 |-------|---------|
@@ -29,7 +59,7 @@
 
 ---
 
-### 2. Data Analysis & Visualization
+### 4. Data Analysis & Visualization
 
 | Field | Details |
 |-------|---------|
@@ -44,7 +74,7 @@
 
 ---
 
-### 3. UI/UX Design Mastery
+### 5. UI/UX Design Mastery
 
 | Field | Details |
 |-------|---------|
@@ -59,7 +89,7 @@
 
 ---
 
-### 4. Cybersecurity Fundamentals
+### 6. Cybersecurity Fundamentals
 
 | Field | Details |
 |-------|---------|
@@ -74,7 +104,7 @@
 
 ---
 
-### 5. Digital Marketing Pro
+### 7. Digital Marketing Pro
 
 | Field | Details |
 |-------|---------|
@@ -89,7 +119,7 @@
 
 ---
 
-### 6. Mobile App Development
+### 8. Mobile App Development
 
 | Field | Details |
 |-------|---------|
@@ -106,7 +136,37 @@
 
 ## B. ENTREPRENEURSHIP & BUSINESS TRACK
 
-### 7. Digital Entrepreneurship & Startup Foundations
+### 9. E-commerce & Online Business
+
+| Field | Details |
+|-------|---------|
+| **Duration** | 6 Weeks |
+| **Track** | Business Skills |
+| **Description** | Learn to sell products and services online. Master Jumia, Instagram shops, and digital payment systems. |
+| **Prerequisites** | Basic computer skills |
+| **Skills Covered** | E-commerce Platforms, Social Commerce, Payment Integration, Inventory Management, Digital Marketing |
+| **Project** | Launch and manage an online store |
+| **Certificate** | Yes - upon completion |
+| **Price** | [To be determined] |
+
+---
+
+### 10. AI for Business & Entrepreneurs
+
+| Field | Details |
+|-------|---------|
+| **Duration** | 4 Weeks |
+| **Track** | Business Skills |
+| **Description** | Learn to use AI tools to automate business tasks, enhance marketing, and improve customer service. |
+| **Prerequisites** | Basic computer skills |
+| **Skills Covered** | ChatGPT, AI Writing Tools, AI Marketing, Automation, Customer Service AI, Business Productivity |
+| **Project** | Implement AI tools in a business workflow |
+| **Certificate** | Yes - upon completion |
+| **Price** | [To be determined] |
+
+---
+
+### 11. Digital Entrepreneurship & Startup Foundations
 
 | Field | Details |
 |-------|---------|
@@ -121,7 +181,7 @@
 
 ---
 
-### 8. Business Sustainability, Leadership & Scaling
+### 12. Business Sustainability, Leadership & Scaling
 
 | Field | Details |
 |-------|---------|
@@ -136,7 +196,7 @@
 
 ---
 
-### 9. Digital Skills for MSMEs & Public Sector
+### 13. Digital Skills for MSMEs & Public Sector
 
 | Field | Details |
 |-------|---------|
@@ -151,7 +211,7 @@
 
 ---
 
-### 10. Social Innovation & Impact Entrepreneurship
+### 14. Social Innovation & Impact Entrepreneurship
 
 | Field | Details |
 |-------|---------|
@@ -166,7 +226,7 @@
 
 ---
 
-### 11. Digital Law, IP & Tech Policy
+### 15. Digital Law, IP & Tech Policy
 
 | Field | Details |
 |-------|---------|
@@ -181,7 +241,7 @@
 
 ---
 
-### 12. Monitoring, Evaluation & Impact Reporting
+### 16. Monitoring, Evaluation & Impact Reporting
 
 | Field | Details |
 |-------|---------|
@@ -242,9 +302,9 @@ All courses include:
 
 | Track | Courses | Duration Range |
 |-------|---------|----------------|
-| Technical & Digital Skills | 6 courses | 6-12 weeks |
-| Entrepreneurship & Business | 6 courses | 4-8 weeks |
-| **Total** | **12 courses** | **4-12 weeks** |
+| Technical & Digital Skills | 8 courses | 4-12 weeks |
+| Entrepreneurship & Business | 8 courses | 4-8 weeks |
+| **Total** | **16 courses** | **4-12 weeks** |
 
 ---
 
