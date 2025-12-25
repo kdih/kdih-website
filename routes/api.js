@@ -3,13 +3,28 @@ const router = express.Router();
 const db = require('../database');
 const { sendEmail } = require('../utils/email');
 const { upload } = require('../utils/upload');
+const { generateToken, verifyToken, requireJwtAuth, requireAuthAny } = require('../utils/jwt');
 
-// Middleware for authentication
+// Middleware for authentication (supports both session and JWT)
 const requireAuth = (req, res, next) => {
-    if (!req.session.user) {
-        return res.status(401).json({ error: 'Unauthorized' });
+    // Check session first (web)
+    if (req.session && req.session.user) {
+        req.user = req.session.user;
+        return next();
     }
-    next();
+
+    // Check JWT (mobile)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const decoded = verifyToken(token);
+        if (decoded) {
+            req.user = decoded;
+            return next();
+        }
+    }
+
+    return res.status(401).json({ error: 'Unauthorized' });
 };
 
 // ===== EXISTING ENDPOINTS =====
@@ -250,6 +265,105 @@ router.get('/check-auth', (req, res) => {
     } else {
         res.json({ authenticated: false });
     }
+});
+
+// ===== MOBILE APP JWT AUTHENTICATION =====
+
+/**
+ * Mobile Login - Returns JWT token instead of session
+ * POST /api/mobile/login
+ * Body: { username, password }
+ * Returns: { message: 'success', token: 'jwt...', user: {...} }
+ */
+router.post('/mobile/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const bcrypt = require('bcrypt');
+        const logger = require('../utils/logger');
+
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+
+        // Check for username OR email
+        db.get("SELECT * FROM users WHERE username = ? OR email = ?", [username, username], async (err, row) => {
+            if (err) {
+                logger.error(`Mobile login error: ${err.message}`);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            if (!row) {
+                logger.warn(`Failed mobile login attempt for username: ${username}`);
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+
+            // Verify password with bcrypt
+            const validPassword = await bcrypt.compare(password, row.password);
+            if (!validPassword) {
+                logger.warn(`Invalid password for mobile login: ${username}`);
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+
+            // Generate JWT token
+            const user = {
+                id: row.id,
+                username: row.username,
+                role: row.role,
+                email: row.email
+            };
+            const token = generateToken(user);
+
+            logger.info(`Mobile user logged in: ${username}`);
+            res.json({
+                message: 'success',
+                token: token,
+                user: {
+                    id: row.id,
+                    username: row.username,
+                    role: row.role,
+                    email: row.email
+                }
+            });
+        });
+    } catch (error) {
+        const logger = require('../utils/logger');
+        logger.error(`Mobile login exception: ${error.message}`);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * Verify JWT token - Check if token is valid
+ * GET /api/mobile/check-auth
+ * Headers: Authorization: Bearer <token>
+ * Returns: { authenticated: true/false, user: {...} }
+ */
+router.get('/mobile/check-auth', (req, res) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.json({ authenticated: false });
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+
+    if (decoded) {
+        res.json({ authenticated: true, user: decoded });
+    } else {
+        res.json({ authenticated: false });
+    }
+});
+
+/**
+ * Refresh JWT token
+ * POST /api/mobile/refresh-token
+ * Headers: Authorization: Bearer <token>
+ * Returns: { message: 'success', token: 'new-jwt...' }
+ */
+router.post('/mobile/refresh-token', requireJwtAuth, (req, res) => {
+    const newToken = generateToken(req.user);
+    res.json({ message: 'success', token: newToken });
 });
 
 // Forgot Password - Initiate Reset

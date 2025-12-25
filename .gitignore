@@ -44,3 +44,7 @@ tmp/
 temp/
 *.tmp
 .admin-credentials-temp.txt
+
+# Flutter APK builds
+*.apk
+kdih_admin_app/build/

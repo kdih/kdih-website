@@ -34,11 +34,10 @@
             overflow: hidden;
         }
 
-        .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2.5rem 2rem;
-            text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        text-align: center;
         }
 
         .login-header h1 {
@@ -183,7 +182,7 @@
             errorMsg.style.display = 'none';
 
             try {
-                const response = await fetch('/api/student/login', {
+                const response = await fetch('/api/member/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
