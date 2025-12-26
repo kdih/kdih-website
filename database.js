@@ -48,15 +48,18 @@ function initDatabase() {
         // See 'member_enrollments' table definition below
 
 
-        // Course Registrations Table (New)
+        // Course Registrations Table (Enhanced with Finance Tracking)
         db.run(`CREATE TABLE IF NOT EXISTS course_registrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER,
             course_title TEXT,
             schedule TEXT,
             title TEXT,
             surname TEXT,
             firstname TEXT,
             othernames TEXT,
+            full_name TEXT,
+            email TEXT,
             gender TEXT,
             nationality TEXT,
             phone TEXT,
@@ -73,7 +76,62 @@ function initDatabase() {
             expectations TEXT,
             requirements TEXT,
             referral TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            course_fee DECIMAL(10,2) DEFAULT 0,
+            amount_paid DECIMAL(10,2) DEFAULT 0,
+            payment_status TEXT DEFAULT 'pending',
+            payment_reference TEXT,
+            eligible_for_certificate INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (course_id) REFERENCES courses(id)
+        )`, (err) => {
+            if (!err) {
+                // Auto-migration for existing tables
+                db.all("PRAGMA table_info(course_registrations)", [], (err, columns) => {
+                    if (!err && columns) {
+                        const colNames = columns.map(c => c.name);
+
+                        if (!colNames.includes('course_id')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN course_id INTEGER");
+                        }
+                        if (!colNames.includes('full_name')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN full_name TEXT");
+                        }
+                        if (!colNames.includes('email')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN email TEXT");
+                        }
+                        if (!colNames.includes('course_fee')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN course_fee DECIMAL(10,2) DEFAULT 0");
+                        }
+                        if (!colNames.includes('amount_paid')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN amount_paid DECIMAL(10,2) DEFAULT 0");
+                        }
+                        if (!colNames.includes('payment_status')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN payment_status TEXT DEFAULT 'pending'");
+                        }
+                        if (!colNames.includes('payment_reference')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN payment_reference TEXT");
+                        }
+                        if (!colNames.includes('eligible_for_certificate')) {
+                            db.run("ALTER TABLE course_registrations ADD COLUMN eligible_for_certificate INTEGER DEFAULT 0");
+                        }
+                    }
+                });
+            }
+        });
+
+        // Student Payments Table (Individual payment records)
+        db.run(`CREATE TABLE IF NOT EXISTS student_payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            registration_id INTEGER NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            payment_method TEXT,
+            payment_reference TEXT,
+            payment_date DATE DEFAULT (date('now')),
+            notes TEXT,
+            recorded_by INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (registration_id) REFERENCES course_registrations(id),
+            FOREIGN KEY (recorded_by) REFERENCES users(id)
         )`);
 
         // Users Table (Admin & Super Admin)

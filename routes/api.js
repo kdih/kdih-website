@@ -1296,7 +1296,7 @@ router.post('/admin/certificates/:id/confirm-finance-with-payment', requireAuth,
     });
 });
 
-// Get student payment status (all registrations with payment info)
+// Get student payment status (all registrations with payment info - ENHANCED)
 router.get('/admin/finance/student-payments', requireAuth, (req, res) => {
     const allowedRoles = ['finance', 'admin', 'super_admin'];
     if (!allowedRoles.includes(req.session.user.role)) {
@@ -1306,21 +1306,23 @@ router.get('/admin/finance/student-payments', requireAuth, (req, res) => {
     const sql = `
         SELECT 
             cr.id,
-            cr.full_name as student_name,
-            cr.email,
+            cr.id as registration_id,
+            COALESCE(cr.full_name, cr.firstname || ' ' || cr.surname) as student_name,
+            COALESCE(cr.email, cr.email_personal) as email,
             cr.phone,
             cr.course_title,
+            cr.course_id,
+            c.title as course_name,
+            COALESCE(cr.course_fee, c.price, 0) as course_fee,
+            COALESCE(cr.amount_paid, 0) as amount_paid,
+            COALESCE(cr.course_fee, c.price, 0) - COALESCE(cr.amount_paid, 0) as outstanding_amount,
             cr.payment_status,
-            cr.payment_reference,
-            cr.course_fee,
+            cr.eligible_for_certificate,
             cr.created_at as registration_date,
-            c.id as certificate_id,
-            c.status as certificate_status,
-            c.payment_amount as paid_amount,
-            c.payment_method,
-            c.payment_reference as cert_payment_ref
+            (SELECT COUNT(*) FROM student_payments WHERE registration_id = cr.id) as payment_count,
+            (SELECT MAX(payment_date) FROM student_payments WHERE registration_id = cr.id) as last_payment_date
         FROM course_registrations cr
-        LEFT JOIN certificates c ON c.student_name = cr.full_name AND c.course_title = cr.course_title
+        LEFT JOIN courses c ON cr.course_id = c.id
         ORDER BY cr.created_at DESC
     `;
 
@@ -1329,10 +1331,13 @@ router.get('/admin/finance/student-payments', requireAuth, (req, res) => {
 
         // Calculate stats
         const total = rows.length;
-        const paid = rows.filter(r => r.payment_status === 'paid' || r.paid_amount).length;
-        const pending = rows.filter(r => r.payment_status === 'pending' || (!r.payment_status && !r.paid_amount)).length;
-        const totalRevenue = rows.reduce((sum, r) => sum + (parseFloat(r.paid_amount) || 0), 0);
+        const paid = rows.filter(r => r.payment_status === 'paid' || r.outstanding_amount <= 0).length;
+        const partial = rows.filter(r => r.payment_status === 'partial' || (r.amount_paid > 0 && r.outstanding_amount > 0)).length;
+        const pending = rows.filter(r => r.payment_status === 'pending' || (r.amount_paid === 0 && r.outstanding_amount > 0)).length;
+        const totalRevenue = rows.reduce((sum, r) => sum + (parseFloat(r.amount_paid) || 0), 0);
         const expectedRevenue = rows.reduce((sum, r) => sum + (parseFloat(r.course_fee) || 0), 0);
+        const outstanding = expectedRevenue - totalRevenue;
+        const eligibleForCert = rows.filter(r => r.eligible_for_certificate === 1 || r.outstanding_amount <= 0).length;
 
         res.json({
             message: 'success',
@@ -1340,16 +1345,18 @@ router.get('/admin/finance/student-payments', requireAuth, (req, res) => {
             stats: {
                 total,
                 paid,
+                partial,
                 pending,
                 totalRevenue,
                 expectedRevenue,
-                outstanding: expectedRevenue - totalRevenue
+                outstanding,
+                eligibleForCert
             }
         });
     });
 });
 
-// Get outstanding payments (students who haven't paid)
+// Get outstanding payments (students who haven't fully paid - ENHANCED)
 router.get('/admin/finance/outstanding-payments', requireAuth, (req, res) => {
     const allowedRoles = ['finance', 'admin', 'super_admin'];
     if (!allowedRoles.includes(req.session.user.role)) {
@@ -1359,30 +1366,42 @@ router.get('/admin/finance/outstanding-payments', requireAuth, (req, res) => {
     const sql = `
         SELECT 
             cr.id,
-            cr.full_name as student_name,
-            cr.email,
+            cr.id as registration_id,
+            COALESCE(cr.full_name, cr.firstname || ' ' || cr.surname) as student_name,
+            COALESCE(cr.email, cr.email_personal) as email,
             cr.phone,
             cr.course_title,
-            cr.course_fee,
+            cr.course_id,
+            c.title as course_name,
+            COALESCE(cr.course_fee, c.price, 0) as course_fee,
+            COALESCE(cr.amount_paid, 0) as amount_paid,
+            COALESCE(cr.course_fee, c.price, 0) - COALESCE(cr.amount_paid, 0) as outstanding_amount,
             cr.payment_status,
             cr.created_at as registration_date,
-            JULIANDAY('now') - JULIANDAY(cr.created_at) as days_since_registration
+            CAST(JULIANDAY('now') - JULIANDAY(cr.created_at) AS INTEGER) as days_since_registration,
+            (SELECT COUNT(*) FROM student_payments WHERE registration_id = cr.id) as payment_count
         FROM course_registrations cr
+        LEFT JOIN courses c ON cr.course_id = c.id
         WHERE (cr.payment_status IS NULL OR cr.payment_status != 'paid')
-        ORDER BY cr.created_at ASC
+            AND (COALESCE(cr.course_fee, c.price, 0) - COALESCE(cr.amount_paid, 0)) > 0
+        ORDER BY COALESCE(cr.course_fee, c.price, 0) - COALESCE(cr.amount_paid, 0) DESC
     `;
 
     db.all(sql, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
 
-        const totalOutstanding = rows.reduce((sum, r) => sum + (parseFloat(r.course_fee) || 0), 0);
+        const totalOutstanding = rows.reduce((sum, r) => sum + (parseFloat(r.outstanding_amount) || 0), 0);
+        const totalCourseFees = rows.reduce((sum, r) => sum + (parseFloat(r.course_fee) || 0), 0);
+        const totalPaid = rows.reduce((sum, r) => sum + (parseFloat(r.amount_paid) || 0), 0);
 
         res.json({
             message: 'success',
             data: rows,
             stats: {
                 count: rows.length,
-                totalOutstanding
+                totalOutstanding,
+                totalCourseFees,
+                totalPaid
             }
         });
     });
@@ -1554,47 +1573,171 @@ router.get('/admin/finance/audit-log', requireAuth, (req, res) => {
     });
 });
 
-// Record manual payment
+// Record payment for a student (ENHANCED - links to registration)
 router.post('/admin/finance/record-payment', requireAuth, (req, res) => {
     const allowedRoles = ['finance', 'super_admin'];
     if (!allowedRoles.includes(req.session.user.role)) {
         return res.status(403).json({ error: 'Access denied' });
     }
 
-    const { student_name, student_email, course_title, amount, payment_method, payment_reference, payment_date, notes } = req.body;
+    const { registration_id, student_name, student_email, course_title, amount, payment_method, payment_reference, payment_date, notes } = req.body;
 
-    if (!student_name || !amount) {
-        return res.status(400).json({ error: 'Student name and amount are required' });
+    if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Valid payment amount is required' });
     }
 
-    const sql = `INSERT INTO payment_records 
-                 (student_name, student_email, course_title, amount, payment_method, payment_reference, payment_date, recorded_by, notes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    // If registration_id is provided, link directly to that registration
+    if (registration_id) {
+        // Get the registration details first
+        db.get(`
+            SELECT cr.*, c.price as course_price 
+            FROM course_registrations cr
+            LEFT JOIN courses c ON cr.course_id = c.id
+            WHERE cr.id = ?
+        `, [registration_id], (err, registration) => {
+            if (err) return res.status(500).json({ error: err.message });
+            if (!registration) return res.status(404).json({ error: 'Registration not found' });
 
-    db.run(sql, [
-        student_name,
-        student_email || null,
-        course_title || null,
-        amount,
-        payment_method || null,
-        payment_reference || null,
-        payment_date || new Date().toISOString().split('T')[0],
-        req.session.user.id,
-        notes || null
-    ], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
+            // Insert payment into student_payments table
+            const insertPaymentSQL = `
+                INSERT INTO student_payments 
+                (registration_id, amount, payment_method, payment_reference, payment_date, notes, recorded_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
 
-        // Log the action
-        logFinanceAction('PAYMENT_RECORDED', 'payment_record', this.lastID,
-            req.session.user.id, req.session.user.username,
-            { student_name, amount, payment_method },
-            req.ip);
+            db.run(insertPaymentSQL, [
+                registration_id,
+                parseFloat(amount),
+                payment_method || null,
+                payment_reference || null,
+                payment_date || new Date().toISOString().split('T')[0],
+                notes || null,
+                req.session.user.id
+            ], function (err) {
+                if (err) return res.status(500).json({ error: err.message });
 
-        res.json({ message: 'success', payment_id: this.lastID });
-    });
+                const paymentId = this.lastID;
+
+                // Calculate new total paid
+                db.get(`
+                    SELECT COALESCE(SUM(amount), 0) as total_paid 
+                    FROM student_payments 
+                    WHERE registration_id = ?
+                `, [registration_id], (err, totals) => {
+                    if (err) return res.status(500).json({ error: err.message });
+
+                    const totalPaid = parseFloat(totals.total_paid) || 0;
+                    const courseFee = parseFloat(registration.course_fee) || parseFloat(registration.course_price) || 0;
+                    const outstandingAmount = courseFee - totalPaid;
+
+                    // Determine payment status and certificate eligibility
+                    let paymentStatus = 'pending';
+                    let eligibleForCertificate = 0;
+
+                    if (outstandingAmount <= 0) {
+                        paymentStatus = 'paid';
+                        eligibleForCertificate = 1;
+                    } else if (totalPaid > 0) {
+                        paymentStatus = 'partial';
+                    }
+
+                    // Update registration with new totals
+                    const updateSQL = `
+                        UPDATE course_registrations 
+                        SET amount_paid = ?,
+                            payment_status = ?,
+                            eligible_for_certificate = ?
+                        WHERE id = ?
+                    `;
+
+                    db.run(updateSQL, [totalPaid, paymentStatus, eligibleForCertificate, registration_id], (err) => {
+                        if (err) return res.status(500).json({ error: err.message });
+
+                        // Log the action
+                        const studentName = registration.full_name ||
+                            `${registration.firstname || ''} ${registration.surname || ''}`.trim();
+
+                        logFinanceAction('PAYMENT_RECORDED', 'student_payment', paymentId,
+                            req.session.user.id, req.session.user.username,
+                            {
+                                registration_id,
+                                student_name: studentName,
+                                amount,
+                                payment_method,
+                                new_total_paid: totalPaid,
+                                outstanding: outstandingAmount,
+                                now_eligible: eligibleForCertificate === 1
+                            },
+                            req.ip);
+
+                        res.json({
+                            message: 'success',
+                            payment_id: paymentId,
+                            registration_id: registration_id,
+                            total_paid: totalPaid,
+                            outstanding: outstandingAmount,
+                            payment_status: paymentStatus,
+                            eligible_for_certificate: eligibleForCertificate === 1
+                        });
+                    });
+                });
+            });
+        });
+    } else {
+        // Legacy: Try to find matching registration by name and course
+        if (!student_name) {
+            return res.status(400).json({ error: 'Either registration_id or student_name is required' });
+        }
+
+        // Find or create a matching registration
+        db.get(`
+            SELECT id FROM course_registrations 
+            WHERE (full_name = ? OR (firstname || ' ' || surname) = ?)
+            ${course_title ? 'AND course_title = ?' : ''}
+            LIMIT 1
+        `, course_title ? [student_name, student_name, course_title] : [student_name, student_name], (err, reg) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            if (reg) {
+                // Recursively call with registration_id
+                req.body.registration_id = reg.id;
+                return router.handle(req, res, () => { });
+            }
+
+            // No matching registration found - insert into legacy payment_records table
+            const sql = `INSERT INTO payment_records 
+                         (student_name, student_email, course_title, amount, payment_method, payment_reference, payment_date, recorded_by, notes)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            db.run(sql, [
+                student_name,
+                student_email || null,
+                course_title || null,
+                parseFloat(amount),
+                payment_method || null,
+                payment_reference || null,
+                payment_date || new Date().toISOString().split('T')[0],
+                req.session.user.id,
+                notes || null
+            ], function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+
+                logFinanceAction('PAYMENT_RECORDED_LEGACY', 'payment_record', this.lastID,
+                    req.session.user.id, req.session.user.username,
+                    { student_name, amount, payment_method },
+                    req.ip);
+
+                res.json({
+                    message: 'success',
+                    payment_id: this.lastID,
+                    note: 'Payment recorded but no matching registration found. Consider linking to a registration.'
+                });
+            });
+        });
+    }
 });
 
-// Get payment records
+// Get payment records (ENHANCED - combines student_payments and legacy payment_records)
 router.get('/admin/finance/payment-records', requireAuth, (req, res) => {
     const allowedRoles = ['finance', 'admin', 'super_admin'];
     if (!allowedRoles.includes(req.session.user.role)) {
@@ -1603,38 +1746,93 @@ router.get('/admin/finance/payment-records', requireAuth, (req, res) => {
 
     const { start_date, end_date, course } = req.query;
 
-    let sql = `SELECT pr.*, u.username as recorded_by_name
-               FROM payment_records pr
-               LEFT JOIN users u ON pr.recorded_by = u.id
-               WHERE 1=1`;
+    // Get payments from new student_payments table
+    let newPaymentsSQL = `
+        SELECT 
+            sp.id,
+            sp.registration_id,
+            COALESCE(cr.full_name, cr.firstname || ' ' || cr.surname) as student_name,
+            COALESCE(cr.email, cr.email_personal) as student_email,
+            cr.course_title,
+            sp.amount,
+            sp.payment_method,
+            sp.payment_reference,
+            sp.payment_date,
+            sp.notes,
+            sp.created_at,
+            u.username as recorded_by_name,
+            'linked' as payment_type
+        FROM student_payments sp
+        LEFT JOIN course_registrations cr ON sp.registration_id = cr.id
+        LEFT JOIN users u ON sp.recorded_by = u.id
+        WHERE 1=1
+    `;
+
+    let legacyPaymentsSQL = `
+        SELECT 
+            pr.id,
+            NULL as registration_id,
+            pr.student_name,
+            pr.student_email,
+            pr.course_title,
+            pr.amount,
+            pr.payment_method,
+            pr.payment_reference,
+            pr.payment_date,
+            pr.notes,
+            pr.created_at,
+            u.username as recorded_by_name,
+            'legacy' as payment_type
+        FROM payment_records pr
+        LEFT JOIN users u ON pr.recorded_by = u.id
+        WHERE 1=1
+    `;
+
     const params = [];
+    const legacyParams = [];
 
     if (start_date) {
-        sql += ` AND date(pr.payment_date) >= date(?)`;
+        newPaymentsSQL += ` AND date(sp.payment_date) >= date(?)`;
+        legacyPaymentsSQL += ` AND date(pr.payment_date) >= date(?)`;
         params.push(start_date);
+        legacyParams.push(start_date);
     }
     if (end_date) {
-        sql += ` AND date(pr.payment_date) <= date(?)`;
+        newPaymentsSQL += ` AND date(sp.payment_date) <= date(?)`;
+        legacyPaymentsSQL += ` AND date(pr.payment_date) <= date(?)`;
         params.push(end_date);
+        legacyParams.push(end_date);
     }
     if (course) {
-        sql += ` AND pr.course_title = ?`;
+        newPaymentsSQL += ` AND cr.course_title = ?`;
+        legacyPaymentsSQL += ` AND pr.course_title = ?`;
         params.push(course);
+        legacyParams.push(course);
     }
 
-    sql += ` ORDER BY pr.created_at DESC`;
+    // Combined query with UNION
+    const combinedSQL = `
+        ${newPaymentsSQL}
+        UNION ALL
+        ${legacyPaymentsSQL}
+        ORDER BY created_at DESC
+    `;
 
-    db.all(sql, params, (err, rows) => {
+    db.all(combinedSQL, [...params, ...legacyParams], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
 
         const totalAmount = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+        const linkedPayments = rows.filter(r => r.payment_type === 'linked').length;
+        const legacyPayments = rows.filter(r => r.payment_type === 'legacy').length;
 
         res.json({
             message: 'success',
             data: rows,
             stats: {
                 count: rows.length,
-                totalAmount
+                totalAmount,
+                linkedPayments,
+                legacyPayments
             }
         });
     });
@@ -1786,49 +1984,99 @@ router.post('/admin/finance/send-reminder', requireAuth, async (req, res) => {
     }
 });
 
-// Get finance dashboard summary
+// Get finance dashboard summary (ENHANCED - integrated finance data)
 router.get('/admin/finance/dashboard-summary', requireAuth, (req, res) => {
     const allowedRoles = ['finance', 'admin', 'super_admin'];
     if (!allowedRoles.includes(req.session.user.role)) {
         return res.status(403).json({ error: 'Access denied' });
     }
 
-    const queries = {
-        pendingCerts: `SELECT COUNT(*) as count FROM certificates WHERE status = 'pending'`,
-        confirmedToday: `SELECT COUNT(*) as count FROM certificates WHERE date(finance_confirmed_at) = date('now')`,
-        revenueToday: `SELECT COALESCE(SUM(payment_amount), 0) as total FROM certificates WHERE date(finance_confirmed_at) = date('now')`,
-        revenueThisMonth: `SELECT COALESCE(SUM(payment_amount), 0) as total FROM certificates WHERE strftime('%Y-%m', finance_confirmed_at) = strftime('%Y-%m', 'now')`,
-        totalRevenue: `SELECT COALESCE(SUM(payment_amount), 0) as total FROM certificates WHERE status IN ('finance_confirmed', 'approved')`,
-        outstandingCount: `SELECT COUNT(*) as count FROM course_registrations WHERE payment_status IS NULL OR payment_status != 'paid'`,
-        recentPayments: `SELECT student_name, course_title, payment_amount, payment_method, finance_confirmed_at 
-                         FROM certificates WHERE finance_confirmed_at IS NOT NULL 
-                         ORDER BY finance_confirmed_at DESC LIMIT 5`
-    };
-
     const results = {};
 
-    db.get(queries.pendingCerts, [], (err, pending) => {
+    // Query 1: Certificate stats
+    db.get(`SELECT COUNT(*) as count FROM certificates WHERE status = 'pending'`, [], (err, pending) => {
         results.pendingCerts = pending?.count || 0;
 
-        db.get(queries.confirmedToday, [], (err, confirmed) => {
-            results.confirmedToday = confirmed?.count || 0;
+        // Query 2: Total students registered
+        db.get(`SELECT COUNT(*) as count FROM course_registrations`, [], (err, totalStudents) => {
+            results.totalStudents = totalStudents?.count || 0;
 
-            db.get(queries.revenueToday, [], (err, revToday) => {
-                results.revenueToday = revToday?.total || 0;
+            // Query 3: Payment status breakdown
+            db.all(`
+                SELECT 
+                    payment_status,
+                    COUNT(*) as count,
+                    COALESCE(SUM(amount_paid), 0) as total_paid,
+                    COALESCE(SUM(course_fee), 0) as total_fees
+                FROM course_registrations
+                GROUP BY payment_status
+            `, [], (err, paymentStats) => {
+                const paid = paymentStats?.find(s => s.payment_status === 'paid') || { count: 0, total_paid: 0 };
+                const partial = paymentStats?.find(s => s.payment_status === 'partial') || { count: 0, total_paid: 0 };
+                const pendingPayment = paymentStats?.find(s => s.payment_status === 'pending' || !s.payment_status) || { count: 0, total_paid: 0 };
 
-                db.get(queries.revenueThisMonth, [], (err, revMonth) => {
-                    results.revenueThisMonth = revMonth?.total || 0;
+                results.paidStudents = paid.count;
+                results.partialStudents = partial.count;
+                results.pendingStudents = pendingPayment.count;
 
-                    db.get(queries.totalRevenue, [], (err, revTotal) => {
-                        results.totalRevenue = revTotal?.total || 0;
+                // Query 4: Revenue from student_payments
+                db.get(`
+                    SELECT 
+                        COALESCE(SUM(amount), 0) as total,
+                        COALESCE(SUM(CASE WHEN date(payment_date) = date('now') THEN amount ELSE 0 END), 0) as today,
+                        COALESCE(SUM(CASE WHEN strftime('%Y-%m', payment_date) = strftime('%Y-%m', 'now') THEN amount ELSE 0 END), 0) as this_month,
+                        COUNT(*) as payment_count
+                    FROM student_payments
+                `, [], (err, revenue) => {
+                    results.totalRevenue = revenue?.total || 0;
+                    results.revenueToday = revenue?.today || 0;
+                    results.revenueThisMonth = revenue?.this_month || 0;
+                    results.paymentCount = revenue?.payment_count || 0;
 
-                        db.get(queries.outstandingCount, [], (err, outstanding) => {
-                            results.outstandingCount = outstanding?.count || 0;
+                    // Query 5: Outstanding calculation
+                    db.get(`
+                        SELECT 
+                            COUNT(*) as count,
+                            COALESCE(SUM(COALESCE(course_fee, 0) - COALESCE(amount_paid, 0)), 0) as total_outstanding
+                        FROM course_registrations
+                        WHERE payment_status IS NULL OR payment_status != 'paid'
+                    `, [], (err, outstanding) => {
+                        results.outstandingCount = outstanding?.count || 0;
+                        results.totalOutstanding = outstanding?.total_outstanding || 0;
 
-                            db.all(queries.recentPayments, [], (err, recent) => {
+                        // Query 6: Eligible for certificate
+                        db.get(`
+                            SELECT COUNT(*) as count 
+                            FROM course_registrations 
+                            WHERE eligible_for_certificate = 1
+                        `, [], (err, eligible) => {
+                            results.eligibleForCert = eligible?.count || 0;
+
+                            // Query 7: Recent payments
+                            db.all(`
+                                SELECT 
+                                    COALESCE(cr.full_name, cr.firstname || ' ' || cr.surname) as student_name,
+                                    cr.course_title,
+                                    sp.amount as payment_amount,
+                                    sp.payment_method,
+                                    sp.payment_date
+                                FROM student_payments sp
+                                LEFT JOIN course_registrations cr ON sp.registration_id = cr.id
+                                ORDER BY sp.created_at DESC 
+                                LIMIT 5
+                            `, [], (err, recent) => {
                                 results.recentPayments = recent || [];
 
-                                res.json({ message: 'success', data: results });
+                                // Query 8: Payments today count
+                                db.get(`
+                                    SELECT COUNT(*) as count 
+                                    FROM student_payments 
+                                    WHERE date(payment_date) = date('now')
+                                `, [], (err, todayCount) => {
+                                    results.confirmedToday = todayCount?.count || 0;
+
+                                    res.json({ message: 'success', data: results });
+                                });
                             });
                         });
                     });

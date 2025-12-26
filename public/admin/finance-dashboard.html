@@ -462,14 +462,14 @@
         <button class="tab-btn active" onclick="switchTab('overview')">
             <i class="ph-fill ph-chart-pie"></i> Overview
         </button>
-        <button class="tab-btn" onclick="switchTab('certificates')">
-            <i class="ph-fill ph-certificate"></i> Certificate Payments
-        </button>
         <button class="tab-btn" onclick="switchTab('students')">
             <i class="ph-fill ph-users"></i> Student Payments
         </button>
         <button class="tab-btn" onclick="switchTab('outstanding')">
             <i class="ph-fill ph-warning"></i> Outstanding
+        </button>
+        <button class="tab-btn" onclick="switchTab('certready')">
+            <i class="ph-fill ph-certificate"></i> Certificate Ready
         </button>
         <button class="tab-btn" onclick="switchTab('records')">
             <i class="ph-fill ph-receipt"></i> Payment Records
@@ -587,11 +587,11 @@
                     <button class="btn btn-primary" onclick="openRecordPaymentModal()">
                         <i class="ph-fill ph-plus"></i> Record Payment
                     </button>
-                    <button class="btn btn-outline" onclick="exportData('certificates')">
-                        <i class="ph-fill ph-download"></i> Export Certificates
+                    <button class="btn btn-success" onclick="switchTab('certready'); loadCertificateReady();">
+                        <i class="ph-fill ph-certificate"></i> View Cert Ready
                     </button>
-                    <button class="btn btn-outline" onclick="exportData('outstanding')">
-                        <i class="ph-fill ph-download"></i> Export Outstanding
+                    <button class="btn btn-outline" onclick="exportCertificateReady()">
+                        <i class="ph-fill ph-download"></i> Export Cert Ready
                     </button>
                     <button class="btn btn-outline" onclick="exportData('audit')">
                         <i class="ph-fill ph-download"></i> Export Audit Log
@@ -600,20 +600,33 @@
             </div>
         </div>
 
-        <!-- Certificates Tab -->
-        <div id="certificates-tab" class="tab-content">
+        <!-- Certificate Ready Tab (NEW - Students with full payment) -->
+        <div id="certready-tab" class="tab-content">
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div class="stat-card highlight">
+                    <div class="stat-header">
+                        <span class="stat-title">Ready for Certificate</span>
+                        <i class="ph-fill ph-certificate" style="color: var(--success);"></i>
+                    </div>
+                    <div class="stat-value" id="cert-ready-count">0</div>
+                    <div class="stat-label">Fully paid students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Revenue from Completed</span>
+                    </div>
+                    <div class="stat-value" id="cert-ready-revenue">₦0</div>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-header">
-                    <h3><i class="ph-fill ph-certificate"></i> Certificate Payment Confirmations</h3>
+                    <h3><i class="ph-fill ph-certificate"></i> Students Ready for Certificate</h3>
                     <div class="filter-bar">
-                        <input type="text" id="cert-search" placeholder="Search..." onkeyup="filterCertificates()">
-                        <select id="cert-status-filter" onchange="filterCertificates()">
-                            <option value="">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="finance_confirmed">Confirmed</option>
-                            <option value="approved">Approved</option>
-                        </select>
-                        <button class="btn btn-outline btn-sm" onclick="loadCertificates()">
+                        <input type="text" id="certready-search" placeholder="Search..." onkeyup="filterCertReady()">
+                        <button class="btn btn-success btn-sm" onclick="exportCertificateReady()">
+                            <i class="ph-fill ph-download"></i> Export for Certificates
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="loadCertificateReady()">
                             <i class="ph ph-arrow-clockwise"></i> Refresh
                         </button>
                     </div>
@@ -621,17 +634,17 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Student</th>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
                             <th>Course</th>
+                            <th>Course Fee</th>
+                            <th>Amount Paid</th>
+                            <th>Payment Date</th>
                             <th>Status</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                            <th>Date</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="certificates-table">
+                    <tbody id="certready-table">
                         <tr>
                             <td colspan="8" class="empty-state"><i class="ph ph-spinner loading"></i></td>
                         </tr>
@@ -651,6 +664,7 @@
                         <select id="student-status-filter" onchange="filterStudents()">
                             <option value="">All</option>
                             <option value="paid">Paid</option>
+                            <option value="partial">Partial</option>
                             <option value="pending">Pending</option>
                         </select>
                         <button class="btn btn-outline btn-sm" onclick="loadStudentPayments()">
@@ -666,13 +680,14 @@
                             <th>Course</th>
                             <th>Course Fee</th>
                             <th>Paid</th>
+                            <th>Outstanding</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="students-table">
                         <tr>
-                            <td colspan="7" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                            <td colspan="8" class="empty-state"><i class="ph ph-spinner loading"></i></td>
                         </tr>
                     </tbody>
                 </table>
@@ -709,14 +724,16 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Course</th>
-                            <th>Amount Due</th>
-                            <th>Days Overdue</th>
+                            <th>Course Fee</th>
+                            <th>Paid</th>
+                            <th>Outstanding</th>
+                            <th>Days</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="outstanding-table">
                         <tr>
-                            <td colspan="7" class="empty-state"><i class="ph ph-spinner loading"></i></td>
+                            <td colspan="9" class="empty-state"><i class="ph ph-spinner loading"></i></td>
                         </tr>
                     </tbody>
                 </table>
@@ -964,9 +981,74 @@
         </div>
     </div>
 
+    <!-- Student Payment Modal (New - Linked to Registration) -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ph-fill ph-currency-ngn"></i> Record Student Payment</h3>
+                <button class="modal-close" onclick="closeModal('payment-modal')">&times;</button>
+            </div>
+            <form id="payment-form" onsubmit="submitStudentPayment(event)">
+                <input type="hidden" id="payment-registration-id">
+                <div class="form-group">
+                    <label>Student: <strong id="payment-student-name"></strong></label>
+                </div>
+                <div class="form-group">
+                    <label>Course: <strong id="payment-course-title"></strong></label>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Course Fee</label>
+                        <input type="text" id="payment-course-fee" readonly class="text-muted">
+                    </div>
+                    <div class="form-group">
+                        <label>Outstanding Amount</label>
+                        <input type="text" id="payment-outstanding" readonly
+                            style="color: var(--warning); font-weight: bold;">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Payment Amount (₦) *</label>
+                        <input type="number" id="payment-amount" step="0.01" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Date</label>
+                        <input type="date" id="payment-date">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="payment-method">
+                            <option value="">Select...</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Paystack">Paystack</option>
+                            <option value="POS">POS</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Reference</label>
+                        <input type="text" id="payment-reference" placeholder="Transaction ID">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="payment-notes" rows="2" placeholder="Optional notes"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    <i class="ph-fill ph-check"></i> Record Payment
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Data storage
         let certificatesData = [];
+        let certReadyData = [];
         let studentsData = [];
         let outstandingData = [];
         let recordsData = [];
@@ -984,9 +1066,9 @@
             // Load data for the tab
             switch (tab) {
                 case 'overview': loadDashboard(); break;
-                case 'certificates': loadCertificates(); break;
                 case 'students': loadStudentPayments(); break;
                 case 'outstanding': loadOutstanding(); break;
+                case 'certready': loadCertificateReady(); break;
                 case 'records': loadPaymentRecords(); break;
                 case 'analytics': loadAnalytics(); break;
                 case 'audit': loadAuditLog(); break;
@@ -1028,7 +1110,6 @@
 
                     renderRecentPayments(d.recentPayments);
                 }
-                loadCertificates(); // Also load pending
             } catch (error) {
                 console.error('Dashboard error:', error);
             }
@@ -1159,23 +1240,44 @@
         function renderStudentsTable() {
             const tbody = document.getElementById('students-table');
             if (studentsData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No students</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No students</td></tr>';
                 return;
             }
 
             tbody.innerHTML = studentsData.map(s => {
-                const isPaid = s.payment_status === 'paid' || s.paid_amount;
+                const isPaid = s.payment_status === 'paid' || s.outstanding_amount <= 0;
+                const isPartial = s.payment_status === 'partial' || (s.amount_paid > 0 && s.outstanding_amount > 0);
+
+                let statusBadge = '<span class="badge badge-warning">Pending</span>';
+                if (isPaid) {
+                    statusBadge = '<span class="badge badge-success">Paid</span>';
+                } else if (isPartial) {
+                    statusBadge = '<span class="badge badge-info">Partial</span>';
+                }
+
+                const certBadge = s.eligible_for_certificate ?
+                    '<span class="badge badge-success" title="Eligible for Certificate">✓</span>' :
+                    '<span class="badge badge-danger" title="Not Eligible">✗</span>';
+
                 return `
                     <tr>
-                        <td>${s.student_name}</td>
+                        <td>${s.student_name || '-'}</td>
                         <td>${s.email || '-'}</td>
-                        <td>${s.course_title}</td>
+                        <td>${s.course_title || '-'}</td>
                         <td>${s.course_fee ? formatCurrency(s.course_fee) : '-'}</td>
-                        <td>${s.paid_amount ? formatCurrency(s.paid_amount) : '-'}</td>
-                        <td>${isPaid ? '<span class="badge badge-success">Paid</span>' : '<span class="badge badge-warning">Pending</span>'}</td>
+                        <td>${s.amount_paid ? formatCurrency(s.amount_paid) : '₦0'}</td>
+                        <td style="color: ${s.outstanding_amount > 0 ? 'var(--warning)' : 'var(--success)'};">
+                            ${s.outstanding_amount ? formatCurrency(s.outstanding_amount) : '₦0'}
+                        </td>
+                        <td>${statusBadge} ${certBadge}</td>
                         <td>
+                            ${!isPaid ? `
+                                <button class="btn btn-success btn-sm" onclick="openPaymentModal(${s.registration_id}, '${(s.student_name || '').replace(/'/g, "\\'")}', '${(s.course_title || '').replace(/'/g, "\\'")}', ${s.course_fee || 0}, ${s.outstanding_amount || 0})" title="Record Payment">
+                                    <i class="ph-fill ph-plus"></i>
+                                </button>
+                            ` : ''}
                             ${!isPaid && s.email ? `
-                                <button class="btn btn-warning btn-sm" onclick="openReminderModal('${s.student_name}', '${s.email}', '${s.course_title}', ${s.course_fee || 0})">
+                                <button class="btn btn-warning btn-sm" onclick="openReminderModal('${(s.student_name || '').replace(/'/g, "\\'")}', '${s.email}', '${(s.course_title || '').replace(/'/g, "\\'")}', ${s.outstanding_amount || 0})" title="Send Reminder">
                                     <i class="ph-fill ph-envelope"></i>
                                 </button>
                             ` : ''}
@@ -1190,9 +1292,16 @@
             const status = document.getElementById('student-status-filter').value;
 
             const filtered = studentsData.filter(s => {
-                const matchSearch = s.student_name.toLowerCase().includes(search) || (s.email || '').toLowerCase().includes(search);
-                const isPaid = s.payment_status === 'paid' || s.paid_amount;
-                const matchStatus = !status || (status === 'paid' ? isPaid : !isPaid);
+                const matchSearch = (s.student_name || '').toLowerCase().includes(search) || (s.email || '').toLowerCase().includes(search);
+
+                const isPaid = s.payment_status === 'paid' || s.outstanding_amount <= 0;
+                const isPartial = s.payment_status === 'partial' || (s.amount_paid > 0 && s.outstanding_amount > 0);
+
+                let matchStatus = true;
+                if (status === 'paid') matchStatus = isPaid;
+                else if (status === 'partial') matchStatus = isPartial;
+                else if (status === 'pending') matchStatus = !isPaid && !isPartial;
+
                 return matchSearch && matchStatus;
             });
 
@@ -1221,27 +1330,127 @@
         function renderOutstandingTable() {
             const tbody = document.getElementById('outstanding-table');
             if (outstandingData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="ph ph-check-circle"></i> No outstanding payments!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="ph ph-check-circle"></i> No outstanding payments!</td></tr>';
                 return;
             }
 
             tbody.innerHTML = outstandingData.map(o => `
                 <tr>
-                    <td>${o.student_name}</td>
+                    <td>${o.student_name || '-'}</td>
                     <td>${o.email || '-'}</td>
                     <td>${o.phone || '-'}</td>
-                    <td>${o.course_title}</td>
-                    <td>${formatCurrency(o.course_fee)}</td>
-                    <td>${Math.floor(o.days_since_registration || 0)} days</td>
+                    <td>${o.course_title || '-'}</td>
+                    <td>${formatCurrency(o.course_fee || 0)}</td>
+                    <td>${formatCurrency(o.amount_paid || 0)}</td>
+                    <td style="color: var(--warning); font-weight: bold;">${formatCurrency(o.outstanding_amount || 0)}</td>
+                    <td>${o.days_since_registration || 0} days</td>
                     <td>
+                        <button class="btn btn-success btn-sm" onclick="openPaymentModal(${o.registration_id}, '${(o.student_name || '').replace(/'/g, "\\'")}', '${(o.course_title || '').replace(/'/g, "\\'")}', ${o.course_fee || 0}, ${o.outstanding_amount || 0})" title="Record Payment">
+                            <i class="ph-fill ph-plus"></i>
+                        </button>
                         ${o.email ? `
-                            <button class="btn btn-warning btn-sm" onclick="openReminderModal('${o.student_name}', '${o.email}', '${o.course_title}', ${o.course_fee || 0})">
-                                <i class="ph-fill ph-envelope"></i> Remind
+                            <button class="btn btn-warning btn-sm" onclick="openReminderModal('${(o.student_name || '').replace(/'/g, "\\'")}', '${o.email}', '${(o.course_title || '').replace(/'/g, "\\'")}', ${o.outstanding_amount || 0})" title="Send Reminder">
+                                <i class="ph-fill ph-envelope"></i>
                             </button>
                         ` : ''}
                     </td>
                 </tr>
             `).join('');
+        }
+
+        // Load Certificate Ready (students with full payment)
+        async function loadCertificateReady() {
+            try {
+                const response = await fetch('/api/admin/finance/student-payments');
+                const data = await response.json();
+                if (data.message === 'success') {
+                    // Filter only students who are eligible for certificate (fully paid)
+                    certReadyData = data.data.filter(s =>
+                        s.eligible_for_certificate === 1 ||
+                        s.payment_status === 'paid' ||
+                        (s.outstanding_amount !== null && s.outstanding_amount <= 0)
+                    );
+
+                    // Calculate stats
+                    const totalRevenue = certReadyData.reduce((sum, s) => sum + (parseFloat(s.amount_paid) || 0), 0);
+                    document.getElementById('cert-ready-count').textContent = certReadyData.length;
+                    document.getElementById('cert-ready-revenue').textContent = formatCurrency(totalRevenue);
+
+                    renderCertReadyTable();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderCertReadyTable() {
+            const tbody = document.getElementById('certready-table');
+            if (certReadyData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="ph ph-info"></i> No students with complete payments yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = certReadyData.map(s => `
+                <tr>
+                    <td>${s.student_name || '-'}</td>
+                    <td>${s.email || '-'}</td>
+                    <td>${s.phone || '-'}</td>
+                    <td>${s.course_title || '-'}</td>
+                    <td>${formatCurrency(s.course_fee || 0)}</td>
+                    <td style="color: var(--success);">${formatCurrency(s.amount_paid || 0)}</td>
+                    <td>${s.last_payment_date || s.registration_date || '-'}</td>
+                    <td><span class="badge badge-success"><i class="ph-fill ph-check-circle"></i> Ready</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function filterCertReady() {
+            const search = document.getElementById('certready-search').value.toLowerCase();
+
+            const filtered = certReadyData.filter(s =>
+                (s.student_name || '').toLowerCase().includes(search) ||
+                (s.email || '').toLowerCase().includes(search) ||
+                (s.course_title || '').toLowerCase().includes(search)
+            );
+
+            const orig = certReadyData;
+            certReadyData = filtered;
+            renderCertReadyTable();
+            certReadyData = orig;
+        }
+
+        // Export Certificate Ready students as CSV
+        async function exportCertificateReady() {
+            if (certReadyData.length === 0) {
+                alert('No students ready for certificates to export');
+                return;
+            }
+
+            // Create CSV content
+            const headers = ['Student Name', 'Email', 'Phone', 'Course', 'Course Fee', 'Amount Paid', 'Payment Date'];
+            const rows = certReadyData.map(s => [
+                s.student_name || '',
+                s.email || '',
+                s.phone || '',
+                s.course_title || '',
+                s.course_fee || 0,
+                s.amount_paid || 0,
+                s.last_payment_date || s.registration_date || ''
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+            ].join('\n');
+
+            // Download the CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `certificate_ready_students_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            alert(`Exported ${certReadyData.length} students ready for certificates!`);
         }
 
         // Load payment records
@@ -1381,16 +1590,36 @@
                 return;
             }
 
-            tbody.innerHTML = auditData.map(a => `
-                <tr>
-                    <td>${new Date(a.created_at).toLocaleString()}</td>
-                    <td><span class="badge badge-info">${a.action}</span></td>
-                    <td>${a.user_name || '-'}</td>
-                    <td>${a.entity_type} #${a.entity_id || '-'}</td>
-                    <td><small>${a.details || '-'}</small></td>
-                    <td><small>${a.ip_address || '-'}</small></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = auditData.map(a => {
+                // Parse and format details
+                let detailsHtml = '-';
+                try {
+                    const details = typeof a.details === 'string' ? JSON.parse(a.details) : a.details;
+                    if (details) {
+                        const items = [];
+                        if (details.student_name) items.push(`<strong>${details.student_name}</strong>`);
+                        if (details.amount) items.push(`₦${parseFloat(details.amount).toLocaleString()}`);
+                        if (details.payment_method) items.push(details.payment_method);
+                        if (details.new_total_paid) items.push(`Total: ₦${parseFloat(details.new_total_paid).toLocaleString()}`);
+                        if (details.outstanding !== undefined) items.push(`Outstanding: ₦${parseFloat(details.outstanding).toLocaleString()}`);
+                        if (details.now_eligible !== undefined) items.push(details.now_eligible ? '✅ Cert Ready' : '⏳ Pending');
+                        detailsHtml = items.length > 0 ? items.join(' • ') : '-';
+                    }
+                } catch (e) {
+                    detailsHtml = a.details ? String(a.details).substring(0, 50) + '...' : '-';
+                }
+
+                return `
+                    <tr>
+                        <td>${new Date(a.created_at).toLocaleString()}</td>
+                        <td><span class="badge badge-info">${a.action}</span></td>
+                        <td>${a.user_name || '-'}</td>
+                        <td>${a.entity_type || '-'} ${a.entity_id ? '#' + a.entity_id : ''}</td>
+                        <td><small>${detailsHtml}</small></td>
+                        <td><small>${a.ip_address || '-'}</small></td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // Modals
@@ -1413,6 +1642,72 @@
             document.getElementById('reminder-course').value = course;
             document.getElementById('reminder-amount').value = amount;
             document.getElementById('reminder-modal').classList.add('active');
+        }
+
+        // NEW: Open payment modal for a specific registration
+        function openPaymentModal(registrationId, studentName, courseTitle, courseFee, outstanding) {
+            document.getElementById('payment-registration-id').value = registrationId;
+            document.getElementById('payment-student-name').textContent = studentName;
+            document.getElementById('payment-course-title').textContent = courseTitle;
+            document.getElementById('payment-course-fee').value = formatCurrency(courseFee);
+            document.getElementById('payment-outstanding').value = formatCurrency(outstanding);
+            document.getElementById('payment-amount').value = outstanding;
+            document.getElementById('payment-amount').max = outstanding;
+            document.getElementById('payment-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('payment-method').value = '';
+            document.getElementById('payment-reference').value = '';
+            document.getElementById('payment-notes').value = '';
+            document.getElementById('payment-modal').classList.add('active');
+        }
+
+        // NEW: Submit student payment (linked to registration)
+        async function submitStudentPayment(e) {
+            e.preventDefault();
+
+            const registrationId = document.getElementById('payment-registration-id').value;
+            const amount = document.getElementById('payment-amount').value;
+
+            if (!registrationId || !amount) {
+                alert('Registration ID and amount are required');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/finance/record-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        registration_id: registrationId,
+                        amount: parseFloat(amount),
+                        payment_method: document.getElementById('payment-method').value,
+                        payment_reference: document.getElementById('payment-reference').value,
+                        payment_date: document.getElementById('payment-date').value,
+                        notes: document.getElementById('payment-notes').value
+                    })
+                });
+
+                const data = await response.json();
+                if (data.message === 'success') {
+                    let msg = `Payment of ${formatCurrency(amount)} recorded successfully!`;
+                    if (data.payment_status === 'paid') {
+                        msg += `\n\n✅ Student has now FULLY PAID and is ELIGIBLE FOR CERTIFICATION!`;
+                    } else if (data.payment_status === 'partial') {
+                        msg += `\n\nPartial payment. Outstanding: ${formatCurrency(data.outstanding)}`;
+                    }
+                    alert(msg);
+                    closeModal('payment-modal');
+                    // Refresh relevant data
+                    loadStudentPayments();
+                    loadOutstanding();
+                    loadPaymentRecords();
+                    loadDashboard();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Error recording payment');
+            }
         }
 
         function closeModal(id) {
