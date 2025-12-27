@@ -4395,27 +4395,29 @@
                 document.getElementById('jobTitle').value = job.title;
                 document.getElementById('jobDepartment').value = job.department || '';
                 document.getElementById('jobType').value = job.employment_type;
-                document.getElementById('jobLocation').value = job.location;
+                document.getElementById('jobLocation').value = job.location || '';
                 document.getElementById('jobSalary').value = job.salary_info || '';
                 document.getElementById('jobDeadline').value = job.application_deadline || '';
                 document.getElementById('jobStatus').value = job.status;
                 document.getElementById('jobDescription').value = job.description || '';
 
-                // Populate responsibilities
+                // Populate responsibilities (handle null/undefined)
+                const responsibilities = job.responsibilities || [];
                 const respList = document.getElementById('responsibilitiesList');
                 respList.innerHTML = '';
-                (job.responsibilities || []).forEach(item => {
+                responsibilities.forEach(item => {
                     addListItem('responsibilities', item);
                 });
-                if (job.responsibilities.length === 0) addListItem('responsibilities');
+                if (responsibilities.length === 0) addListItem('responsibilities');
 
-                // Populate requirements
+                // Populate requirements (handle null/undefined)
+                const requirements = job.requirements || [];
                 const reqList = document.getElementById('requirementsList');
                 reqList.innerHTML = '';
-                (job.requirements || []).forEach(item => {
+                requirements.forEach(item => {
                     addListItem('requirements', item);
                 });
-                if (job.requirements.length === 0) addListItem('requirements');
+                if (requirements.length === 0) addListItem('requirements');
 
                 document.getElementById('jobModal').classList.add('show');
             } catch (error) {
