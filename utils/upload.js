@@ -18,7 +18,7 @@ try {
 }
 
 // Create subdirectories with error handling
-const subdirs = ['pitch-decks', 'certificates', 'profiles', 'documents', 'cv', 'portfolio'];
+const subdirs = ['pitch-decks', 'certificates', 'profiles', 'documents', 'cv', 'portfolio', 'gallery'];
 subdirs.forEach(dir => {
     try {
         const dirPath = path.join(uploadsDir, dir);
@@ -31,13 +31,27 @@ subdirs.forEach(dir => {
     }
 });
 
+// Ensure gallery directory exists in public/images
+const galleryDir = path.join(__dirname, '..', 'public', 'images', 'gallery');
+try {
+    if (!fs.existsSync(galleryDir)) {
+        fs.mkdirSync(galleryDir, { recursive: true });
+        console.log('Created gallery directory:', galleryDir);
+    }
+} catch (err) {
+    console.error('Error creating gallery directory:', err.message);
+}
+
 // Configure storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         let uploadPath = uploadsDir;
 
         // Determine subdirectory based on file type or request
-        if (req.body.uploadType === 'pitch-deck' || file.fieldname === 'pitchDeck') {
+        if (req.body.uploadType === 'gallery' || file.fieldname === 'galleryImage') {
+            // Gallery images go to public/images/gallery for direct serving
+            uploadPath = galleryDir;
+        } else if (req.body.uploadType === 'pitch-deck' || file.fieldname === 'pitchDeck') {
             uploadPath = path.join(uploadsDir, 'pitch-decks');
         } else if (req.body.uploadType === 'certificate' || file.fieldname === 'certificate') {
             uploadPath = path.join(uploadsDir, 'certificates');
@@ -65,6 +79,7 @@ const fileFilter = (req, file, cb) => {
         'pitch-deck': ['.pdf', '.ppt', '.pptx', '.doc', '.docx'],
         'certificate': ['.pdf', '.jpg', '.jpeg', '.png'],
         'profile': ['.jpg', '.jpeg', '.png'],
+        'gallery': ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
         'document': ['.pdf', '.doc', '.docx', '.txt']
     };
 

@@ -91,8 +91,112 @@ function showCreateGalleryModal() {
     editingGalleryId = null;
     document.getElementById('gallery-modal-title').textContent = 'Add Gallery Image';
     document.getElementById('gallery-form').reset();
+    document.getElementById('gallery-id').value = '';
+    document.getElementById('gallery-image-url').value = '';
     document.getElementById('gallery-image-preview').style.display = 'none';
+    document.getElementById('upload-status').textContent = '';
+    document.getElementById('gallery-image-file').value = '';
     document.getElementById('gallery-modal').classList.add('show');
+
+    // Setup upload area click handler
+    setupUploadArea();
+}
+
+// Setup upload area for drag and drop
+function setupUploadArea() {
+    const uploadArea = document.getElementById('gallery-upload-area');
+    const fileInput = document.getElementById('gallery-image-file');
+
+    // Click to select file
+    uploadArea.onclick = () => fileInput.click();
+
+    // Drag and drop handlers
+    uploadArea.ondragover = (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#10b981';
+        uploadArea.style.background = 'rgba(16, 185, 129, 0.1)';
+    };
+
+    uploadArea.ondragleave = () => {
+        uploadArea.style.borderColor = 'rgba(255,255,255,0.3)';
+        uploadArea.style.background = 'rgba(255,255,255,0.05)';
+    };
+
+    uploadArea.ondrop = (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'rgba(255,255,255,0.3)';
+        uploadArea.style.background = 'rgba(255,255,255,0.05)';
+
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleFileUpload(file);
+        } else {
+            alert('Please drop an image file (JPG, PNG, WebP, or GIF)');
+        }
+    };
+}
+
+// Handle file selection from input
+function handleGalleryFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        handleFileUpload(file);
+    }
+}
+
+// Upload file to server
+async function handleFileUpload(file) {
+    const uploadStatus = document.getElementById('upload-status');
+    const preview = document.getElementById('gallery-image-preview');
+    const submitBtn = document.getElementById('gallery-submit-btn');
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File is too large. Maximum size is 5MB.');
+        return;
+    }
+
+    // Show uploading status
+    uploadStatus.textContent = 'Uploading...';
+    submitBtn.disabled = true;
+
+    // Show local preview immediately
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    const formData = new FormData();
+    formData.append('galleryImage', file);
+    formData.append('uploadType', 'gallery');
+
+    try {
+        const response = await fetch('/api/gallery/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.message === 'success') {
+            document.getElementById('gallery-image-url').value = data.image_url;
+            uploadStatus.textContent = '✓ Uploaded';
+            uploadStatus.style.color = '#10b981';
+        } else {
+            throw new Error(data.error || 'Upload failed');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        uploadStatus.textContent = '✗ Upload failed';
+        uploadStatus.style.color = '#ef4444';
+        alert('Failed to upload image: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+    }
 }
 
 // Edit gallery item
@@ -106,12 +210,15 @@ async function editGalleryItem(id) {
             const item = data.data;
 
             document.getElementById('gallery-modal-title').textContent = 'Edit Gallery Image';
+            document.getElementById('gallery-id').value = id;
             document.getElementById('gallery-title').value = item.title;
             document.getElementById('gallery-description').value = item.description || '';
             document.getElementById('gallery-image-url').value = item.image_url;
             document.getElementById('gallery-category').value = item.category;
             document.getElementById('gallery-sort-order').value = item.sort_order;
             document.getElementById('gallery-featured').checked = item.is_featured;
+            document.getElementById('upload-status').textContent = '(Current image loaded)';
+            document.getElementById('upload-status').style.color = '#10b981';
 
             // Show preview
             const preview = document.getElementById('gallery-image-preview');
@@ -119,6 +226,9 @@ async function editGalleryItem(id) {
             preview.style.display = 'block';
 
             document.getElementById('gallery-modal').classList.add('show');
+
+            // Setup upload area for editing
+            setupUploadArea();
         }
     } catch (error) {
         console.error('Error loading gallery item:', error);
@@ -130,10 +240,18 @@ async function editGalleryItem(id) {
 async function saveGalleryItem(event) {
     event.preventDefault();
 
+    const imageUrl = document.getElementById('gallery-image-url').value;
+
+    // Validate that image has been uploaded
+    if (!imageUrl && !editingGalleryId) {
+        alert('Please upload an image first');
+        return;
+    }
+
     const formData = {
         title: document.getElementById('gallery-title').value,
         description: document.getElementById('gallery-description').value,
-        image_url: document.getElementById('gallery-image-url').value,
+        image_url: imageUrl,
         category: document.getElementById('gallery-category').value,
         sort_order: parseInt(document.getElementById('gallery-sort-order').value) || 0,
         is_featured: document.getElementById('gallery-featured').checked

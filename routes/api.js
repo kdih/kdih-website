@@ -972,6 +972,52 @@ router.post('/gallery/reorder', requireAuth, (req, res) => {
         .catch(err => res.status(500).json({ error: err.message }));
 });
 
+// Upload gallery image with file (Admin only)
+router.post('/gallery/upload', requireAuth, upload.single('galleryImage'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    // Return the public URL path for the uploaded image
+    const imageUrl = `/images/gallery/${req.file.filename}`;
+
+    res.json({
+        message: 'success',
+        image_url: imageUrl,
+        filename: req.file.filename
+    });
+});
+
+// Create gallery item with image upload (Admin only)
+router.post('/gallery/create-with-image', requireAuth, upload.single('galleryImage'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    const { title, description, category, sort_order, is_featured } = req.body;
+
+    if (!title) {
+        return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const image_url = `/images/gallery/${req.file.filename}`;
+
+    const sql = `INSERT INTO gallery (title, description, image_url, category, sort_order, is_featured) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+
+    db.run(sql, [title, description, image_url, category, sort_order || 0, is_featured ? 1 : 0], function (err) {
+        if (err) {
+            logger.error('Error creating gallery item:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({
+            message: 'success',
+            id: this.lastID,
+            image_url: image_url
+        });
+    });
+});
+
 // ===== CERTIFICATES ENDPOINTS =====
 
 // Import certificate generator
