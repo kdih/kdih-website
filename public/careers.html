@@ -1258,10 +1258,14 @@
                 : null;
 
             return `
-                <div class="job-card">
+                <div class="job-card" style="${job.status === 'closed' ? 'opacity: 0.85;' : ''}">
                     <div class="job-header">
                         <div class="job-title">
                             <h3>${job.title}</h3>
+                            ${job.status === 'closed'
+                    ? '<span style="display: inline-block; background: #94a3b8; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem;">CLOSED</span>'
+                    : '<span style="display: inline-block; background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem;">HIRING NOW</span>'
+                }
                         </div>
                     </div>
                     <div class="job-meta">
@@ -1308,7 +1312,12 @@
                     ` : ''}
                     
                     <div class="job-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        ${job.employment_type === 'part-time' ? `
+                        ${job.status === 'closed' ? `
+                            <button disabled 
+                               class="apply-btn" style="background: #94a3b8; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: not-allowed; display: inline-flex; align-items: center; gap: 0.5rem; opacity: 0.8;">
+                                <i class="ph-fill ph-prohibit"></i> Applications Closed
+                            </button>
+                        ` : job.employment_type === 'part-time' ? `
                             <button onclick="openTrainerModal()" 
                                class="apply-btn" style="background: #10b981; color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;">
                                 <i class="ph-fill ph-user-plus"></i> Register Your Interest

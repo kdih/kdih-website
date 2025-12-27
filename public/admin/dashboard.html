@@ -1925,6 +1925,44 @@
         let currentTab = 'overview';
         let currentUser = null;
 
+        // Show notification toast
+        function showNotification(message, type = 'info') {
+            // Remove any existing notification
+            const existing = document.querySelector('.notification-toast');
+            if (existing) existing.remove();
+
+            const notification = document.createElement('div');
+            notification.className = `notification-toast notification-${type}`;
+            notification.innerHTML = `
+                <i class="ph ${type === 'success' ? 'ph-check-circle' : type === 'error' ? 'ph-x-circle' : 'ph-info'}"></i>
+                <span>${message}</span>
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                font-weight: 500;
+                ${type === 'success' ? 'background: #10b981; color: white;' : ''}
+                ${type === 'error' ? 'background: #ef4444; color: white;' : ''}
+                ${type === 'info' ? 'background: #3b82f6; color: white;' : ''}
+            `;
+            document.body.appendChild(notification);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
         function switchTab(tab) {
             currentTab = tab;
 

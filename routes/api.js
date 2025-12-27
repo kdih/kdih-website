@@ -5196,16 +5196,16 @@ router.delete('/admin/jobs/:id', requireSuperAdmin, (req, res) => {
     });
 });
 
-// Public endpoint - Get active jobs for careers page
+// Public endpoint - Get visible jobs for careers page (active + closed, not draft)
 router.get('/jobs/active', (req, res) => {
     const sql = `
         SELECT 
             id, title, department, employment_type, location,
             salary_info, application_deadline, description,
-            responsibilities, requirements, created_at
+            responsibilities, requirements, status, created_at
         FROM jobs
-        WHERE status = 'active'
-        ORDER BY created_at DESC
+        WHERE status IN ('active', 'closed')
+        ORDER BY status ASC, created_at DESC
     `;
 
     db.all(sql, [], (err, jobs) => {
